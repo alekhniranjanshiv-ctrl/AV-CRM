@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AudioCalc — Pro Audio Engineering Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0D10;
+  --panel:#15181D;
+  --panel2:#1C2026;
+  --line:#272B33;
+  --text:#EDEDEF;
+  --muted:#8A909B;
+  --accent:#3DC6E8;
+  --amber:#E8A23D;
+  --green:#4CAF6D;
+  --red:#E25C5C;
+  --purple:#A78BFA;
+  --radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  display:flex;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{background:var(--accent);color:#0B0D10;}
+
+/* ===== Sidebar ===== */
+.sidebar{
+  width:220px;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#101317,#0B0D10);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:0;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.brand{
+  padding:24px 20px 20px;
+  border-bottom:1px solid var(--line);
+}
+.brand-name{
+  font-family:'Oswald',sans-serif;
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:0.04em;
+  color:var(--text);
+}
+.brand-name span{color:var(--accent);}
+.brand-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  margin-top:4px;
+}
+.nav-section-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  color:var(--muted);
+  padding:16px 20px 6px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 20px;
+  cursor:pointer;
+  font-size:13px;
+  color:var(--muted);
+  border-left:3px solid transparent;
+  transition:all 0.15s;
+  user-select:none;
+}
+.nav-item:hover{color:var(--text);background:rgba(61,198,232,0.05);}
+.nav-item.active{
+  color:var(--accent);
+  border-left-color:var(--accent);
+  background:rgba(61,198,232,0.08);
+}
+.nav-item .nav-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+  min-width:18px;
+}
+.nav-item.active .nav-num{color:var(--accent);}
+.nav-icon{
+  font-size:15px;
+  width:18px;
+  text-align:center;
+  flex-shrink:0;
+}
+.sidebar-footer{
+  margin-top:auto;
+  padding:16px 20px;
+  border-top:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:var(--muted);
+  line-height:1.7;
+}
+
+/* ===== Main ===== */
+.main{
+  flex:1;
+  overflow-y:auto;
+  padding:32px;
+  max-width:900px;
+}
+@media(max-width:768px){
+  body{flex-direction:column;}
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:column;}
+  .nav-list{display:flex;flex-wrap:wrap;padding:8px 12px;}
+  .nav-section-label{display:none;}
+  .nav-item{border-left:none;border-bottom:2px solid transparent;padding:8px 10px;font-size:11px;}
+  .nav-item.active{border-bottom-color:var(--accent);border-left:none;}
+  .main{padding:16px;}
+}
+
+/* ===== Page ===== */
+.page{display:none;}
+.page.active{display:block;}
+
+.page-header{margin-bottom:28px;}
+.page-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color:var(--accent);
+  margin-bottom:8px;
+}
+.page-title{
+  font-family:'Oswald',sans-serif;
+  font-size:32px;
+  font-weight:600;
+  color:var(--text);
+  line-height:1.1;
+}
+.page-desc{
+  font-size:14px;
+  color:var(--muted);
+  margin-top:8px;
+  line-height:1.6;
+  max-width:640px;
+}
+
+/* ===== Calc Card ===== */
+.calc-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  margin-bottom:20px;
+}
+.calc-card-title{
+  font-family:'Oswald',sans-serif;
+  font-size:16px;
+  font-weight:500;
+  letter-spacing:0.06em;
+  color:var(--text);
+  margin-bottom:4px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.calc-card-title .tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  background:rgba(61,198,232,0.12);
+  color:var(--accent);
+  padding:2px 7px;
+  border-radius:4px;
+}
+.calc-card-formula{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:18px;
+  padding:8px 12px;
+  background:var(--panel2);
+  border-radius:6px;
+  border-left:2px solid var(--accent);
+  line-height:1.7;
+}
+
+/* ===== Fields ===== */
+.fields-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+.field-group{display:flex;flex-direction:column;gap:5px;}
+.field-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  color:var(--muted);
+}
+.field-input,.field-select{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:9px 12px;
+  color:var(--text);
+  font-size:14px;
+  font-family:'JetBrains Mono',monospace;
+  width:100%;
+  outline:none;
+  transition:border-color 0.15s;
+}
+.field-input:focus,.field-select:focus{border-color:var(--accent);}
+.field-select option{background:var(--panel2);}
+
+/* ===== Result ===== */
+.result-bar{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:20px;
+}
+.result-item{display:flex;flex-direction:column;gap:3px;}
+.result-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  color:var(--muted);
+}
+.result-value{
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;
+  font-weight:700;
+  color:var(--accent);
+}
+.result-value.warn{color:var(--amber);}
+.result-value.danger{color:var(--red);}
+.result-value.good{color:var(--green);}
+.result-note{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:8px;
+  line-height:1.6;
+  font-style:italic;
+}
+
+/* ===== Table (for multi-row calcs) ===== */
+.data-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.data-table th{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  color:var(--muted);
+  padding:8px 12px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+}
+.data-table td{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  padding:8px 12px;
+  border-bottom:1px solid rgba(39,43,51,0.6);
+  color:var(--text);
+}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table td.accent{color:var(--accent);font-weight:700;}
+.data-table td.warn{color:var(--amber);}
+.data-table td.good{color:var(--green);}
+.data-table td.danger{color:var(--red);}
+
+/* ===== Speaker list for 100V ===== */
+.speaker-list{display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.speaker-row{
+  display:grid;
+  grid-template-columns:1fr 120px 120px 36px;
+  gap:10px;
+  align-items:center;
+}
+.add-btn{
+  background:none;
+  border:1px dashed var(--line);
+  border-radius:6px;
+  color:var(--accent);
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  padding:8px 16px;
+  cursor:pointer;
+  width:100%;
+  margin-top:4px;
+  transition:all 0.15s;
+}
+.add-btn:hover{border-color:var(--accent);background:rgba(61,198,232,0.06);}
+.remove-btn{
+  background:none;
+  border:none;
+  color:var(--red);
+  cursor:pointer;
+  font-size:16px;
+  padding:4px;
+  opacity:0.6;
+  transition:opacity 0.15s;
+}
+.remove-btn:hover{opacity:1;}
+
+/* ===== RT60 materials ===== */
+.materials-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;
+  margin:12px 0;
+}
+.material-card{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.material-name{font-size:13px;color:var(--text);}
+.material-row{
+  display:grid;
+  grid-template-columns:60px 1fr 80px;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+}
+.material-row .field-input{padding:5px 8px;font-size:12px;}
+
+/* ===== Impedance builder ===== */
+.imp-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.imp-mode-btn{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  padding:8px 16px;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.imp-mode-btn.active{
+  background:rgba(61,198,232,0.12);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+/* ===== Divider ===== */
+.section-divider{
+  border:none;
+  border-top:1px solid var(--line);
+  margin:20px 0;
+}
+
+/* ===== Tooltip chip ===== */
+.tip{
+  display:inline-block;
+  background:rgba(167,139,250,0.12);
+  color:var(--purple);
+  border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  padding:3px 8px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+
+/* ===== Range slider ===== */
+input[type=range]{
+  -webkit-appearance:none;
+  width:100%;
+  height:4px;
+  background:var(--line);
+  border-radius:2px;
+  outline:none;
+  margin-top:4px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:var(--accent);
+  cursor:pointer;
+}
+
+/* ===== Reference page ===== */
+.ref-section{margin-bottom:28px;}
+.ref-section h3{
+  font-family:'Oswald',sans-serif;
+  font-size:15px;
+  color:var(--accent);
+  letter-spacing:0.06em;
+  margin-bottom:10px;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--line);
+}
+.ref-table{width:100%;border-collapse:collapse;}
+.ref-table th{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:7px 10px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+}
+.ref-table td{
+  font-size:13px;
+  padding:8px 10px;
+  border-bottom:1px solid rgba(39,43,51,0.5);
+  color:var(--text);
+  line-height:1.5;
+}
+.ref-table tr:last-child td{border-bottom:none;}
+.ref-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);}
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<div class="sidebar">
+  <div class="brand">
+    <div class="brand-name">AUDIO<span>CALC</span></div>
+    <div class="brand-sub">Pro Audio Engineering</div>
+  </div>
+
+  <div class="nav-section-label">Calculators</div>
+  <div class="nav-list">
+    <div class="nav-item active" data-page="spl">
+      <span class="nav-num">01</span>
+      <span class="nav-icon">📢</span>SPL / Distance
+    </div>
+    <div class="nav-item" data-page="power">
+      <span class="nav-num">02</span>
+      <span class="nav-icon">⚡</span>Amp Power
+    </div>
+    <div class="nav-item" data-page="line100v">
+      <span class="nav-num">03</span>
+      <span class="nav-icon">🔌</span>100V Line
+    </div>
+    <div class="nav-item" data-page="coverage">
+      <span class="nav-num">04</span>
+      <span class="nav-icon">⭕</span>Coverage
+    </div>
+    <div class="nav-item" data-page="rt60">
+      <span class="nav-num">05</span>
+      <span class="nav-icon">🏛</span>RT60
+    </div>
+    <div class="nav-item" data-page="delay">
+      <span class="nav-num">06</span>
+      <span class="nav-icon">⏱</span>Delay / Time
+    </div>
+    <div class="nav-item" data-page="impedance">
+      <span class="nav-num">07</span>
+      <span class="nav-icon">〰</span>Impedance
+    </div>
+    <div class="nav-item" data-page="ref">
+      <span class="nav-num">08</span>
+      <span class="nav-icon">📖</span>Reference
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    All calculations run<br>locally in your browser.<br>Nothing is uploaded.
+  </div>
+</div>
+
+<!-- ===== Main ===== -->
+<div class="main">
+
+  <!-- 01 SPL / Distance -->
+  <div class="page active" id="page-spl">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 01</div>
+      <div class="page-title">SPL / Distance</div>
+      <div class="page-desc">Calculates how loudness changes with distance from a speaker using the Inverse Square Law. Every time distance doubles, SPL drops 6 dB.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Source SPL at distance <span class="tag">Inverse Square Law</span></div>
+      <div class="calc-card-formula">SPL at D = SPL_ref − 20 × log₁₀(D / D_ref)</div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Ref SPL (dB) at D_ref</div>
+          <input class="field-input" id="spl-ref" type="number" value="100" step="0.5">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Reference distance (m)</div>
+          <input class="field-input" id="spl-dref" type="number" value="1" step="0.5" min="0.1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Target distance (m)</div>
+          <input class="field-input" id="spl-d" type="number" value="6" step="0.5" min="0.1">
+        </div>
+      </div>
+      <div class="result-bar">
+        <div class="result-item">
+          <div class="result-label">SPL at target</div>
+          <div class="result-value" id="spl-out">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Drop from ref</div>
+          <div class="result-value" id="spl-drop">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="spl-note"></div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Distance table for this speaker</div>
+      <table class="data-table" id="spl-table">
+        <thead><tr><th>Distance (m)</th><th>Distance (ft)</th><th>SPL (dB)</th><th>vs Target SPL</th></tr></thead>
+        <tbody id="spl-tbody"></tbody>
+      </table>
+
+      <hr class="section-divider">
+      <div class="fields-row" style="margin-top:12px;">
+        <div class="field-group">
+          <div class="field-label">Target SPL for space (dB)</div>
+          <input class="field-input" id="spl-target" type="number" value="85" step="1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Use case</div>
+          <select class="field-select" id="spl-usecase">
+            <option value="85">Custom</option>
+            <option value="70">BGM / Restaurant (70 dB)</option>
+            <option value="75">Retail foreground (75 dB)</option>
+            <option value="72">Office / speech (72 dB)</option>
+            <option value="80">Gym / high-energy (80 dB)</option>
+            <option value="100">Live music / stage (100 dB)</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-note" id="spl-range-note"></div>
+    </div>
+  </div>
+
+  <!-- 02 Amplifier Power -->
+  <div class="page" id="page-power">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 02</div>
+      <div class="page-title">Amplifier Power</div>
+      <div class="page-desc">How much amplifier power does a speaker need to hit a target SPL at a given distance? Accounts for sensitivity, throw, and headroom for program peaks.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Required amplifier power <span class="tag">per speaker</span></div>
+      <div class="calc-card-formula">
+        Power (W) = 10 ^ [(Target SPL − Sensitivity + 20×log₁₀(Distance) + Headroom) / 10]
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Speaker sensitivity (dB/W/m)</div>
+          <input class="field-input" id="pw-sens" type="number" value="90" step="0.5">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Target SPL at listener (dB)</div>
+          <input class="field-input" id="pw-target" type="number" value="90" step="1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Throw distance (m)</div>
+          <input class="field-input" id="pw-dist" type="number" value="6" step="0.5" min="0.1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Headroom (dB)</div>
+          <select class="field-select" id="pw-headroom">
+            <option value="3">3 dB — BGM / speech</option>
+            <option value="6" selected>6 dB — live music</option>
+            <option value="10">10 dB — concert / peak</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Number of speakers</div>
+          <input class="field-input" id="pw-count" type="number" value="4" step="1" min="1">
+        </div>
+      </div>
+      <div class="result-bar">
+        <div class="result-item">
+          <div class="result-label">Per speaker</div>
+          <div class="result-value" id="pw-per">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Total amp power</div>
+          <div class="result-value" id="pw-total">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Recommended amp</div>
+          <div class="result-value" id="pw-rec">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="pw-note"></div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Sensitivity comparison for same target</div>
+      <table class="data-table">
+        <thead><tr><th>Sensitivity</th><th>Typical example</th><th>Power needed</th><th>vs 90 dB ref</th></tr></thead>
+        <tbody id="pw-sens-table"></tbody>
+      </table>
+      <div class="result-note">Higher sensitivity = dramatically less power for the same loudness. 6 dB sensitivity gain = 4× less power.</div>
+    </div>
+  </div>
+
+  <!-- 03 100V Line -->
+  <div class="page" id="page-line100v">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 03</div>
+      <div class="page-title">100V / 70V Line Loading</div>
+      <div class="page-desc">For distributed audio systems. Add speakers with their transformer tap settings — the calculator checks total load against your amplifier's rated output. Keep load ≤ 80% of amp rating.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Amplifier & line settings</div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Amp rated power (W)</div>
+          <input class="field-input" id="v100-amp" type="number" value="240" step="10" min="10">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Line voltage</div>
+          <select class="field-select" id="v100-voltage">
+            <option value="100" selected>100V</option>
+            <option value="70">70V</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Safety headroom</div>
+          <select class="field-select" id="v100-headroom">
+            <option value="0.8" selected>80% (recommended)</option>
+            <option value="0.7">70% (conservative)</option>
+            <option value="1.0">100% (max)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Speaker list</div>
+      <div style="display:grid;grid-template-columns:1fr 120px 120px 36px;gap:10px;margin-bottom:6px;">
+        <div class="field-label">Speaker name</div>
+        <div class="field-label">Tap (W)</div>
+        <div class="field-label">Qty</div>
+        <div></div>
+      </div>
+      <div class="speaker-list" id="v100-speaker-list"></div>
+      <button class="add-btn" id="v100-add">+ Add speaker</button>
+
+      <hr class="section-divider">
+      <div class="result-bar" id="v100-result">
+        <div class="result-item">
+          <div class="result-label">Total load</div>
+          <div class="result-value" id="v100-load">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Amp capacity</div>
+          <div class="result-value" id="v100-cap">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Load used</div>
+          <div class="result-value" id="v100-pct">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Status</div>
+          <div class="result-value" id="v100-status">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="v100-note"></div>
+    </div>
+  </div>
+
+  <!-- 04 Coverage -->
+  <div class="page" id="page-coverage">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 04</div>
+      <div class="page-title">Coverage Diameter & Grid</div>
+      <div class="page-desc">For in-ceiling distributed speaker placement. Calculates coverage circle from mounting height and dispersion angle, then computes speaker counts for both square and hexagonal grid patterns.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Room & speaker inputs</div>
+      <div class="calc-card-formula">
+        D = 2 × H × tan(θ/2) &nbsp;|&nbsp; Square S = D/√2 &nbsp;|&nbsp; Hex S = D×√3/2
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Ceiling height (m)</div>
+          <input class="field-input" id="cov-ceil" type="number" value="3" step="0.1" min="1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Listening plane (m)</div>
+          <input class="field-input" id="cov-listen" type="number" value="1.2" step="0.1" min="0">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Dispersion angle (°)</div>
+          <input class="field-input" id="cov-angle" type="number" value="100" step="5" min="30" max="180">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Overlap (%)</div>
+          <input class="field-input" id="cov-overlap" type="number" value="15" step="5" min="0" max="40">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Room length (m)</div>
+          <input class="field-input" id="cov-len" type="number" value="10" step="0.5" min="1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Room width (m)</div>
+          <input class="field-input" id="cov-wid" type="number" value="8" step="0.5" min="1">
+        </div>
+      </div>
+      <div class="result-bar">
+        <div class="result-item">
+          <div class="result-label">Mounting height H</div>
+          <div class="result-value" id="cov-H">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Coverage diameter D</div>
+          <div class="result-value" id="cov-D">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Square spacing</div>
+          <div class="result-value" id="cov-Ssq">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Hex spacing</div>
+          <div class="result-value" id="cov-Shex">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Speaker count comparison</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Pattern</th>
+            <th>Effective spacing</th>
+            <th>Speakers for room</th>
+            <th>Saving vs square</th>
+          </tr>
+        </thead>
+        <tbody id="cov-table"></tbody>
+      </table>
+      <div class="result-note" id="cov-note"></div>
+    </div>
+  </div>
+
+  <!-- 05 RT60 -->
+  <div class="page" id="page-rt60">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 05</div>
+      <div class="page-title">RT60 Reverberation Time</div>
+      <div class="page-desc">Estimates reverberation time using the Sabine formula. Add room surfaces with their material and area — the calculator sums absorption and tells you if the space is suitable for speech or music.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Room volume</div>
+      <div class="calc-card-formula">RT60 = 0.161 × V / A &nbsp;(Sabine, metric) &nbsp;|&nbsp; A = Σ(area × absorption coeff.)</div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Room length (m)</div>
+          <input class="field-input" id="rt-len" type="number" value="12" step="0.5" min="1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Room width (m)</div>
+          <input class="field-input" id="rt-wid" type="number" value="8" step="0.5" min="1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Room height (m)</div>
+          <input class="field-input" id="rt-hei" type="number" value="3" step="0.5" min="1">
+        </div>
+      </div>
+      <div class="result-note" style="margin-top:0;margin-bottom:12px;font-style:normal;">
+        Volume: <span id="rt-vol" style="color:var(--accent);font-family:'JetBrains Mono',monospace;">—</span> m³
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Surface materials</div>
+      <div style="display:grid;grid-template-columns:1fr 160px 100px 36px;gap:10px;margin-bottom:8px;">
+        <div class="field-label">Surface / Material</div>
+        <div class="field-label">Absorption coeff. (0–1)</div>
+        <div class="field-label">Area (m²)</div>
+        <div></div>
+      </div>
+      <div id="rt-surfaces"></div>
+      <button class="add-btn" id="rt-add">+ Add surface</button>
+
+      <hr class="section-divider">
+      <div class="result-bar">
+        <div class="result-item">
+          <div class="result-label">Total absorption (sabins)</div>
+          <div class="result-value" id="rt-A">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">RT60</div>
+          <div class="result-value" id="rt-out">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Suitability</div>
+          <div class="result-value" id="rt-suit">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="rt-note"></div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Common absorption coefficients <span class="tip">reference</span></div>
+      <table class="data-table">
+        <thead><tr><th>Material</th><th>500 Hz coeff.</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="accent">Carpet (thick)</td><td>0.35</td><td>Best for absorbing mid-highs</td></tr>
+          <tr><td class="accent">Carpet (thin)</td><td>0.20</td><td>Common in offices</td></tr>
+          <tr><td class="accent">Acoustic ceiling tiles</td><td>0.70</td><td>NRC 0.65–0.85 typical</td></tr>
+          <tr><td class="accent">Gypsum / POP ceiling</td><td>0.05</td><td>Highly reflective</td></tr>
+          <tr><td class="accent">Concrete / brick (bare)</td><td>0.02</td><td>Almost zero absorption</td></tr>
+          <tr><td class="accent">Glass (large window)</td><td>0.04</td><td>Reflective at most frequencies</td></tr>
+          <tr><td class="accent">Wooden floor</td><td>0.07</td><td>Low absorber</td></tr>
+          <tr><td class="accent">Padded seating (per seat)</td><td>0.40</td><td>Significant when room is occupied</td></tr>
+          <tr><td class="accent">Curtains / drapes (heavy)</td><td>0.40</td><td>Good for hotel / conference rooms</td></tr>
+          <tr><td class="accent">Acoustic wall panel</td><td>0.80</td><td>Rockwool / glasswool 50mm</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 06 Delay -->
+  <div class="page" id="page-delay">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 06</div>
+      <div class="page-title">Delay / Time Alignment</div>
+      <div class="page-desc">Calculates the delay needed for fill speakers and monitors so all sound arrives at the listener as a single coherent wavefront. Includes Haas effect offset and speed-of-sound temperature correction.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Speed of sound <span class="tag">temperature corrected</span></div>
+      <div class="calc-card-formula">c = 331 + 0.6 × T (°C) &nbsp;m/s</div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Air temperature (°C)</div>
+          <input class="field-input" id="dly-temp" type="number" value="25" step="1">
+        </div>
+      </div>
+      <div class="result-bar">
+        <div class="result-item">
+          <div class="result-label">Speed of sound</div>
+          <div class="result-value" id="dly-sos">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">ms per metre</div>
+          <div class="result-value" id="dly-msperm">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">ms per foot</div>
+          <div class="result-value" id="dly-msperft">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Fill speaker delay <span class="tag">Haas effect</span></div>
+      <div class="calc-card-formula">
+        Delay = (Distance_fill_from_main / c) − (Distance_listener_from_main / c) + Haas offset
+      </div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Main speaker → fill (m)</div>
+          <input class="field-input" id="dly-main-to-fill" type="number" value="20" step="0.5" min="0.1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Main speaker → listener (m)</div>
+          <input class="field-input" id="dly-main-to-listener" type="number" value="18" step="0.5" min="0.1">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Haas offset (ms)</div>
+          <select class="field-select" id="dly-haas">
+            <option value="0">0 ms — aligned</option>
+            <option value="10" selected>10 ms — standard Haas</option>
+            <option value="20">20 ms — reinforce main</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-bar">
+        <div class="result-item">
+          <div class="result-label">Fill speaker delay</div>
+          <div class="result-value" id="dly-fill-delay">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Fill acoustic delay</div>
+          <div class="result-value" id="dly-fill-acoustic">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Haas offset</div>
+          <div class="result-value" id="dly-haas-out">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="dly-note"></div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Multi-zone delay table</div>
+      <div class="result-note" style="font-style:normal;margin-bottom:12px;">Enter distances from the <strong>main PA</strong> to each zone's fill speaker.</div>
+      <div id="dly-zones"></div>
+      <button class="add-btn" id="dly-add">+ Add zone</button>
+      <table class="data-table" style="margin-top:14px;">
+        <thead><tr><th>Zone</th><th>Distance (m)</th><th>Acoustic delay (ms)</th><th>+ Haas (ms)</th><th>Set DSP to</th></tr></thead>
+        <tbody id="dly-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 07 Impedance -->
+  <div class="page" id="page-impedance">
+    <div class="page-header">
+      <div class="page-eyebrow">Calculator 07</div>
+      <div class="page-title">Impedance & Wiring</div>
+      <div class="page-desc">Calculates total load impedance for speakers wired in series, parallel, or series-parallel combinations. Checks if the result is safe for your amplifier.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Amp minimum impedance</div>
+      <div class="fields-row">
+        <div class="field-group">
+          <div class="field-label">Amp minimum safe impedance (Ω)</div>
+          <select class="field-select" id="imp-amp-min">
+            <option value="8">8 Ω (conservative amps)</option>
+            <option value="4" selected>4 Ω (most professional amps)</option>
+            <option value="2">2 Ω (high-current amps)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Series wiring <span class="tag">impedances add</span></div>
+      <div class="calc-card-formula">Z_total = Z₁ + Z₂ + Z₃ + …</div>
+      <div id="imp-series-speakers"></div>
+      <button class="add-btn" id="imp-series-add">+ Add speaker</button>
+      <div class="result-bar" style="margin-top:14px;">
+        <div class="result-item">
+          <div class="result-label">Total impedance</div>
+          <div class="result-value" id="imp-series-total">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Safe for amp?</div>
+          <div class="result-value" id="imp-series-safe">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="imp-series-note"></div>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-card-title">Parallel wiring <span class="tag">impedance drops</span></div>
+      <div class="calc-card-formula">1/Z_total = 1/Z₁ + 1/Z₂ + 1/Z₃ + …</div>
+      <div id="imp-parallel-speakers"></div>
+      <button class="add-btn" id="imp-parallel-add">+ Add speaker</button>
+      <div class="result-bar" style="margin-top:14px;">
+        <div class="result-item">
+          <div class="result-label">Total impedance</div>
+          <div class="result-value" id="imp-parallel-total">—</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">Safe for amp?</div>
+          <div class="result-value" id="imp-parallel-safe">—</div>
+        </div>
+      </div>
+      <div class="result-note" id="imp-parallel-note"></div>
+    </div>
+  </div>
+
+  <!-- 08 Reference -->
+  <div class="page" id="page-ref">
+    <div class="page-header">
+      <div class="page-eyebrow">Quick Reference</div>
+      <div class="page-title">Engineering Reference</div>
+      <div class="page-desc">Key tables and values you'll use on every project — SPL targets, RT60 targets, absorption coefficients, common impedance combinations, and signal level guide.</div>
+    </div>
+
+    <div class="calc-card">
+      <div class="ref-section">
+        <h3>Target SPL by application</h3>
+        <table class="ref-table">
+          <thead><tr><th>Use Case</th><th>Target SPL</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Background music — restaurant / café</td><td>68–75 dB</td><td>Comfortable conversation</td></tr>
+            <tr><td>Retail foreground music</td><td>75–82 dB</td><td>Energetic without shouting</td></tr>
+            <tr><td>Speech — conference room</td><td>65–72 dB</td><td>STI > 0.70 required</td></tr>
+            <tr><td>Office open-plan paging</td><td>70–78 dB</td><td>6–10 dB above ambient</td></tr>
+            <tr><td>Gym / fitness studio</td><td>82–92 dB</td><td>High-energy zones higher</td></tr>
+            <tr><td>House of worship — speech</td><td>70–80 dB</td><td>Low RT60 critical</td></tr>
+            <tr><td>Live music — small venue</td><td>95–103 dB</td><td>Front of house mix position</td></tr>
+            <tr><td>Concert / outdoor festival</td><td>103–110 dB</td><td>OSHA limit 90 dB avg 8h</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-section">
+        <h3>RT60 targets by room type</h3>
+        <table class="ref-table">
+          <thead><tr><th>Room Type</th><th>Target RT60</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Boardroom / conference</td><td>0.4–0.6 s</td><td>Speech intelligibility</td></tr>
+            <tr><td>Open-plan office</td><td>< 0.5 s</td><td>Privacy, focus</td></tr>
+            <tr><td>Restaurant</td><td>0.7–1.0 s</td><td>Lively but not chaotic</td></tr>
+            <tr><td>Hotel lobby / atrium</td><td>1.0–1.5 s</td><td>Ambience acceptable</td></tr>
+            <tr><td>Multi-purpose hall</td><td>0.9–1.3 s</td><td>Balance speech & music</td></tr>
+            <tr><td>House of worship — speech</td><td>0.8–1.2 s</td><td>Highly reverberant spaces need treatment</td></tr>
+            <tr><td>Concert hall — classical</td><td>1.8–2.2 s</td><td>Warmth and bloom</td></tr>
+            <tr><td>Recording studio (live room)</td><td>0.2–0.5 s</td><td>Controlled, dry</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-section">
+        <h3>Common impedance combinations</h3>
+        <table class="ref-table">
+          <thead><tr><th>Wiring</th><th>Each speaker</th><th>Result</th><th>Amp safe?</th></tr></thead>
+          <tbody>
+            <tr><td>2 × parallel</td><td>8 Ω</td><td>4 Ω</td><td style="color:var(--green)">✓ Yes (4Ω min)</td></tr>
+            <tr><td>2 × parallel</td><td>4 Ω</td><td>2 Ω</td><td style="color:var(--amber)">⚠ High-current only</td></tr>
+            <tr><td>4 × parallel</td><td>8 Ω</td><td>2 Ω</td><td style="color:var(--red)">✗ Most amps no</td></tr>
+            <tr><td>2 × series</td><td>8 Ω</td><td>16 Ω</td><td style="color:var(--green)">✓ Safe (power halved)</td></tr>
+            <tr><td>2S × 2P (4 speakers)</td><td>8 Ω</td><td>8 Ω</td><td style="color:var(--green)">✓ Ideal</td></tr>
+            <tr><td>2S × 2P (4 speakers)</td><td>4 Ω</td><td>4 Ω</td><td style="color:var(--green)">✓ Safe</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-section">
+        <h3>Signal levels</h3>
+        <table class="ref-table">
+          <thead><tr><th>Level</th><th>dBu / dBV</th><th>Where used</th></tr></thead>
+          <tbody>
+            <tr><td>Mic level</td><td>−60 to −40 dBu</td><td>Condenser / dynamic mic output</td></tr>
+            <tr><td>Instrument level</td><td>−20 to −10 dBV</td><td>Guitar, keyboard direct</td></tr>
+            <tr><td>Consumer line</td><td>−10 dBV</td><td>Home audio, consumer gear</td></tr>
+            <tr><td>Professional line</td><td>+4 dBu</td><td>Mixers, DSPs, pro amps</td></tr>
+            <tr><td>AES3 digital</td><td>+4 dBu ref</td><td>Pro digital audio XLR</td></tr>
+            <tr><td>Speaker level</td><td>+20 to +40 dBu</td><td>Amp output to speaker</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-section">
+        <h3>Speech Intelligibility (STI)</h3>
+        <table class="ref-table">
+          <thead><tr><th>STI Score</th><th>Rating</th><th>Application suitability</th></tr></thead>
+          <tbody>
+            <tr><td>0.75 – 1.0</td><td style="color:var(--green)">Excellent</td><td>Boardrooms, critical listening, voice alarm</td></tr>
+            <tr><td>0.60 – 0.75</td><td style="color:var(--green)">Good</td><td>Conferences, houses of worship</td></tr>
+            <tr><td>0.45 – 0.60</td><td style="color:var(--amber)">Fair</td><td>Marginal for speech — add treatment</td></tr>
+            <tr><td>< 0.45</td><td style="color:var(--red)">Poor</td><td>Unacceptable — redesign required</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ref-section">
+        <h3>Dispersion angle guide</h3>
+        <table class="ref-table">
+          <thead><tr><th>Angle</th><th>Use case</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>60°–70°</td><td>High ceiling, narrow beam</td><td>Longer throw, harder to calculate — need more precision</td></tr>
+            <tr><td>90°</td><td>Standard ceiling speaker</td><td>Common, easy to space in grid</td></tr>
+            <tr><td>100°–110°</td><td>Wide coverage, lower ceiling</td><td>Best balance for 2.8–4m ceilings</td></tr>
+            <tr><td>120°–130°</td><td>Very wide, borderline</td><td>Good overlap, but SPL at edge drops quickly</td></tr>
+            <tr><td>160°–180°</td><td>Ultra-wide / outdoor</td><td>Full-range surface-mount speakers</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+/* ===================================================
+   NAVIGATION
+=================================================== */
+document.querySelectorAll('.nav-item').forEach(function(el){
+  el.addEventListener('click', function(){
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    el.classList.add('active');
+    const page = el.dataset.page;
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById('page-' + page).classList.add('active');
+    recalcAll();
+  });
+});
+
+function fmt(n, dec){ return isNaN(n) || !isFinite(n) ? '—' : n.toFixed(dec || 0); }
+function fmtW(n){ return n < 1000 ? fmt(n,0) + ' W' : fmt(n/1000,2) + ' kW'; }
+
+function val(id){ return parseFloat(document.getElementById(id).value) || 0; }
+function setHtml(id, html){ const el = document.getElementById(id); if(el) el.innerHTML = html; }
+function setTxt(id, txt){ const el = document.getElementById(id); if(el) el.textContent = txt; }
+function setClass(id, cls){ const el = document.getElementById(id); if(el){ el.className = 'result-value ' + cls; } }
+
+/* ===================================================
+   01 SPL / Distance
+=================================================== */
+function calcSPL(){
+  const splRef = val('spl-ref');
+  const dRef   = val('spl-dref') || 1;
+  const d      = val('spl-d') || 1;
+  const target = val('spl-target');
+
+  const splAtD = splRef - 20 * Math.log10(d / dRef);
+  const drop   = splAtD - splRef;
+
+  setTxt('spl-out', fmt(splAtD, 1) + ' dB');
+  setTxt('spl-drop', fmt(drop, 1) + ' dB');
+
+  const diff = splAtD - target;
+  let cls = diff >= 0 ? 'good' : diff >= -6 ? 'warn' : 'danger';
+  setClass('spl-out', cls);
+
+  // Distance table
+  const distances = [1,2,3,4,5,6,8,10,12,15,20,25,30];
+  let rows = '';
+  distances.forEach(function(dist){
+    const spl = splRef - 20*Math.log10(dist/dRef);
+    const diff2 = spl - target;
+    const cls2 = diff2 >= 0 ? 'good' : diff2 >= -6 ? 'warn' : 'danger';
+    rows += '<tr><td>' + dist + ' m</td><td>' + fmt(dist*3.281,1) + ' ft</td>' +
+      '<td class="accent">' + fmt(spl,1) + ' dB</td>' +
+      '<td class="' + cls2 + '">' + (diff2 >= 0 ? '+' : '') + fmt(diff2,1) + ' dB</td></tr>';
+  });
+  setHtml('spl-tbody', rows);
+
+  // Max distance where target is still met
+  const maxDist = dRef * Math.pow(10, (splRef - target) / 20);
+  setTxt('spl-range-note', target + ' dB target is met up to ' + fmt(maxDist,1) + ' m (' + fmt(maxDist*3.281,1) + ' ft) from this speaker.');
+  setTxt('spl-note', splAtD >= target
+    ? 'Speaker meets the ' + target + ' dB target at ' + d + ' m — ' + fmt(splAtD - target,1) + ' dB of margin.'
+    : 'Speaker is ' + fmt(target - splAtD,1) + ' dB short of the ' + target + ' dB target at ' + d + ' m. Move speaker closer, use a higher-sensitivity model, or increase amp power.');
+}
+
+document.getElementById('spl-usecase').addEventListener('change', function(){
+  if(this.value !== '85') document.getElementById('spl-target').value = this.value;
+  calcSPL();
+});
+
+/* ===================================================
+   02 Amplifier Power
+=================================================== */
+function calcPower(){
+  const sens     = val('pw-sens');
+  const target   = val('pw-target');
+  const dist     = val('pw-dist') || 1;
+  const headroom = val('pw-headroom');
+  const count    = val('pw-count') || 1;
+
+  const dbNeeded = target - sens + 20*Math.log10(dist) + headroom;
+  const perSpk   = Math.pow(10, dbNeeded/10);
+  const total    = perSpk * count;
+  const recAmp   = roundUpAmp(total);
+
+  setTxt('pw-per',   fmtW(perSpk));
+  setTxt('pw-total', fmtW(total));
+  setTxt('pw-rec',   fmtW(recAmp));
+  setClass('pw-per', perSpk > 500 ? 'warn' : '');
+  setClass('pw-total', total > 2000 ? 'danger' : total > 500 ? 'warn' : 'good');
+
+  setTxt('pw-note',
+    'At ' + dist + ' m with ' + headroom + ' dB headroom, each speaker needs ' + fmt(perSpk,0) + ' W to hit ' + target + ' dB. ' +
+    'Total for ' + count + ' speaker(s): ' + fmt(total,0) + ' W — use a ' + fmtW(recAmp) + ' amplifier minimum (same channel, or bridged).');
+
+  // Sensitivity comparison table
+  const sensList = [84, 87, 90, 93, 96, 100];
+  const examples = ['Budget 2-way','PA driver','Standard woofer','Efficient PA','Pro line-array driver','High-efficiency horn'];
+  let rows = '';
+  sensList.forEach(function(s, i){
+    const db = target - s + 20*Math.log10(dist) + headroom;
+    const pw = Math.pow(10, db/10);
+    const ratio = perSpk / pw;
+    const cls = s >= sens ? 'good' : 'accent';
+    rows += '<tr><td class="' + cls + '">' + s + ' dB/W/m</td><td>' + examples[i] + '</td>' +
+      '<td class="' + cls + '">' + fmtW(pw) + '</td><td>' + (ratio > 1 ? fmt(ratio,1) + '× less' : fmt(1/ratio,1) + '× more') + '</td></tr>';
+  });
+  setHtml('pw-sens-table', rows);
+}
+
+function roundUpAmp(w){
+  const sizes = [50,100,150,200,250,300,400,500,750,1000,1500,2000,3000,4000,5000];
+  for(let s of sizes){ if(s >= w * 1.25) return s; }
+  return Math.ceil(w * 1.3 / 100) * 100;
+}
+
+/* ===================================================
+   03 100V Line
+=================================================== */
+let v100Speakers = [
+  {name:'In-ceiling speaker (standard)', tap:4, qty:8},
+  {name:'In-ceiling speaker (low output)', tap:2, qty:4},
+];
+
+function renderV100(){
+  const list = document.getElementById('v100-speaker-list');
+  list.innerHTML = v100Speakers.map(function(sp, i){
+    return '<div class="speaker-row">' +
+      '<input class="field-input" type="text" value="' + sp.name + '" data-vi="' + i + '" data-vf="name" placeholder="Speaker name">' +
+      '<input class="field-input" type="number" value="' + sp.tap + '" data-vi="' + i + '" data-vf="tap" step="0.5" min="0.5" placeholder="Tap W">' +
+      '<input class="field-input" type="number" value="' + sp.qty + '" data-vi="' + i + '" data-vf="qty" step="1" min="1" placeholder="Qty">' +
+      '<button class="remove-btn" data-vi="' + i + '" data-vrm="1">✕</button>' +
+    '</div>';
+  }).join('');
+
+  list.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      const i = parseInt(this.dataset.vi);
+      const f = this.dataset.vf;
+      v100Speakers[i][f] = f === 'name' ? this.value : parseFloat(this.value) || 0;
+      calcV100();
+    });
+  });
+  list.querySelectorAll('[data-vrm]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      v100Speakers.splice(parseInt(this.dataset.vi), 1);
+      renderV100(); calcV100();
+    });
+  });
+  calcV100();
+}
+
+function calcV100(){
+  const ampW    = val('v100-amp');
+  const hroom   = parseFloat(document.getElementById('v100-headroom').value) || 0.8;
+  const cap     = ampW * hroom;
+  const total   = v100Speakers.reduce(function(s, sp){ return s + sp.tap * sp.qty; }, 0);
+  const pct     = total / ampW * 100;
+
+  setTxt('v100-load', fmt(total,0) + ' W');
+  setTxt('v100-cap',  fmt(cap,0) + ' W');
+  setTxt('v100-pct',  fmt(pct,0) + '%');
+
+  let status, cls, note;
+  if(total === 0){
+    status = '—'; cls = ''; note = 'Add speakers above.';
+  } else if(total <= cap){
+    const rem = cap - total;
+    status = 'OK'; cls = 'good';
+    note = 'Safe. ' + fmt(rem,0) + ' W remaining capacity — room for ~' + Math.floor(rem / (total/v100Speakers.reduce(function(s,sp){return s+sp.qty;},1) || 1)) + ' more speakers at average tap.';
+  } else {
+    status = 'OVERLOAD'; cls = 'danger';
+    note = 'Total load exceeds safe capacity by ' + fmt(total - cap, 0) + ' W. Reduce tap settings, split across two amplifiers, or use a higher-rated amp.';
+  }
+  setTxt('v100-status', status);
+  setClass('v100-status', cls);
+  setTxt('v100-note', note);
+}
+
+document.getElementById('v100-add').addEventListener('click', function(){
+  v100Speakers.push({name:'New speaker', tap:4, qty:1});
+  renderV100();
+});
+['v100-amp','v100-voltage','v100-headroom'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', calcV100);
+  document.getElementById(id).addEventListener('change', calcV100);
+});
+
+/* ===================================================
+   04 Coverage
+=================================================== */
+function calcCoverage(){
+  const ceil    = val('cov-ceil');
+  const listen  = val('cov-listen');
+  const angle   = val('cov-angle');
+  const overlap = val('cov-overlap') / 100;
+  const len     = val('cov-len');
+  const wid     = val('cov-wid');
+
+  const H = ceil - listen;
+  const D = 2 * H * Math.tan((angle/2) * Math.PI/180);
+  const Ssq  = D / Math.sqrt(2);
+  const Shex = D * Math.sqrt(3) / 2;
+
+  const Ssq_eff  = Ssq  * (1 - overlap);
+  const Shex_eff = Shex * (1 - overlap);
+
+  // Speaker counts
+  const colsSq = Math.ceil(wid / Ssq_eff);
+  const rowsSq = Math.ceil(len / Ssq_eff);
+  const nSq = colsSq * rowsSq;
+
+  // Hex: alternating rows
+  const rowsHex = Math.ceil(len / (Shex_eff * Math.sqrt(3)/2));
+  const colsA   = Math.ceil(wid / Shex_eff);
+  const colsB   = Math.max(1, colsA - 1);
+  const nHex    = Math.ceil(rowsHex/2) * colsA + Math.floor(rowsHex/2) * colsB;
+
+  const saving = nSq - nHex;
+  const savePct = nSq > 0 ? saving / nSq * 100 : 0;
+
+  setTxt('cov-H',    fmt(H,2) + ' m');
+  setTxt('cov-D',    fmt(D,2) + ' m');
+  setTxt('cov-Ssq',  fmt(Ssq,2) + ' m');
+  setTxt('cov-Shex', fmt(Shex,2) + ' m');
+
+  const rows =
+    '<tr><td>Square grid</td><td class="accent">' + fmt(Ssq_eff,2) + ' m</td>' +
+      '<td class="accent">' + nSq + ' speakers (' + colsSq + ' × ' + rowsSq + ')</td><td>—</td></tr>' +
+    '<tr><td>Hexagonal (staggered)</td><td class="accent">' + fmt(Shex_eff,2) + ' m</td>' +
+      '<td class="good">' + nHex + ' speakers</td>' +
+      '<td class="good">' + (saving > 0 ? '−' + saving + ' (' + fmt(savePct,0) + '% fewer)' : saving === 0 ? 'same' : '+' + Math.abs(saving)) + '</td></tr>';
+
+  setHtml('cov-table', rows);
+  setTxt('cov-note', 'Hex grid saves ~' + fmt(savePct,0) + '% speakers for the same coverage overlap. ' +
+    'In a ' + len + ' × ' + wid + ' m room with ' + angle + '° speakers at ' + ceil + ' m ceiling: ' +
+    nSq + ' vs ' + nHex + ' speakers. Each speaker covers a ' + fmt(D,1) + ' m diameter circle at the ' + listen + ' m listening plane.');
+}
+
+/* ===================================================
+   05 RT60
+=================================================== */
+let rt60Surfaces = [
+  {name:'Floor (tiled / marble)', coeff:0.02, area:96},
+  {name:'Ceiling (POP / gypsum)', coeff:0.05, area:96},
+  {name:'Walls (painted plaster)', coeff:0.03, area:108},
+  {name:'Glass windows', coeff:0.04, area:20},
+];
+
+function renderRT60(){
+  const surf = document.getElementById('rt-surfaces');
+  surf.innerHTML = rt60Surfaces.map(function(s,i){
+    return '<div class="speaker-row" style="grid-template-columns:1fr 160px 100px 36px;">' +
+      '<input class="field-input" type="text" value="' + s.name + '" data-ri="' + i + '" data-rf="name" placeholder="Surface name">' +
+      '<input class="field-input" type="number" value="' + s.coeff + '" data-ri="' + i + '" data-rf="coeff" step="0.01" min="0" max="1" placeholder="Coeff">' +
+      '<input class="field-input" type="number" value="' + s.area + '" data-ri="' + i + '" data-rf="area" step="1" min="0" placeholder="m²">' +
+      '<button class="remove-btn" data-ri="' + i + '" data-rrm="1">✕</button>' +
+    '</div>';
+  }).join('');
+
+  surf.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      const i = parseInt(this.dataset.ri);
+      const f = this.dataset.rf;
+      rt60Surfaces[i][f] = f === 'name' ? this.value : parseFloat(this.value) || 0;
+      calcRT60();
+    });
+  });
+  surf.querySelectorAll('[data-rrm]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      rt60Surfaces.splice(parseInt(this.dataset.ri), 1);
+      renderRT60(); calcRT60();
+    });
+  });
+  calcRT60();
+}
+
+function calcRT60(){
+  const len = val('rt-len'), wid = val('rt-wid'), hei = val('rt-hei');
+  const V = len * wid * hei;
+  setTxt('rt-vol', fmt(V,1));
+
+  const A = rt60Surfaces.reduce(function(s,surf){ return s + surf.coeff * surf.area; }, 0);
+  const rt = V > 0 && A > 0 ? 0.161 * V / A : 0;
+
+  setTxt('rt-A', fmt(A,1) + ' m²');
+  setTxt('rt-out', fmt(rt,2) + ' s');
+
+  let suit, cls, note;
+  if(rt < 0.4){
+    suit = 'DRY'; cls = 'warn';
+    note = 'Very short RT60 — suitable for recording studios. May sound unnaturally dead for speech or music in a commercial space.';
+  } else if(rt < 0.65){
+    suit = 'EXCELLENT'; cls = 'good';
+    note = 'Ideal for speech, conference rooms, and boardrooms. Good STI expected.';
+  } else if(rt < 1.0){
+    suit = 'GOOD'; cls = 'good';
+    note = 'Good for multi-purpose spaces, restaurants, and general speech. Intelligibility remains acceptable.';
+  } else if(rt < 1.5){
+    suit = 'ACCEPTABLE'; cls = 'warn';
+    note = 'Suitable for music. Speech intelligibility begins to suffer — consider distributed ceiling speakers with narrow dispersion, or acoustic panels.';
+  } else {
+    suit = 'REVERBERANT'; cls = 'danger';
+    note = 'High reverberation — typical of marble lobbies, churches, and large open spaces. DSP and distributed audio systems essential. Consider acoustic treatment: 50mm rockwool panels on 25% of wall area would help.';
+  }
+  setTxt('rt-suit', suit);
+  setClass('rt-suit', cls);
+  setTxt('rt-note', note);
+}
+
+document.getElementById('rt-add').addEventListener('click', function(){
+  rt60Surfaces.push({name:'New surface', coeff:0.10, area:10});
+  renderRT60();
+});
+['rt-len','rt-wid','rt-hei'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', calcRT60);
+});
+
+/* ===================================================
+   06 Delay
+=================================================== */
+let dlyZones = [{name:'Zone A fill', dist:15},{name:'Zone B fill', dist:25}];
+
+function calcDelay(){
+  const temp = val('dly-temp');
+  const sos  = 331 + 0.6 * temp;
+  const msPm = 1000 / sos;
+  const msPft= msPm / 3.281;
+
+  setTxt('dly-sos',    fmt(sos,1) + ' m/s');
+  setTxt('dly-msperm', fmt(msPm,3) + ' ms/m');
+  setTxt('dly-msperft',fmt(msPft,3) + ' ms/ft');
+
+  const mainToFill     = val('dly-main-to-fill');
+  const mainToListener = val('dly-main-to-listener');
+  const haas           = val('dly-haas');
+
+  const fillAcoustic = mainToFill * msPm;
+  const mainAcoustic = mainToListener * msPm;
+  const dlyNeeded    = fillAcoustic - mainAcoustic + haas;
+
+  setTxt('dly-fill-acoustic', fmt(fillAcoustic,1) + ' ms');
+  setTxt('dly-fill-delay',    fmt(Math.max(0,dlyNeeded),1) + ' ms');
+  setTxt('dly-haas-out',      '+' + haas + ' ms');
+
+  setTxt('dly-note', dlyNeeded < 0
+    ? 'Fill speaker is CLOSER to the listener than the main PA. The fill arrives early — it should still be delayed by ' + fmt(-dlyNeeded + haas,1) + ' ms to avoid pre-ringing.'
+    : 'Set fill speaker DSP delay to ' + fmt(dlyNeeded,1) + ' ms. This ensures sound from the main PA arrives first (Haas effect — brain locks onto earliest arrival).');
+
+  // Zone table
+  const zoneEl = document.getElementById('dly-zones');
+  zoneEl.innerHTML = dlyZones.map(function(z,i){
+    return '<div class="speaker-row" style="grid-template-columns:1fr 140px 36px;margin-bottom:8px;">' +
+      '<input class="field-input" type="text" value="' + z.name + '" data-di="' + i + '" data-df="name" placeholder="Zone name">' +
+      '<input class="field-input" type="number" value="' + z.dist + '" data-di="' + i + '" data-df="dist" step="1" min="1" placeholder="Distance m">' +
+      '<button class="remove-btn" data-di="' + i + '" data-drm="1">✕</button>' +
+    '</div>';
+  }).join('');
+
+  zoneEl.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      const i = parseInt(this.dataset.di);
+      dlyZones[i][this.dataset.df] = this.dataset.df === 'name' ? this.value : parseFloat(this.value)||0;
+      calcDelay();
+    });
+  });
+  zoneEl.querySelectorAll('[data-drm]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      dlyZones.splice(parseInt(this.dataset.di), 1);
+      calcDelay();
+    });
+  });
+
+  let trows = '';
+  dlyZones.forEach(function(z){
+    const acDly = z.dist * msPm;
+    const dsp   = acDly + haas;
+    trows += '<tr><td class="accent">' + z.name + '</td><td>' + fmt(z.dist,0) + ' m</td>' +
+      '<td>' + fmt(acDly,1) + ' ms</td><td>+' + haas + ' ms</td><td class="good">' + fmt(dsp,1) + ' ms</td></tr>';
+  });
+  setHtml('dly-table', trows || '<tr><td colspan="5" class="muted">No zones — add below.</td></tr>');
+}
+
+document.getElementById('dly-add').addEventListener('click', function(){
+  dlyZones.push({name:'New zone', dist:10});
+  calcDelay();
+});
+['dly-temp','dly-main-to-fill','dly-main-to-listener','dly-haas'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', calcDelay);
+  document.getElementById(id).addEventListener('change', calcDelay);
+});
+
+/* ===================================================
+   07 Impedance
+=================================================== */
+let impSeries   = [8, 8];
+let impParallel = [8, 8];
+
+function renderImp(type, arr, addId, listId, totalId, safeId, noteId){
+  const listEl = document.getElementById(listId);
+  listEl.innerHTML = arr.map(function(z, i){
+    return '<div class="speaker-row" style="grid-template-columns:1fr 120px 36px;margin-bottom:8px;">' +
+      '<div class="field-label" style="display:flex;align-items:center;">Speaker ' + (i+1) + '</div>' +
+      '<input class="field-input" type="number" value="' + z + '" data-ii="' + i + '" data-it="' + type + '" step="1" min="1" placeholder="Ω">' +
+      '<button class="remove-btn" data-ii="' + i + '" data-it="' + type + '" data-irm="1">✕</button>' +
+    '</div>';
+  }).join('');
+
+  listEl.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      const i = parseInt(this.dataset.ii);
+      const t = this.dataset.it;
+      if(t === 'series') impSeries[i] = parseFloat(this.value)||1;
+      else impParallel[i] = parseFloat(this.value)||1;
+      calcImp();
+    });
+  });
+  listEl.querySelectorAll('[data-irm]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const t = this.dataset.it;
+      if(t === 'series') impSeries.splice(parseInt(this.dataset.ii),1);
+      else impParallel.splice(parseInt(this.dataset.ii),1);
+      renderImp('series', impSeries, 'imp-series-add', 'imp-series-speakers', 'imp-series-total', 'imp-series-safe', 'imp-series-note');
+      renderImp('parallel', impParallel, 'imp-parallel-add', 'imp-parallel-speakers', 'imp-parallel-total', 'imp-parallel-safe', 'imp-parallel-note');
+    });
+  });
+}
+
+function calcImp(){
+  const minAmp = parseFloat(document.getElementById('imp-amp-min').value) || 4;
+
+  // Series
+  const totalS = impSeries.reduce(function(a,b){return a+b;},0);
+  const safeS  = totalS >= minAmp;
+  setTxt('imp-series-total', fmt(totalS,1) + ' Ω');
+  setTxt('imp-series-safe',  safeS ? '✓ SAFE' : '⚠ TOO LOW');
+  setClass('imp-series-total', safeS ? 'good' : 'warn');
+  setClass('imp-series-safe',  safeS ? 'good' : 'warn');
+  setTxt('imp-series-note', 'Series raises impedance — amp sees ' + fmt(totalS,1) + ' Ω but delivers less power. Safe for all amps. Downside: if one speaker fails, all go silent.');
+
+  // Parallel
+  const recip = impParallel.reduce(function(a,b){return a + 1/b;},0);
+  const totalP = 1/recip;
+  const safeP  = totalP >= minAmp;
+  setTxt('imp-parallel-total', fmt(totalP,2) + ' Ω');
+  setTxt('imp-parallel-safe',  safeP ? '✓ SAFE' : '✗ DANGER');
+  setClass('imp-parallel-total', safeP ? 'good' : 'danger');
+  setClass('imp-parallel-safe',  safeP ? 'good' : 'danger');
+  setTxt('imp-parallel-note', safeP
+    ? 'Parallel drops impedance — amp delivers more power. ' + fmt(totalP,2) + ' Ω is safe for a ' + minAmp + ' Ω minimum amp.'
+    : 'DANGER — ' + fmt(totalP,2) + ' Ω is below your amp\'s ' + minAmp + ' Ω minimum. The amp may overheat or shut down. Use series-parallel wiring or 100V line instead.');
+}
+
+function initImp(){
+  renderImp('series',   impSeries,   'imp-series-add',   'imp-series-speakers',   'imp-series-total',   'imp-series-safe',   'imp-series-note');
+  renderImp('parallel', impParallel, 'imp-parallel-add', 'imp-parallel-speakers', 'imp-parallel-total', 'imp-parallel-safe', 'imp-parallel-note');
+  calcImp();
+}
+
+document.getElementById('imp-series-add').addEventListener('click', function(){
+  impSeries.push(8);
+  renderImp('series', impSeries, 'imp-series-add', 'imp-series-speakers', 'imp-series-total', 'imp-series-safe', 'imp-series-note');
+  calcImp();
+});
+document.getElementById('imp-parallel-add').addEventListener('click', function(){
+  impParallel.push(8);
+  renderImp('parallel', impParallel, 'imp-parallel-add', 'imp-parallel-speakers', 'imp-parallel-total', 'imp-parallel-safe', 'imp-parallel-note');
+  calcImp();
+});
+document.getElementById('imp-amp-min').addEventListener('change', calcImp);
+
+/* ===================================================
+   Wire all inputs to recalc
+=================================================== */
+function recalcAll(){
+  calcSPL();
+  calcPower();
+  calcV100();
+  calcCoverage();
+  calcRT60();
+  calcDelay();
+  calcImp();
+}
+
+document.querySelectorAll('.field-input,.field-select').forEach(function(el){
+  el.addEventListener('input', recalcAll);
+  el.addEventListener('change', recalcAll);
+});
+
+/* ===== Boot ===== */
+renderV100();
+renderRT60();
+initImp();
+recalcAll();
+</script>
+</body>
+</html>

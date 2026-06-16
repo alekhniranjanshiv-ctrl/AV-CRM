@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AudioPlan — Distributed Speaker Coverage Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0B0D10;
+  --panel:#15181D;
+  --panel2:#1C2026;
+  --line:#272B33;
+  --text:#EDEDEF;
+  --muted:#8A909B;
+  --accent:#3DC6E8;
+  --amber:#E8A23D;
+  --blue:#3D7EE8;
+  --green:#4CAF6D;
+  --red:#E25C5C;
+  --radius:10px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  display:flex;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{background:var(--accent); color:#0B0D10;}
+
+/* ===== Sidebar ===== */
+.sidebar{
+  width:230px;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#101317,#0B0D10);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:24px 0;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  font-family:'Oswald',sans-serif;
+  font-size:20px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:0 24px 6px;
+  color:var(--text);
+}
+.brand span{color:var(--accent);}
+.brand-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+  padding:0 24px 24px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border-bottom:1px solid var(--line);
+  margin-bottom:8px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 24px;
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  cursor:pointer;
+  border-left:3px solid transparent;
+  transition:all .15s ease;
+  user-select:none;
+}
+.nav-item:hover{color:var(--text); background:rgba(255,255,255,0.02);}
+.nav-item.active{
+  color:var(--accent);
+  border-left-color:var(--accent);
+  background:rgba(61,198,232,0.06);
+}
+.nav-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  width:18px;
+}
+.nav-item.active .nav-num{color:var(--accent);}
+.sidebar-footer{
+  margin-top:auto;
+  padding:16px 24px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+  border-top:1px solid var(--line);
+}
+
+/* ===== Main ===== */
+.main{
+  flex:1;
+  padding:32px 40px 60px;
+  max-width:1100px;
+}
+.page{display:none; animation:fadein .25s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.page-header{margin-bottom:28px;}
+.page-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--accent);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.page-title{
+  font-family:'Oswald',sans-serif;
+  font-size:32px;
+  font-weight:600;
+  letter-spacing:0.5px;
+}
+.page-desc{color:var(--muted); margin-top:8px; font-size:14px; max-width:680px; line-height:1.6;}
+
+/* ===== Cards / Form ===== */
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  margin-bottom:20px;
+}
+.card-title{
+  font-family:'Oswald',sans-serif;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--text);
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.card-title::before{
+  content:'';
+  width:6px; height:6px;
+  background:var(--accent);
+  border-radius:50%;
+  flex-shrink:0;
+}
+.grid{display:grid; gap:16px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
+.grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+@media(max-width:760px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+label{
+  display:block;
+  font-size:12px;
+  font-weight:500;
+  color:var(--muted);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+input, select, textarea{
+  width:100%;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:10px 12px;
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  transition:border-color .15s;
+}
+input::placeholder{color:#4A4F58; font-family:'Inter',sans-serif;}
+input:focus, select:focus, textarea:focus{
+  outline:none;
+  border-color:var(--accent);
+}
+.field{margin-bottom:0;}
+.field-row{display:flex; gap:10px; align-items:flex-end;}
+
+/* Buttons */
+.btn{
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:11px 22px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  cursor:pointer;
+  transition:all .15s;
+}
+.btn:hover{border-color:var(--accent); color:var(--accent);}
+.btn-primary{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#0B0D10;
+}
+.btn-primary:hover{background:#6cd4ef; color:#0B0D10;}
+.btn-danger{border-color:var(--red); color:var(--red);}
+.btn-danger:hover{background:var(--red); color:#fff;}
+.btn-sm{padding:7px 14px; font-size:11px;}
+.btn-row{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+
+/* Results / readout */
+.readout{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent);
+  border-radius:6px;
+  padding:14px 16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  line-height:1.8;
+}
+.readout .label{color:var(--muted); display:inline-block; width:220px;}
+.readout .val{color:var(--text); font-weight:500;}
+.readout .val.warn{color:var(--accent);}
+
+/* Toggle / segmented control */
+.seg{display:flex; border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+.seg button{flex:1; background:var(--panel2); border:none; color:var(--muted); padding:9px 12px;
+  font-family:'Oswald',sans-serif; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; cursor:pointer;}
+.seg button.active{background:var(--accent); color:#0B0D10;}
+.seg button:not(:last-child){border-right:1px solid var(--line);}
+
+/* Zone list */
+.zone-list{display:flex; flex-direction:column; gap:10px;}
+.zone-row{display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--panel2);
+  border:1px solid var(--line); border-radius:8px; padding:12px 16px; cursor:pointer;}
+.zone-row.active{border-color:var(--accent);}
+.zone-row-name{font-weight:600; font-size:14px;}
+.zone-row-meta{font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-top:2px;}
+.zone-row-actions{display:flex; gap:8px; flex-shrink:0;}
+
+/* Plan / SVG */
+.plan-wrap{background:#06070a; border:1px solid var(--line); border-radius:var(--radius); padding:12px; overflow:auto;}
+.plan-wrap svg{display:block; margin:0 auto; max-width:100%;}
+.legend{
+  display:flex; gap:18px; margin-top:14px; flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);
+}
+.legend-item{display:flex; align-items:center; gap:6px;}
+.legend-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+.legend-ring{width:14px; height:14px; border-radius:50%; border:1.5px solid currentColor; flex-shrink:0;}
+
+/* Pattern reference cards */
+.pattern-card{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap;}
+.pattern-card .pattern-fig{flex-shrink:0; background:#06070a; border:1px solid var(--line); border-radius:8px; padding:10px;}
+.pattern-card .pattern-text{flex:1; min-width:220px; font-size:13px; color:var(--muted); line-height:1.7;}
+.pattern-text h4{font-family:'Oswald',sans-serif; font-size:14px; color:var(--text); margin-bottom:6px; letter-spacing:0.5px;}
+
+/* Product table (quote) */
+.product-table{width:100%; border-collapse:collapse; font-size:13px;}
+.product-table th{
+  text-align:left;
+  font-family:'Oswald',sans-serif;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:10px 8px;
+  border-bottom:1px solid var(--line);
+}
+.product-table td{
+  padding:8px;
+  border-bottom:1px solid var(--line);
+}
+.product-table input, .product-table select{padding:7px 8px; font-size:12px;}
+.product-table tr:hover{background:rgba(255,255,255,0.015);}
+
+.budget-bar{
+  height:10px;
+  background:var(--panel2);
+  border-radius:5px;
+  overflow:hidden;
+  margin:10px 0 16px;
+  border:1px solid var(--line);
+}
+.budget-fill{height:100%; background:linear-gradient(90deg,var(--accent),#8fe6f7); transition:width .4s ease;}
+.budget-fill.over{background:linear-gradient(90deg,var(--red),#f08080);}
+
+.total-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 0; font-family:'Oswald',sans-serif; font-size:18px; font-weight:600;
+  border-top:1px solid var(--line); margin-top:8px;
+}
+.total-row .amt{font-family:'JetBrains Mono',monospace; color:var(--accent);}
+
+/* Toast */
+.toast{
+  position:fixed; bottom:24px; right:24px;
+  background:var(--panel2); border:1px solid var(--green);
+  border-left:4px solid var(--green);
+  color:var(--text); padding:14px 20px; border-radius:8px;
+  font-family:'Inter',sans-serif; font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  transform:translateY(20px); opacity:0; pointer-events:none;
+  transition:all .3s ease; z-index:999;
+}
+.toast.show{transform:translateY(0); opacity:1;}
+
+.helper{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;}
+.section-divider{height:1px; background:var(--line); margin:24px 0;}
+
+/* Security note */
+.security-note{
+  display:flex; gap:12px; align-items:flex-start;
+  background:rgba(76,175,109,0.06);
+  border:1px solid rgba(76,175,109,0.25);
+  border-radius:8px; padding:14px 16px; margin-top:18px;
+  font-size:12px; color:var(--muted); line-height:1.6;
+}
+.security-note strong{color:var(--green);}
+
+/* responsive */
+@media(max-width:880px){
+  body{flex-direction:column;}
+  .sidebar{width:100%; height:auto; position:relative; flex-direction:row; overflow-x:auto; padding:12px;}
+  .brand,.brand-sub,.sidebar-footer{display:none;}
+  .nav-item{padding:10px 16px; border-left:none; border-bottom:3px solid transparent; white-space:nowrap; flex-shrink:0;}
+  .nav-item.active{border-bottom-color:var(--accent); border-left-color:transparent;}
+  .main{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="brand">Audio<span>Plan</span></div>
+  <div class="brand-sub">Coverage Design Suite v1.0</div>
+  <div class="nav-item active" data-page="project"><span class="nav-num">01</span>Project</div>
+  <div class="nav-item" data-page="setup"><span class="nav-num">02</span>Speaker &amp; Coverage</div>
+  <div class="nav-item" data-page="zones"><span class="nav-num">03</span>Zones / Rooms</div>
+  <div class="nav-item" data-page="plan"><span class="nav-num">04</span>Layout Plan</div>
+  <div class="nav-item" data-page="reference"><span class="nav-num">05</span>Pattern Reference</div>
+  <div class="nav-item" data-page="quote"><span class="nav-num">06</span>Quote Builder</div>
+  <div class="nav-item" data-page="report"><span class="nav-num">07</span>Generate Report</div>
+  <div class="sidebar-footer">All data stored locally<br>in this browser only.</div>
+</nav>
+
+<main class="main">
+
+  <!-- ===================== PAGE 1: PROJECT ===================== -->
+  <section class="page active" id="page-project">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 01</div>
+      <div class="page-title">Project &amp; Client Details</div>
+      <div class="page-desc">Enter the client and project information that will appear on the cover of your coverage report and quotation.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Client Information</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Client Name</label><input id="p_client" placeholder="e.g. Mr. Sharma"></div>
+        <div class="field"><label>Project / Site Name</label><input id="p_project" placeholder="e.g. Villa Residence — Ceiling Audio"></div>
+        <div class="field"><label>Site Address</label><input id="p_address" placeholder="City, Area"></div>
+        <div class="field"><label>Contact Number</label><input id="p_phone" placeholder="+91 ..."></div>
+        <div class="field"><label>Email</label><input id="p_email" placeholder="client@email.com"></div>
+        <div class="field"><label>Date</label><input id="p_date" type="date"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your Company Details</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Company / Trade Name</label><input id="c_company" placeholder="Your enterprise name"></div>
+        <div class="field"><label>GSTIN / Tax ID (optional)</label><input id="c_gst" placeholder="e.g. 27ABCDE1234F1Z5"></div>
+        <div class="field"><label>Phone</label><input id="c_phone" placeholder="Your contact number"></div>
+        <div class="field"><label>Email</label><input id="c_email" placeholder="Your email"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+      <button class="btn" onclick="newProject()">Start New Project</button>
+    </div>
+
+    <div class="security-note">
+      <span>🔒</span>
+      <div><strong>Your data stays on this device.</strong> AudioPlan runs entirely in your browser — no client data, product prices, or reports are uploaded to any server. Use "Export Project File" on the Report page to back up or move a project to another computer.</div>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 2: SPEAKER & COVERAGE SETUP ===================== -->
+  <section class="page" id="page-setup">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 02</div>
+      <div class="page-title">Speaker &amp; Coverage Defaults</div>
+      <div class="page-desc">These defaults are used for new zones. Each zone can override them. Coverage is calculated from the speaker's conical dispersion angle (the "-6dB" beamwidth most manufacturers publish) and the mounting height above the listening plane.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Mounting Type</div>
+      <div class="seg" id="defaultMountSeg">
+        <button data-val="ceiling" class="active">In-Ceiling</button>
+        <button data-val="wall">On-Wall</button>
+      </div>
+      <div class="helper" id="mountHelperDefault"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Dispersion &amp; Listening Plane</div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Speaker Dispersion Angle (conical, -6dB)</label>
+          <select id="d_dispersion" onchange="onDispersionChange()">
+            <option value="70">70° — narrow / directional</option>
+            <option value="90">90° — standard</option>
+            <option value="100" selected>100° — wide coverage (most common in-ceiling)</option>
+            <option value="110">110° — extra-wide</option>
+            <option value="130">130° — very wide / dual-tweeter</option>
+            <option value="custom">Custom...</option>
+          </select>
+        </div>
+        <div class="field" id="customDispersionField" style="display:none;">
+          <label>Custom Dispersion Angle (degrees)</label>
+          <input id="d_dispersion_custom" type="number" step="1" min="20" max="170" placeholder="e.g. 105" oninput="recalcAll()">
+        </div>
+        <div class="field">
+          <label>Ceiling / Mounting Height (ft)</label>
+          <input id="d_ceiling_height" type="number" step="0.1" placeholder="e.g. 9" value="9" oninput="recalcAll()">
+        </div>
+        <div class="field">
+          <label>Listening Plane Height (ft, from floor)</label>
+          <input id="d_listen_height" type="number" step="0.1" placeholder="e.g. 4" value="4" oninput="recalcAll()">
+        </div>
+      </div>
+      <div class="helper">Listening plane = the height at which even coverage matters most (ear height seated ≈ 3.5–4 ft, standing ≈ 5.5 ft; for background music in retail/hospitality, 4 ft is a common reference). Mounting height used in the coverage formula = Ceiling Height − Listening Plane Height.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Pattern &amp; Overlap</div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Default Layout Pattern</label>
+          <div class="seg" id="defaultPatternSeg">
+            <button data-val="hex" class="active">Hexagonal (staggered)</button>
+            <button data-val="square">Square Grid</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Overlap Margin: <span id="overlapValLabel">15%</span></label>
+          <input id="d_overlap" type="range" min="0" max="30" step="1" value="15" oninput="onOverlapInput(this.value)" style="accent-color:var(--accent);">
+        </div>
+      </div>
+      <div class="helper">Overlap margin reduces speaker spacing below the theoretical maximum so coverage circles overlap slightly, avoiding "dead spots" between speakers and smoothing the SPL transition. 10–20% is typical for background/foreground music systems.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Live Coverage Readout (current defaults)</div>
+      <div class="readout" id="coverageReadout"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('zones')">Continue to Zones / Rooms →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 3: ZONES ===================== -->
+  <section class="page" id="page-zones">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 03</div>
+      <div class="page-title">Zones / Rooms</div>
+      <div class="page-desc">Break the project into zones (rooms or open-plan areas). Each zone gets its own coverage calculation, speaker count, and layout plan — useful when pitching a multi-room ceiling audio system to an architect or interior designer.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Zone List</div>
+      <div class="zone-list" id="zoneList"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addZone()">+ Add Zone</button>
+      </div>
+    </div>
+
+    <div class="card" id="zoneEditorCard" style="display:none;">
+      <div class="card-title">Zone Details</div>
+      <div id="zoneEditor"></div>
+    </div>
+
+    <div class="card" id="zoneSummaryCard" style="display:none;">
+      <div class="card-title">Coverage Summary</div>
+      <div class="readout" id="zoneSummary"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('plan')">Continue to Layout Plan →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 4: LAYOUT PLAN ===================== -->
+  <section class="page" id="page-plan">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 04</div>
+      <div class="page-title">Layout Plan</div>
+      <div class="page-desc">A scaled top-down plan of the selected zone showing speaker positions and their dispersion coverage footprint. This is the visual you'll walk an architect or interior designer through.</div>
+    </div>
+
+    <div class="card">
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Zone</label>
+          <select id="planZoneSelect" onchange="onPlanZoneChange()"></select>
+        </div>
+        <div class="field">
+          <label>Pattern for this Plan</label>
+          <div class="seg" id="planPatternSeg">
+            <button data-val="hex" class="active">Hexagonal</button>
+            <button data-val="square">Square</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="plan-wrap" id="planWrap"></div>
+      <div class="legend" id="planLegend"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Plan Notes</div>
+      <div class="readout" id="planNotes"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('reference')">Continue to Pattern Reference →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 5: PATTERN REFERENCE ===================== -->
+  <section class="page" id="page-reference">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 05</div>
+      <div class="page-title">In-Ceiling &amp; On-Wall Pattern Reference</div>
+      <div class="page-desc">A quick reference you can talk an architect or interior designer through — how dispersion coverage, mounting height and grid pattern relate, and why hexagonal layouts are usually the more efficient choice.</div>
+    </div>
+    <div id="referenceContent"></div>
+  </section>
+
+  <!-- ===================== PAGE 6: QUOTE ===================== -->
+  <section class="page" id="page-quote">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 06</div>
+      <div class="page-title">Quote Builder</div>
+      <div class="page-desc">Speaker quantities are pre-filled from your zone calculations. Maintain your price list once and reuse it across projects.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Suggested Quantities (from zones)</div>
+      <div class="readout" id="quoteSuggestion"></div>
+      <div class="btn-row">
+        <button class="btn btn-sm" onclick="applySuggestedQuantities()">Apply suggested quantities to price list</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Product / Price List</div>
+      <div style="overflow-x:auto;">
+        <table class="product-table" id="productTable">
+          <thead>
+            <tr><th style="width:30%;">Product Name</th><th style="width:18%;">Category</th><th style="width:12%;">Price (₹)</th><th style="width:10%;">Qty</th><th style="width:14%;">Line Total</th><th style="width:8%;">Include</th><th style="width:8%;"></th></tr>
+          </thead>
+          <tbody id="productRows"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-sm" onclick="addProductRow()">+ Add Product</button>
+        <button class="btn btn-sm" onclick="saveProductDB()">Save Price List</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Budget</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Client Budget (₹, optional)</label><input id="q_budget" type="number" placeholder="e.g. 350000" oninput="renderBudgetBar()"></div>
+      </div>
+      <div class="budget-bar"><div class="budget-fill" id="budgetFill" style="width:0%;"></div></div>
+      <div class="readout">
+        <div><span class="label">Items Included</span><span class="val" id="qSummaryItems">0</span></div>
+        <div><span class="label">Subtotal</span><span class="val" id="qSummarySubtotal">₹0</span></div>
+        <div><span class="label">Client Budget</span><span class="val" id="qSummaryBudget">—</span></div>
+        <div><span class="label">Remaining / Over Budget</span><span class="val" id="qSummaryDiff">—</span></div>
+      </div>
+      <div class="total-row"><span>Grand Total</span><span class="amt" id="qGrandTotal">₹0</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('report')">Continue to Report →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 7: REPORT ===================== -->
+  <section class="page" id="page-report">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 07</div>
+      <div class="page-title">Generate Client Report</div>
+      <div class="page-desc">Produce a polished PDF combining project details, per-zone coverage calculations, layout diagrams, the pattern reference, and (optionally) the quotation — ready to share with an architect or interior designer.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Report Options</div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label><input type="checkbox" id="rep_quote" checked style="width:auto; margin-right:8px;">Include Quotation</label>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="rep_plans" checked style="width:auto; margin-right:8px;">Include Layout Plan Diagrams</label>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="rep_reference" checked style="width:auto; margin-right:8px;">Include Pattern Reference Page</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Generate</div>
+      <div class="helper" style="margin-bottom:14px;">The report is generated entirely in your browser. Nothing is uploaded.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generatePDF()">📄 Generate PDF Report</button>
+        <button class="btn" onclick="exportProjectFile()">⬇ Export Project File (.json)</button>
+        <button class="btn" onclick="importProjectFile()">⬆ Import Project File</button>
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
+      </div>
+    </div>
+
+    <div class="security-note">
+      <span>🔒</span>
+      <div><strong>Privacy by design.</strong> All calculations, layout diagrams, and PDF generation happen locally in your browser. To work on a project across multiple devices, use Export/Import — this creates a single .json file you control.</div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+<script>
+/* ============================================================
+   STATE & PERSISTENCE
+============================================================ */
+const STORAGE_KEY = 'audioplan_project';
+const PRODUCT_DB_KEY = 'audioplan_products';
+
+let state = {
+  project: {},
+  company: {},
+  defaults: { mount:'ceiling', dispersion:'100', dispersionCustom:'', ceilingHeight:'9', listenHeight:'4', pattern:'hex', overlap:15 },
+  zones: [],
+  activeZoneId: null,
+  planZoneId: null,
+  planPattern: 'hex'
+};
+
+function uid(){ return 'z' + Math.random().toString(36).slice(2,9); }
+
+function val(id){ const e=document.getElementById(id); return e? e.value : ''; }
+function setVal(id, v, fallback){
+  const e=document.getElementById(id);
+  if(!e) return;
+  if(v!==undefined && v!==null && v!=='') e.value = v;
+  else if(fallback!==undefined) e.value = fallback;
+}
+function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const loaded = JSON.parse(raw);
+      state = Object.assign({}, state, loaded);
+      state.defaults = Object.assign({}, { mount:'ceiling', dispersion:'100', dispersionCustom:'', ceilingHeight:'9', listenHeight:'4', pattern:'hex', overlap:15 }, loaded.defaults || {});
+      state.zones = loaded.zones || [];
+    }
+  }catch(e){ console.warn('Could not load state', e); }
+  hydrateForm();
+}
+
+function persistState(){
+  state.project = {
+    client: val('p_client'), project: val('p_project'), address: val('p_address'),
+    phone: val('p_phone'), email: val('p_email'), date: val('p_date')
+  };
+  state.company = {
+    company: val('c_company'), gst: val('c_gst'), phone: val('c_phone'), email: val('c_email')
+  };
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ console.warn('Could not save state', e); }
+}
+
+function hydrateForm(){
+  const p = state.project||{}, c = state.company||{};
+  setVal('p_client', p.client); setVal('p_project', p.project); setVal('p_address', p.address);
+  setVal('p_phone', p.phone); setVal('p_email', p.email); setVal('p_date', p.date);
+  setVal('c_company', c.company); setVal('c_gst', c.gst); setVal('c_phone', c.phone); setVal('c_email', c.email);
+
+  // defaults
+  const d = state.defaults;
+  setSeg('defaultMountSeg', d.mount);
+  setSeg('defaultPatternSeg', d.pattern);
+  setVal('d_dispersion', d.dispersion, '100');
+  document.getElementById('customDispersionField').style.display = (d.dispersion === 'custom') ? '' : 'none';
+  setVal('d_dispersion_custom', d.dispersionCustom);
+  setVal('d_ceiling_height', d.ceilingHeight, '9');
+  setVal('d_listen_height', d.listenHeight, '4');
+  const overlapSlider = document.getElementById('d_overlap');
+  if(overlapSlider) overlapSlider.value = d.overlap;
+  document.getElementById('overlapValLabel').textContent = d.overlap + '%';
+
+  renderZoneList();
+  renderZoneEditor();
+  renderPlanZoneSelect();
+  renderPlan();
+  recalcAll();
+}
+
+function saveProject(){
+  persistState();
+  showToast('Project saved to this browser.');
+}
+function newProject(){
+  if(!confirm('Start a new project? Unsaved changes to the current project will be lost (saved projects remain in Export files).')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = {
+    project:{}, company:{},
+    defaults: { mount:'ceiling', dispersion:'100', dispersionCustom:'', ceilingHeight:'9', listenHeight:'4', pattern:'hex', overlap:15 },
+    zones: [], activeZoneId:null, planZoneId:null, planPattern:'hex'
+  };
+  hydrateForm();
+  showToast('New project started.');
+}
+function saveAndGo(page){
+  persistState();
+  navTo(page);
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    persistState();
+    navTo(item.dataset.page);
+  });
+});
+function navTo(page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+page));
+  if(page==='zones'){ renderZoneList(); renderZoneEditor(); }
+  if(page==='plan'){ renderPlanZoneSelect(); renderPlan(); }
+  if(page==='reference'){ renderReference(); }
+  if(page==='quote'){ renderQuoteSuggestion(); renderProductTable(); }
+}
+
+/* ============================================================
+   SEGMENTED CONTROL HELPERS
+============================================================ */
+function setSeg(containerId, value){
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  Array.from(c.querySelectorAll('button')).forEach(b=>{
+    b.classList.toggle('active', b.dataset.val === value);
+  });
+}
+function wireSeg(containerId, onChange){
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  c.addEventListener('click', function(e){
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    Array.from(c.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b===btn));
+    onChange(btn.dataset.val);
+  });
+}
+
+wireSeg('defaultMountSeg', function(v){
+  state.defaults.mount = v;
+  updateMountHelper();
+  recalcAll();
+});
+wireSeg('defaultPatternSeg', function(v){
+  state.defaults.pattern = v;
+  recalcAll();
+});
+wireSeg('planPatternSeg', function(v){
+  state.planPattern = v;
+  renderPlan();
+});
+
+function onDispersionChange(){
+  state.defaults.dispersion = val('d_dispersion');
+  document.getElementById('customDispersionField').style.display = (state.defaults.dispersion === 'custom') ? '' : 'none';
+  recalcAll();
+}
+function onOverlapInput(v){
+  state.defaults.overlap = parseInt(v)||0;
+  document.getElementById('overlapValLabel').textContent = state.defaults.overlap + '%';
+  recalcAll();
+}
+function updateMountHelper(){
+  const el = document.getElementById('mountHelperDefault');
+  if(!el) return;
+  if(state.defaults.mount === 'ceiling'){
+    el.textContent = 'In-ceiling speakers fire straight down in a cone — coverage is calculated as a circle on the listening plane directly below each speaker.';
+  } else {
+    el.textContent = 'On-wall speakers are modelled as a single row along the longer wall, firing across the room. If the room is deeper than the coverage diameter, a second row (opposite wall or ceiling units) is recommended for full-depth coverage — AudioPlan will flag this per zone.';
+  }
+}
+
+/* ============================================================
+   COVERAGE MATH
+============================================================ */
+function dispersionAngle(obj){
+  const d = (obj.dispersion === 'custom') ? (parseFloat(obj.dispersionCustom)||100) : (parseFloat(obj.dispersion)||100);
+  return Math.max(20, Math.min(170, d));
+}
+function mountingHeight(obj){
+  const ch = parseFloat(obj.ceilingHeight)||0;
+  const lh = parseFloat(obj.listenHeight)||0;
+  return Math.max(0.5, ch - lh);
+}
+function coverageDiameter(obj){
+  const theta = dispersionAngle(obj) * Math.PI / 180;
+  const H = mountingHeight(obj);
+  return 2 * H * Math.tan(theta/2);
+}
+function maxSpacing(D, pattern){
+  return pattern === 'hex' ? D * Math.sqrt(3)/2 : D / Math.sqrt(2);
+}
+function effectiveSpacing(D, pattern, overlapPct){
+  return maxSpacing(D, pattern) * (1 - (overlapPct||0)/100);
+}
+
+function calcCeilingLayout(zone, pattern){
+  const D = coverageDiameter(zone);
+  const S = effectiveSpacing(D, pattern, zone.overlap);
+  const L = parseFloat(zone.length)||0, W = parseFloat(zone.width)||0;
+  const result = { D, S, pattern, count:0, positions:[], L, W };
+  if(!L || !W || S<=0) return result;
+
+  if(pattern === 'square'){
+    const cols = Math.max(1, Math.round(W/S));
+    const rows = Math.max(1, Math.round(L/S));
+    const sx = W/cols, sy = L/rows;
+    const positions = [];
+    for(let j=0;j<rows;j++){
+      for(let i=0;i<cols;i++){
+        positions.push({x:(i+0.5)*sx, y:(j+0.5)*sy});
+      }
+    }
+    Object.assign(result, { sx, sy, cols, rows, count: positions.length, positions });
+  } else {
+    const R = S * Math.sqrt(3)/2;
+    const rows = Math.max(1, Math.round(L/R));
+    const rActual = L/rows;
+    const colsA = Math.max(1, Math.round(W/S));
+    const sx = W/colsA;
+    const colsB = Math.max(0, colsA - 1);
+    const positions = [];
+    for(let j=0;j<rows;j++){
+      const y = (j+0.5)*rActual;
+      if(j % 2 === 0){
+        for(let i=0;i<colsA;i++) positions.push({x:(i+0.5)*sx, y});
+      } else {
+        for(let i=0;i<colsB;i++) positions.push({x:(i+1)*sx, y});
+      }
+    }
+    Object.assign(result, { sx, rActual, colsA, colsB, rows, count: positions.length, positions });
+  }
+  return result;
+}
+
+function calcWallLayout(zone){
+  const D = coverageDiameter(zone);
+  const S = D * (1 - (zone.overlap||0)/100);
+  const Lraw = parseFloat(zone.length)||0, Wraw = parseFloat(zone.width)||0;
+  const L = Math.max(Lraw, Wraw); // longer wall
+  const W = Math.min(Lraw, Wraw); // room depth
+  const result = { D, S, count:0, positions:[], L, W, depthWarning:false };
+  if(!L || S<=0) return result;
+  const cols = Math.max(1, Math.round(L/S));
+  const sx = L/cols;
+  const positions = [];
+  for(let i=0;i<cols;i++) positions.push({x:(i+0.5)*sx, y:0});
+  result.sx = sx; result.cols = cols; result.count = positions.length; result.positions = positions;
+  result.depthWarning = W > D;
+  return result;
+}
+
+function calcZone(zone, patternOverride){
+  const pattern = patternOverride || zone.pattern || 'hex';
+  if(zone.mount === 'wall') return Object.assign({ mount:'wall' }, calcWallLayout(zone));
+  return Object.assign({ mount:'ceiling', pattern }, calcCeilingLayout(zone, pattern));
+}
+
+/* current "defaults" packaged like a zone, for the live readout */
+function currentDefaultsAsZone(){
+  return {
+    mount: state.defaults.mount,
+    dispersion: state.defaults.dispersion,
+    dispersionCustom: state.defaults.dispersionCustom,
+    ceilingHeight: state.defaults.ceilingHeight,
+    listenHeight: state.defaults.listenHeight,
+    pattern: state.defaults.pattern,
+    overlap: state.defaults.overlap,
+    length: 30, width: 20 // sample room for the readout
+  };
+}
+
+function recalcAll(){
+  state.defaults.dispersionCustom = val('d_dispersion_custom');
+  state.defaults.ceilingHeight = val('d_ceiling_height');
+  state.defaults.listenHeight = val('d_listen_height');
+  updateMountHelper();
+  renderCoverageReadout();
+  renderZoneList();
+  renderZoneEditor();
+  renderZoneSummary();
+  if(document.getElementById('page-plan').classList.contains('active')) renderPlan();
+  if(document.getElementById('page-quote').classList.contains('active')) renderQuoteSuggestion();
+}
+
+function renderCoverageReadout(){
+  const el = document.getElementById('coverageReadout');
+  const sample = currentDefaultsAsZone();
+  const D = coverageDiameter(sample);
+  const H = mountingHeight(sample);
+  const theta = dispersionAngle(sample);
+  const sSquare = effectiveSpacing(D, 'square', sample.overlap);
+  const sHex = effectiveSpacing(D, 'hex', sample.overlap);
+  const sampleSquare = calcCeilingLayout(sample, 'square');
+  const sampleHex = calcCeilingLayout(sample, 'hex');
+
+  let rows = '';
+  rows += kvRow('Dispersion angle (-6dB)', theta.toFixed(0) + '°');
+  rows += kvRow('Mounting height', H.toFixed(2) + ' ft');
+  rows += kvRow('Coverage diameter / speaker', D.toFixed(2) + ' ft', true);
+  rows += kvRow('Max spacing, square (0% ovlp)', maxSpacing(D,'square').toFixed(2) + ' ft');
+  rows += kvRow('Max spacing, hex (0% ovlp)', maxSpacing(D,'hex').toFixed(2) + ' ft');
+  rows += kvRow('Eff. spacing @ ' + sample.overlap + '% \u2014 square', sSquare.toFixed(2) + ' ft');
+  rows += kvRow('Eff. spacing @ ' + sample.overlap + '% \u2014 hex', sHex.toFixed(2) + ' ft');
+  if(state.defaults.mount === 'ceiling'){
+    rows += kvRow('30\u00D720ft room \u2014 square', sampleSquare.count + ' speakers (' + sampleSquare.cols + ' \u00D7 ' + sampleSquare.rows + ')');
+    rows += kvRow('30\u00D720ft room \u2014 hex', sampleHex.count + ' speakers', true);
+  }
+  el.innerHTML = rows;
+}
+function kvRow(label, value, warn){
+  return '<div><span class="label">' + escapeHtml(label) + '</span><span class="val' + (warn?' warn':'') + '">' + escapeHtml(value) + '</span></div>';
+}
+
+/* ============================================================
+   ZONES
+============================================================ */
+function addZone(){
+  const z = {
+    id: uid(),
+    name: 'Zone ' + (state.zones.length + 1),
+    length: 20, width: 15,
+    mount: state.defaults.mount,
+    dispersion: state.defaults.dispersion,
+    dispersionCustom: state.defaults.dispersionCustom,
+    ceilingHeight: state.defaults.ceilingHeight,
+    listenHeight: state.defaults.listenHeight,
+    pattern: state.defaults.pattern,
+    overlap: state.defaults.overlap
+  };
+  state.zones.push(z);
+  state.activeZoneId = z.id;
+  persistState();
+  renderZoneList();
+  renderZoneEditor();
+  renderZoneSummary();
+  renderPlanZoneSelect();
+}
+function removeZone(id){
+  if(!confirm('Remove this zone?')) return;
+  state.zones = state.zones.filter(z=>z.id!==id);
+  if(state.activeZoneId===id) state.activeZoneId = state.zones[0] ? state.zones[0].id : null;
+  if(state.planZoneId===id) state.planZoneId = state.zones[0] ? state.zones[0].id : null;
+  persistState();
+  renderZoneList();
+  renderZoneEditor();
+  renderZoneSummary();
+  renderPlanZoneSelect();
+  renderPlan();
+}
+function selectZone(id){
+  state.activeZoneId = id;
+  renderZoneList();
+  renderZoneEditor();
+  renderZoneSummary();
+}
+function getActiveZone(){
+  return state.zones.find(z=>z.id===state.activeZoneId) || null;
+}
+function getZoneById(id){
+  return state.zones.find(z=>z.id===id) || null;
+}
+
+function renderZoneList(){
+  const wrap = document.getElementById('zoneList');
+  if(!wrap) return;
+  if(state.zones.length===0){
+    wrap.innerHTML = '<div class="helper">No zones yet. Add a zone for each room or open area that needs ceiling/wall speaker coverage.</div>';
+    return;
+  }
+  wrap.innerHTML = state.zones.map(function(z){
+    const calc = calcZone(z);
+    const active = z.id === state.activeZoneId;
+    const dims = (parseFloat(z.length)||0) + ' \u00D7 ' + (parseFloat(z.width)||0) + ' ft \u00B7 ' + (z.mount==='wall'?'On-Wall':'In-Ceiling') + (z.mount==='wall' ? '' : ' \u00B7 ' + (z.pattern==='hex'?'Hex':'Square'));
+    const countLabel = calc.count + (z.mount==='wall' ? ' speaker' + (calc.count!==1?'s':'') + ' (1 row)' : ' speaker' + (calc.count!==1?'s':''));
+    return '<div class="zone-row ' + (active?'active':'') + '" onclick="selectZone(\'' + z.id + '\')">' +
+      '<div><div class="zone-row-name">' + escapeHtml(z.name) + '</div><div class="zone-row-meta">' + dims + ' \u2014 ' + countLabel + '</div></div>' +
+      '<div class="zone-row-actions"><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); removeZone(\'' + z.id + '\')">Remove</button></div>' +
+    '</div>';
+  }).join('');
+}
+
+function zoneField(zone, label, field, type, extra){
+  const value = (zone[field] === undefined || zone[field] === null) ? '' : zone[field];
+  return '<div class="field"><label>' + escapeHtml(label) + '</label>' +
+    '<input type="' + (type||'text') + '" value="' + escapeHtml(value) + '" data-zone-field="' + field + '" ' + (extra||'') + '></div>';
+}
+
+function renderZoneEditor(){
+  const card = document.getElementById('zoneEditorCard');
+  const wrap = document.getElementById('zoneEditor');
+  const zone = getActiveZone();
+  if(!zone){ card.style.display='none'; return; }
+  card.style.display='';
+
+  const dispOptions = [['70','70\u00B0 \u2014 narrow'],['90','90\u00B0 \u2014 standard'],['100','100\u00B0 \u2014 wide'],['110','110\u00B0 \u2014 extra-wide'],['130','130\u00B0 \u2014 very wide'],['custom','Custom...']];
+
+  wrap.innerHTML = '' +
+    zoneField(zone, 'Zone Name', 'name') +
+    '<div class="grid grid-2" style="margin-top:14px;">' +
+      zoneField(zone, 'Room Length (ft)', 'length', 'number', 'step="0.1"') +
+      zoneField(zone, 'Room Width (ft)', 'width', 'number', 'step="0.1"') +
+    '</div>' +
+    '<div style="margin-top:14px;"><label>Mounting Type</label><div class="seg" data-zone-seg="mount">' +
+      '<button data-val="ceiling" class="' + (zone.mount==='ceiling'?'active':'') + '">In-Ceiling</button>' +
+      '<button data-val="wall" class="' + (zone.mount==='wall'?'active':'') + '">On-Wall</button>' +
+    '</div></div>' +
+    '<div class="grid grid-2" style="margin-top:14px;">' +
+      '<div class="field"><label>Dispersion Angle</label><select data-zone-field="dispersion">' +
+        dispOptions.map(function(o){ return '<option value="'+o[0]+'" '+(zone.dispersion===o[0]?'selected':'')+'>'+o[1]+'</option>'; }).join('') +
+      '</select></div>' +
+      (zone.dispersion==='custom' ? zoneField(zone,'Custom Dispersion (deg)','dispersionCustom','number','step="1" min="20" max="170"') : '<div></div>') +
+      zoneField(zone, 'Ceiling / Mounting Height (ft)', 'ceilingHeight', 'number', 'step="0.1"') +
+      zoneField(zone, 'Listening Plane Height (ft)', 'listenHeight', 'number', 'step="0.1"') +
+    '</div>' +
+    (zone.mount==='ceiling' ? (
+      '<div class="grid grid-2" style="margin-top:14px;">' +
+        '<div class="field"><label>Layout Pattern</label><div class="seg" data-zone-seg="pattern">' +
+          '<button data-val="hex" class="' + (zone.pattern==='hex'?'active':'') + '">Hexagonal</button>' +
+          '<button data-val="square" class="' + (zone.pattern!=='hex'?'active':'') + '">Square</button>' +
+        '</div></div>' +
+        '<div class="field"><label>Overlap: ' + (zone.overlap!==undefined?zone.overlap:15) + '%</label>' +
+          '<input type="range" min="0" max="30" step="1" value="' + (zone.overlap!==undefined?zone.overlap:15) + '" data-zone-field="overlap" style="accent-color:var(--accent);"></div>' +
+      '</div>'
+    ) : (
+      '<div class="grid grid-2" style="margin-top:14px;">' +
+        '<div class="field"><label>Overlap: ' + (zone.overlap!==undefined?zone.overlap:15) + '%</label>' +
+          '<input type="range" min="0" max="30" step="1" value="' + (zone.overlap!==undefined?zone.overlap:15) + '" data-zone-field="overlap" style="accent-color:var(--accent);"></div>' +
+      '</div>'
+    ));
+
+  // wire inputs
+  Array.from(wrap.querySelectorAll('[data-zone-field]')).forEach(function(input){
+    const field = input.dataset.zoneField;
+    input.addEventListener('input', function(){
+      const z = getActiveZone();
+      if(!z) return;
+      z[field] = (input.type==='number' || input.type==='range') ? input.value : input.value;
+      if(field==='overlap'){
+        const labelSpan = input.closest('.field').querySelector('label');
+        labelSpan.textContent = 'Overlap: ' + input.value + '%';
+      }
+      persistState();
+      renderZoneList();
+      renderZoneSummary();
+      if(field==='dispersion'){ renderZoneEditor(); }
+      if(document.getElementById('page-plan').classList.contains('active')) renderPlan();
+    });
+  });
+  Array.from(wrap.querySelectorAll('[data-zone-seg]')).forEach(function(seg){
+    const field = seg.dataset.zoneSeg;
+    Array.from(seg.querySelectorAll('button')).forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const z = getActiveZone();
+        if(!z) return;
+        Array.from(seg.querySelectorAll('button')).forEach(b=>b.classList.toggle('active', b===btn));
+        z[field] = btn.dataset.val;
+        persistState();
+        renderZoneList();
+        renderZoneEditor();
+        renderZoneSummary();
+        if(document.getElementById('page-plan').classList.contains('active')) renderPlan();
+      });
+    });
+  });
+
+  renderZoneSummary();
+}
+
+function renderZoneSummary(){
+  const card = document.getElementById('zoneSummaryCard');
+  const el = document.getElementById('zoneSummary');
+  const zone = getActiveZone();
+  if(!zone){ card.style.display='none'; return; }
+  card.style.display='';
+  const calc = calcZone(zone);
+  const D = calc.D, H = mountingHeight(zone), theta = dispersionAngle(zone);
+  let rows = '';
+  rows += kvRow('Mounting height', H.toFixed(2) + ' ft');
+  rows += kvRow('Dispersion angle', theta.toFixed(0) + '\u00B0');
+  rows += kvRow('Coverage diameter per speaker', D.toFixed(2) + ' ft');
+  if(zone.mount === 'ceiling'){
+    rows += kvRow('Pattern', zone.pattern==='hex' ? 'Hexagonal (staggered)' : 'Square grid');
+    rows += kvRow('Effective spacing', calc.S.toFixed(2) + ' ft');
+    if(zone.pattern==='hex'){
+      rows += kvRow('Grid', calc.rows + ' rows \u2014 alternating ' + calc.colsA + ' / ' + calc.colsB + ' speakers');
+    } else {
+      rows += kvRow('Grid', calc.cols + ' \u00D7 ' + calc.rows + ' (cols \u00D7 rows)');
+    }
+    rows += kvRow('Total speakers (this zone)', calc.count + '', true);
+
+    // comparison with the other pattern
+    const other = calcCeilingLayout(zone, zone.pattern==='hex'?'square':'hex');
+    const diff = other.count - calc.count;
+    if(diff !== 0){
+      const better = diff > 0 ? zone.pattern : (zone.pattern==='hex'?'square':'hex');
+      rows += kvRow((zone.pattern==='hex'?'Square':'Hexagonal') + ' grid would need', other.count + ' speakers (' + (diff>0?'+':'') + diff + ' vs current)');
+    }
+  } else {
+    rows += kvRow('Arrangement', 'Single row along longer wall (' + calc.L.toFixed(1) + ' ft)');
+    rows += kvRow('Effective spacing', calc.S.toFixed(2) + ' ft');
+    rows += kvRow('Total speakers (this zone)', calc.count + '', true);
+    if(calc.depthWarning){
+      rows += kvRow('Coverage depth check', '\u26A0 Room depth (' + calc.W.toFixed(1) + ' ft) exceeds coverage diameter (' + D.toFixed(1) + ' ft) \u2014 consider a second row or in-ceiling units for the far half of the room.');
+    } else {
+      rows += kvRow('Coverage depth check', '\u2713 Room depth (' + calc.W.toFixed(1) + ' ft) is within the coverage diameter (' + D.toFixed(1) + ' ft).');
+    }
+  }
+  el.innerHTML = rows;
+}
+
+/* ============================================================
+   LAYOUT PLAN (SVG)
+============================================================ */
+function renderPlanZoneSelect(){
+  const sel = document.getElementById('planZoneSelect');
+  if(!sel) return;
+  if(state.zones.length===0){
+    sel.innerHTML = '<option value="">No zones yet \u2014 add one in Step 03</option>';
+    state.planZoneId = null;
+    return;
+  }
+  if(!state.planZoneId || !getZoneById(state.planZoneId)) state.planZoneId = state.zones[0].id;
+  sel.innerHTML = state.zones.map(function(z){
+    return '<option value="' + z.id + '" ' + (z.id===state.planZoneId?'selected':'') + '>' + escapeHtml(z.name) + '</option>';
+  }).join('');
+}
+function onPlanZoneChange(){
+  state.planZoneId = val('planZoneSelect');
+  const zone = getZoneById(state.planZoneId);
+  if(zone && zone.mount==='ceiling') setSeg('planPatternSeg', zone.pattern);
+  renderPlan();
+}
+
+function renderPlan(){
+  const wrap = document.getElementById('planWrap');
+  const legend = document.getElementById('planLegend');
+  const notes = document.getElementById('planNotes');
+  const zone = getZoneById(state.planZoneId);
+  if(!zone){
+    wrap.innerHTML = '<div class="helper" style="padding:24px;">Add a zone in Step 03 (Zones / Rooms) to see its layout plan here.</div>';
+    legend.innerHTML = '';
+    notes.innerHTML = '';
+    return;
+  }
+
+  const pattern = zone.mount==='ceiling' ? state.planPattern : null;
+  const calc = zone.mount==='ceiling' ? calcCeilingLayout(zone, pattern) : calcWallLayout(zone);
+  const L = parseFloat(zone.length)||0, W = parseFloat(zone.width)||0;
+
+  const padding = 50;
+  const maxW = 640, maxH = 460;
+  const availW = maxW - padding*2, availH = maxH - padding*2;
+  const scale = (L>0 && W>0) ? Math.min(availW/W, availH/L) : 1;
+  const roomW = W*scale, roomL = L*scale;
+  const ox = (maxW - roomW)/2, oy = (maxH - roomL)/2;
+
+  let svg = '<svg viewBox="0 0 ' + maxW + ' ' + maxH + '" width="' + maxW + '" height="' + maxH + '" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<defs><clipPath id="roomClip"><rect x="' + ox + '" y="' + oy + '" width="' + roomW + '" height="' + roomL + '"/></clipPath></defs>';
+  // room outline
+  svg += '<rect x="' + ox + '" y="' + oy + '" width="' + roomW + '" height="' + roomL + '" fill="none" stroke="#3a3f4a" stroke-width="2"/>';
+
+  // coverage circles (clipped to room)
+  svg += '<g clip-path="url(#roomClip)">';
+  (calc.positions||[]).forEach(function(pos){
+    const cx = ox + pos.x*scale;
+    const cy = zone.mount==='wall' ? oy : oy + pos.y*scale;
+    const r = (calc.D/2)*scale;
+    const fill = zone.mount==='wall' ? 'rgba(76,175,109,0.12)' : 'rgba(61,198,232,0.12)';
+    const stroke = zone.mount==='wall' ? '#4CAF6D' : '#3DC6E8';
+    svg += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1" stroke-dasharray="4 3"/>';
+  });
+  svg += '</g>';
+
+  // speaker markers
+  (calc.positions||[]).forEach(function(pos){
+    const cx = ox + pos.x*scale;
+    const cy = zone.mount==='wall' ? oy : oy + pos.y*scale;
+    if(zone.mount==='wall'){
+      svg += '<rect x="' + (cx-5).toFixed(1) + '" y="' + (cy-2).toFixed(1) + '" width="10" height="4" fill="#4CAF6D"/>';
+    } else {
+      svg += '<circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="4" fill="#3DC6E8"/>';
+    }
+  });
+
+  // dimension labels
+  svg += '<text x="' + (ox + roomW/2).toFixed(1) + '" y="' + (oy + roomL + 22).toFixed(1) + '" fill="#8A909B" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">' + W.toFixed(1) + ' ft</text>';
+  svg += '<text x="' + (ox - 14).toFixed(1) + '" y="' + (oy + roomL/2).toFixed(1) + '" fill="#8A909B" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" transform="rotate(-90 ' + (ox-14).toFixed(1) + ' ' + (oy + roomL/2).toFixed(1) + ')">' + L.toFixed(1) + ' ft</text>';
+
+  if(zone.mount==='wall'){
+    svg += '<text x="' + (ox + roomW/2).toFixed(1) + '" y="' + (oy - 12).toFixed(1) + '" fill="#4CAF6D" font-family="Oswald, sans-serif" font-size="11" text-anchor="middle" letter-spacing="1">SPEAKER WALL</text>';
+  }
+
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+
+  // legend
+  let legendHtml = '';
+  if(zone.mount==='ceiling'){
+    legendHtml += '<div class="legend-item"><span class="legend-dot" style="background:#3DC6E8;"></span> In-ceiling speaker</div>';
+    legendHtml += '<div class="legend-item"><span class="legend-ring" style="color:#3DC6E8;"></span> Coverage circle (' + calc.D.toFixed(1) + ' ft diameter)</div>';
+    legendHtml += '<div class="legend-item">Pattern: ' + (pattern==='hex'?'Hexagonal (staggered)':'Square grid') + '</div>';
+    legendHtml += '<div class="legend-item">Total: ' + calc.count + ' speakers</div>';
+  } else {
+    legendHtml += '<div class="legend-item"><span class="legend-dot" style="background:#4CAF6D;"></span> On-wall speaker</div>';
+    legendHtml += '<div class="legend-item"><span class="legend-ring" style="color:#4CAF6D;"></span> Coverage circle (' + calc.D.toFixed(1) + ' ft diameter)</div>';
+    legendHtml += '<div class="legend-item">Single row along ' + calc.L.toFixed(1) + ' ft wall</div>';
+    legendHtml += '<div class="legend-item">Total: ' + calc.count + ' speakers</div>';
+  }
+  legend.innerHTML = legendHtml;
+
+  // notes
+  let notesHtml = '';
+  notesHtml += kvRow('Zone', zone.name);
+  notesHtml += kvRow('Room size', L.toFixed(1) + ' \u00D7 ' + W.toFixed(1) + ' ft');
+  notesHtml += kvRow('Mounting', zone.mount==='ceiling' ? 'In-ceiling' : 'On-wall');
+  notesHtml += kvRow('Coverage diameter', calc.D.toFixed(2) + ' ft per speaker');
+  notesHtml += kvRow('Effective spacing', calc.S.toFixed(2) + ' ft');
+  notesHtml += kvRow('Speaker count', calc.count + '', true);
+  if(zone.mount==='wall' && calc.depthWarning){
+    notesHtml += kvRow('Note', '\u26A0 Room depth exceeds single-row coverage \u2014 consider a second row.');
+  }
+  notes.innerHTML = notesHtml;
+}
+
+/* ============================================================
+   PATTERN REFERENCE PAGE
+============================================================ */
+function squarePatternSvg(){
+  const s = 60, pts = [[40,40],[100,40],[160,40],[40,100],[100,100],[160,100],[40,160],[100,160],[160,160]];
+  let svg = '<svg width="220" height="200" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">';
+  pts.forEach(function(p){
+    svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="34" fill="rgba(61,198,232,0.10)" stroke="#3DC6E8" stroke-width="1" stroke-dasharray="3 3"/>';
+  });
+  pts.forEach(function(p){
+    svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#3DC6E8"/>';
+  });
+  // worst-point markers (cell centers)
+  const cellCenters = [[70,70],[130,70],[70,130],[130,130]];
+  cellCenters.forEach(function(p){
+    svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2" fill="#E25C5C"/>';
+  });
+  svg += '<text x="110" y="190" fill="#8A909B" font-family="JetBrains Mono, monospace" font-size="10" text-anchor="middle">red = worst-coverage point</text>';
+  return svg + '</svg>';
+}
+function hexPatternSvg(){
+  const sx = 60, ry = 52;
+  const rows = [
+    {y:30, xs:[40,100,160]},
+    {y:30+ry, xs:[70,130]},
+    {y:30+ry*2, xs:[40,100,160]},
+    {y:30+ry*3, xs:[70,130]}
+  ];
+  let svg = '<svg width="220" height="230" viewBox="0 0 220 230" xmlns="http://www.w3.org/2000/svg">';
+  rows.forEach(function(row){
+    row.xs.forEach(function(x){
+      svg += '<circle cx="'+x+'" cy="'+row.y+'" r="34" fill="rgba(61,198,232,0.10)" stroke="#3DC6E8" stroke-width="1" stroke-dasharray="3 3"/>';
+    });
+  });
+  rows.forEach(function(row){
+    row.xs.forEach(function(x){
+      svg += '<circle cx="'+x+'" cy="'+row.y+'" r="3.5" fill="#3DC6E8"/>';
+    });
+  });
+  // worst points: centroids of triangles
+  const centroids = [[70,30+ry/2+8],[130,30+ry/2+8],[70,30+ry*1.5+8],[130,30+ry*1.5+8],[70,30+ry*2.5+8],[130,30+ry*2.5+8]];
+  centroids.forEach(function(p){
+    svg += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2" fill="#E25C5C"/>';
+  });
+  svg += '<text x="110" y="222" fill="#8A909B" font-family="JetBrains Mono, monospace" font-size="10" text-anchor="middle">red = worst-coverage point</text>';
+  return svg + '</svg>';
+}
+
+function renderReference(){
+  const el = document.getElementById('referenceContent');
+  el.innerHTML = '' +
+  '<div class="card">' +
+    '<div class="card-title">Dispersion Angle &amp; Coverage Diameter</div>' +
+    '<div class="pattern-card">' +
+      '<div class="pattern-text">' +
+        '<h4>What it means</h4>' +
+        '<p>Manufacturers publish a conical dispersion angle (often the "-6dB" beamwidth) for in-ceiling and on-wall speakers \u2014 typically 70\u00B0\u2013130\u00B0 for in-ceiling models. A wider angle covers a larger circle on the floor below, but with faster level fall-off toward the edge.</p>' +
+        '<h4>The formula AudioPlan uses</h4>' +
+        '<p style="font-family:\'JetBrains Mono\',monospace; color:#EDEDEF;">Coverage diameter = 2 \u00D7 H \u00D7 tan(\u03B8 / 2)</p>' +
+        '<p>Where <b>H</b> = mounting height above the listening plane (ceiling height \u2212 listening plane height), and <b>\u03B8</b> = the dispersion angle.</p>' +
+        '<h4>Why the listening plane matters</h4>' +
+        '<p>A taller ceiling or a lower listening plane (e.g. seated guests vs. a standing reception) increases H, which widens the coverage circle for the same speaker \u2014 fewer speakers needed, but also a lower SPL at the listening plane for the same amplifier power.</p>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-title">Square Grid Pattern</div>' +
+    '<div class="pattern-card">' +
+      '<div class="pattern-fig">' + squarePatternSvg() + '</div>' +
+      '<div class="pattern-text">' +
+        '<h4>Layout</h4>' +
+        '<p>Speakers sit on the corners of a square grid. The hardest point to cover is the centre of each square cell, equidistant from all four neighbours.</p>' +
+        '<h4>Max spacing for full coverage</h4>' +
+        '<p style="font-family:\'JetBrains Mono\',monospace; color:#EDEDEF;">S = D / \u221A2 \u2248 0.707 \u00D7 D</p>' +
+        '<h4>When to use it</h4>' +
+        '<p>Square grids are easy to lay out against a visible ceiling grid (e.g. 2\u00D72 ft tile grids) and easy to explain to a contractor. They need slightly more speakers than a hex grid for the same coverage.</p>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-title">Hexagonal (Staggered) Pattern</div>' +
+    '<div class="pattern-card">' +
+      '<div class="pattern-fig">' + hexPatternSvg() + '</div>' +
+      '<div class="pattern-text">' +
+        '<h4>Layout</h4>' +
+        '<p>Alternate rows are offset by half the spacing, so every speaker has six equidistant neighbours. The hardest point to cover is the centroid of the triangle formed by three adjacent speakers \u2014 closer to its neighbours than the square grid\u2019s cell centre.</p>' +
+        '<h4>Max spacing for full coverage</h4>' +
+        '<p style="font-family:\'JetBrains Mono\',monospace; color:#EDEDEF;">S = D \u00D7 \u221A3 / 2 \u2248 0.866 \u00D7 D &nbsp;(row spacing \u2248 0.75 \u00D7 D)</p>' +
+        '<h4>Why it usually wins</h4>' +
+        '<p>Because S can be larger for the same D, each speaker effectively covers more floor area \u2014 in practice this typically works out to roughly 15\u201325% fewer speakers than an equivalent square grid, with a more uniform sound field (smaller maximum level variation between the loudest and quietest points).</p>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-title">On-Wall Speakers</div>' +
+    '<div class="pattern-text">' +
+      '<p>On-wall (or surface-mount) speakers are typically placed in a single row along a wall, aimed across the room. AudioPlan models the coverage diameter the same way (using the wall-mounting height above the listening plane) and spaces speakers along the longer wall.</p>' +
+      '<p>If the room\u2019s depth (the shorter dimension) exceeds the coverage diameter, a single row won\u2019t reach the far side at a consistent level \u2014 AudioPlan flags this so you can plan a second row of on-wall units, or switch that zone to in-ceiling.</p>' +
+      '<p><b>Where on-wall tends to fit well:</b> corridors, reception desks, retail storefronts, feature walls where ceiling access is restricted (e.g. exposed services, low slab heights, heritage ceilings), or as a quick add-on to an existing in-ceiling system.</p>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="card">' +
+    '<div class="card-title">Talking to Architects &amp; Interior Designers</div>' +
+    '<div class="pattern-text">' +
+      '<p>This is the page to walk through during early-stage design conversations:</p>' +
+      '<p>1. <b>Coordinate with the ceiling grid early.</b> A hex pattern still needs to land sensibly within a false-ceiling module grid (gypsum/POP layout) \u2014 share the speaker grid alongside the lighting and AC diffuser layout so cutouts are planned, not improvised on-site.</p>' +
+      '<p>2. <b>Mounting height drives speaker count.</b> A higher ceiling (more H) needs fewer, wider-dispersion speakers; a lower ceiling needs more, narrower-dispersion units. This is useful when a designer is deciding on a false-ceiling drop height.</p>' +
+      '<p>3. <b>Overlap = headroom for furniture and layout changes.</b> A 15\u201320% overlap means the system still sounds even if furniture, partitions, or seating plans shift after install.</p>' +
+      '<p>4. <b>Zones map to rooms.</b> Each zone in this tool can become its own amplifier channel / volume control \u2014 a natural way to talk about multi-room audio with separate control per space.</p>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ============================================================
+   QUOTE BUILDER
+============================================================ */
+const CATEGORIES = ['In-Ceiling Speakers','On-Wall Speakers','Amplifiers / Zone Amps','Volume Controls','Cabling & Connectivity','Mounts & Brackets','Calibration & Install','Other'];
+
+let products = [];
+
+function loadProductDB(){
+  try{
+    const raw = localStorage.getItem(PRODUCT_DB_KEY);
+    products = raw ? JSON.parse(raw) : [];
+  }catch(e){ products = []; }
+  if(products.length===0){
+    products = [
+      {name:'6.5" In-Ceiling Speaker (100\u00B0, pair)', category:'In-Ceiling Speakers', price:6500, qty:0, include:true},
+      {name:'8" In-Ceiling Subwoofer/Speaker (110\u00B0, pair)', category:'In-Ceiling Speakers', price:11000, qty:0, include:true},
+      {name:'On-Wall Surface Speaker (pair)', category:'On-Wall Speakers', price:9000, qty:0, include:true},
+      {name:'70V / Multi-tap Distributed Amplifier (8-ch)', category:'Amplifiers / Zone Amps', price:65000, qty:1, include:true},
+      {name:'Zone Volume Controller', category:'Volume Controls', price:3500, qty:1, include:true},
+      {name:'Speaker Cable (per 100m roll)', category:'Cabling & Connectivity', price:4500, qty:1, include:true},
+      {name:'In-Ceiling Mounting Brackets / Backboxes (set of 10)', category:'Mounts & Brackets', price:3000, qty:1, include:true},
+      {name:'System Calibration & Installation', category:'Calibration & Install', price:25000, qty:1, include:true},
+    ];
+    saveProductDB();
+  }
+}
+function saveProductDB(){
+  try{ localStorage.setItem(PRODUCT_DB_KEY, JSON.stringify(products)); showToast('Price list saved.'); }
+  catch(e){ console.warn(e); }
+}
+
+function renderProductTable(){
+  const tbody = document.getElementById('productRows');
+  tbody.innerHTML = products.map(function(p,i){
+    const catOptions = CATEGORIES.map(function(c){ return '<option value="'+c+'" '+(p.category===c?'selected':'')+'>'+c+'</option>'; }).join('');
+    const lineTotal = (p.price * p.qty)||0;
+    return '<tr>' +
+      '<td><input value="'+escapeHtml(p.name)+'" oninput="updateProduct('+i+',\'name\',this.value)"></td>' +
+      '<td><select onchange="updateProduct('+i+',\'category\',this.value)">'+catOptions+'</select></td>' +
+      '<td><input type="number" value="'+p.price+'" oninput="updateProduct('+i+',\'price\',this.value)"></td>' +
+      '<td><input type="number" value="'+p.qty+'" min="0" oninput="updateProduct('+i+',\'qty\',this.value)"></td>' +
+      '<td style="font-family:\'JetBrains Mono\',monospace;">\u20B9'+lineTotal.toLocaleString('en-IN')+'</td>' +
+      '<td style="text-align:center;"><input type="checkbox" '+(p.include?'checked':'')+' style="width:auto;" onchange="updateProduct('+i+',\'include\',this.checked)"></td>' +
+      '<td><button class="btn btn-sm btn-danger" onclick="removeProduct('+i+')">\u2715</button></td>' +
+    '</tr>';
+  }).join('');
+  renderBudgetBar();
+}
+function updateProduct(i, field, value){
+  if(field==='price' || field==='qty') value = parseFloat(value)||0;
+  products[i][field] = value;
+  if(field!=='include') renderProductTable(); else renderBudgetBar();
+}
+function addProductRow(){
+  products.push({name:'New Product', category:'Other', price:0, qty:1, include:true});
+  renderProductTable();
+}
+function removeProduct(i){
+  products.splice(i,1);
+  renderProductTable();
+}
+
+function totalSpeakerCounts(){
+  let ceilingCount = 0, wallCount = 0;
+  state.zones.forEach(function(z){
+    const calc = calcZone(z);
+    if(z.mount==='wall') wallCount += calc.count;
+    else ceilingCount += calc.count;
+  });
+  return { ceilingCount, wallCount };
+}
+
+function renderQuoteSuggestion(){
+  const el = document.getElementById('quoteSuggestion');
+  if(state.zones.length===0){
+    el.innerHTML = '<div class="helper">Add zones in Step 03 to get suggested speaker quantities here.</div>';
+    return;
+  }
+  let rows = '';
+  state.zones.forEach(function(z){
+    const calc = calcZone(z);
+    rows += kvRow(z.name + ' (' + (z.mount==='wall'?'On-Wall':'In-Ceiling '+(z.pattern==='hex'?'Hex':'Square')) + ')', calc.count + ' speaker' + (calc.count!==1?'s':''));
+  });
+  const totals = totalSpeakerCounts();
+  rows += kvRow('Total in-ceiling speakers', totals.ceilingCount + '', true);
+  rows += kvRow('Total on-wall speakers', totals.wallCount + '', true);
+  el.innerHTML = rows;
+}
+
+function applySuggestedQuantities(){
+  const totals = totalSpeakerCounts();
+  products.forEach(function(p){
+    if(p.category === 'In-Ceiling Speakers' && totals.ceilingCount > 0 && p.qty === 0){
+      // distribute across in-ceiling product lines isn't precise; set first match to total, leave rest
+    }
+  });
+  // simplest, most predictable behaviour: set qty for the FIRST in-ceiling and FIRST on-wall product line
+  let ceilingSet = false, wallSet = false;
+  products.forEach(function(p){
+    if(p.category === 'In-Ceiling Speakers' && !ceilingSet && totals.ceilingCount > 0){
+      p.qty = totals.ceilingCount; p.include = true; ceilingSet = true;
+    }
+    if(p.category === 'On-Wall Speakers' && !wallSet && totals.wallCount > 0){
+      p.qty = totals.wallCount; p.include = true; wallSet = true;
+    }
+  });
+  renderProductTable();
+  showToast('Suggested quantities applied to the first matching product line in each category.');
+}
+
+function renderBudgetBar(){
+  const included = products.filter(function(p){ return p.include; });
+  const subtotal = included.reduce(function(sum,p){ return sum+(p.price*p.qty); },0);
+  const budget = parseFloat(val('q_budget'))||0;
+
+  document.getElementById('qSummaryItems').textContent = included.length;
+  document.getElementById('qSummarySubtotal').textContent = '\u20B9'+subtotal.toLocaleString('en-IN');
+  document.getElementById('qSummaryBudget').textContent = budget ? '\u20B9'+budget.toLocaleString('en-IN') : '\u2014';
+  document.getElementById('qGrandTotal').textContent = '\u20B9'+subtotal.toLocaleString('en-IN');
+
+  const diffEl = document.getElementById('qSummaryDiff');
+  const fill = document.getElementById('budgetFill');
+  if(budget){
+    const diff = budget - subtotal;
+    diffEl.textContent = (diff>=0? '\u20B9'+diff.toLocaleString('en-IN')+' remaining' : '\u20B9'+Math.abs(diff).toLocaleString('en-IN')+' over budget');
+    diffEl.className = diff>=0 ? 'val' : 'val warn';
+    const pct = Math.min(100, (subtotal/budget)*100);
+    fill.style.width = pct+'%';
+    fill.classList.toggle('over', subtotal>budget);
+  } else {
+    diffEl.textContent = '\u2014';
+    fill.style.width = '0%';
+  }
+}
+
+/* ============================================================
+   PDF REPORT GENERATION
+============================================================ */
+function svgElementToPngDataUrl(svgEl, scaleFactor){
+  return new Promise(function(resolve, reject){
+    try{
+      const xml = new XMLSerializer().serializeToString(svgEl);
+      const svg64 = btoa(unescape(encodeURIComponent(xml)));
+      const image64 = 'data:image/svg+xml;base64,' + svg64;
+      const img = new Image();
+      img.onload = function(){
+        const w = svgEl.viewBox.baseVal.width || svgEl.width.baseVal.value;
+        const h = svgEl.viewBox.baseVal.height || svgEl.height.baseVal.value;
+        const canvas = document.createElement('canvas');
+        canvas.width = w * (scaleFactor||2);
+        canvas.height = h * (scaleFactor||2);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#06070a';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve({ dataUrl: canvas.toDataURL('image/png'), width: canvas.width, height: canvas.height });
+      };
+      img.onerror = reject;
+      img.src = image64;
+    }catch(e){ reject(e); }
+  });
+}
+
+async function generatePDF(){
+  persistState();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const pageW = 210, margin = 16;
+  let y = 20;
+
+  function checkPage(needed){
+    if(y+(needed||10) > 285){ doc.addPage(); y = 20; }
+  }
+  function h1(text){
+    checkPage(14);
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(20,20,20);
+    doc.text(text, margin, y); y+=3;
+    doc.setDrawColor(61,198,232); doc.setLineWidth(0.6);
+    doc.line(margin, y, pageW-margin, y); y+=7;
+  }
+  function kv(label, value){
+    checkPage(6);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90,90,90);
+    doc.text(label, margin, y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
+    const text = String(value!==undefined&&value!==''?value:'\u2014');
+    doc.text(doc.splitTextToSize(text, pageW-margin*2-65), margin+65, y);
+    y+=6;
+  }
+  function paragraph(text){
+    checkPage(12);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(70,70,70);
+    const lines = doc.splitTextToSize(text, pageW-margin*2);
+    lines.forEach(function(line){
+      checkPage(6);
+      doc.text(line, margin, y); y+=5;
+    });
+    y+=2;
+  }
+
+  // ---- Cover ----
+  doc.setFillColor(11,13,16);
+  doc.rect(0,0,pageW,40,'F');
+  doc.setTextColor(61,198,232); doc.setFont('helvetica','bold'); doc.setFontSize(22);
+  doc.text('Distributed Audio Coverage Report', margin, 24);
+  doc.setTextColor(220,220,220); doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text(state.company.company || 'Pro AV & Distributed Audio', margin, 33);
+
+  y = 52;
+  h1('Project Information');
+  kv('Client Name', state.project.client);
+  kv('Project / Site', state.project.project);
+  kv('Site Address', state.project.address);
+  kv('Contact Number', state.project.phone);
+  kv('Email', state.project.email);
+  kv('Date', state.project.date);
+  y+=4;
+
+  // ---- Zones ----
+  if(state.zones.length===0){
+    h1('Zones');
+    paragraph('No zones have been added yet.');
+  } else {
+    state.zones.forEach(function(zone){
+      checkPage(40);
+      const calc = calcZone(zone);
+      h1('Zone: ' + zone.name + ' (' + (zone.mount==='ceiling'?'In-Ceiling':'On-Wall') + ')');
+      kv('Room Size', (parseFloat(zone.length)||0).toFixed(1) + ' \u00D7 ' + (parseFloat(zone.width)||0).toFixed(1) + ' ft');
+      kv('Mounting Height (above listening plane)', mountingHeight(zone).toFixed(2) + ' ft');
+      kv('Dispersion Angle', dispersionAngle(zone).toFixed(0) + '\u00B0');
+      kv('Coverage Diameter per Speaker', calc.D.toFixed(2) + ' ft');
+      if(zone.mount==='ceiling'){
+        kv('Pattern', zone.pattern==='hex' ? 'Hexagonal (staggered)' : 'Square grid');
+        kv('Effective Spacing', calc.S.toFixed(2) + ' ft');
+        kv('Grid', zone.pattern==='hex'
+          ? (calc.rows + ' rows, alternating ' + calc.colsA + ' / ' + calc.colsB + ' speakers')
+          : (calc.cols + ' \u00D7 ' + calc.rows + ' (cols \u00D7 rows)'));
+      } else {
+        kv('Arrangement', 'Single row along ' + calc.L.toFixed(1) + ' ft wall');
+        kv('Effective Spacing', calc.S.toFixed(2) + ' ft');
+        if(calc.depthWarning) kv('Note', 'Room depth exceeds single-row coverage \u2014 consider a second row.');
+      }
+      kv('Speaker Count', String(calc.count));
+      y += 2;
+    });
+  }
+
+  // ---- Layout plans ----
+  if(document.getElementById('rep_plans').checked && state.zones.length>0){
+    for(const zone of state.zones){
+      checkPage(95);
+      h1('Layout Plan \u2014 ' + zone.name);
+      const prevPlanZone = state.planZoneId, prevPattern = state.planPattern;
+      state.planZoneId = zone.id;
+      if(zone.mount==='ceiling') state.planPattern = zone.pattern;
+      renderPlan();
+      await new Promise(function(r){ setTimeout(r, 30); });
+      const svgEl = document.querySelector('#planWrap svg');
+      if(svgEl){
+        try{
+          const snap = await svgElementToPngDataUrl(svgEl, 2);
+          const imgW = pageW - margin*2;
+          const imgH = imgW * (snap.height/snap.width);
+          doc.addImage(snap.dataUrl, 'PNG', margin, y, imgW, imgH);
+          y += imgH + 6;
+        }catch(e){ console.warn('plan snapshot failed', e); }
+      }
+      state.planZoneId = prevPlanZone; state.planPattern = prevPattern;
+    }
+    renderPlan();
+  }
+
+  // ---- Pattern reference ----
+  if(document.getElementById('rep_reference').checked){
+    checkPage(30);
+    h1('Pattern Reference');
+    paragraph('Coverage diameter = 2 x Mounting Height x tan(Dispersion Angle / 2).');
+    paragraph('Square grid: maximum spacing for full coverage S = Coverage Diameter / sqrt(2) (approx. 0.71x).');
+    paragraph('Hexagonal grid: maximum spacing for full coverage S = Coverage Diameter x sqrt(3)/2 (approx. 0.87x), row spacing approx. 0.75x the coverage diameter. Hexagonal layouts typically need roughly 15-25% fewer speakers than an equivalent square grid for the same coverage, with a more even sound field.');
+    paragraph('On-wall speakers are arranged in a single row along the longer wall; if the room depth exceeds the coverage diameter, a second row (or in-ceiling units) is recommended for full-depth coverage.');
+  }
+
+  // ---- Quote ----
+  if(document.getElementById('rep_quote').checked){
+    checkPage(20);
+    h1('Quotation');
+    const included = products.filter(function(p){ return p.include; });
+    doc.setFontSize(9); doc.setFont('helvetica','bold');
+    const qcol = [margin, margin+85, margin+118, margin+138, margin+165];
+    ['Product','Category','Price','Qty','Total'].forEach(function(t,i){ doc.text(t, qcol[i], y); });
+    y+=2; doc.setDrawColor(200,200,200); doc.line(margin,y,pageW-margin,y); y+=5;
+    doc.setFont('helvetica','normal');
+    let total=0;
+    included.forEach(function(p){
+      checkPage(7);
+      const lineTotal = p.price*p.qty;
+      total += lineTotal;
+      doc.text(doc.splitTextToSize(p.name, 80)[0], qcol[0], y);
+      doc.text(p.category, qcol[1], y);
+      doc.text('Rs.'+p.price.toLocaleString('en-IN'), qcol[2], y);
+      doc.text(String(p.qty), qcol[3], y);
+      doc.text('Rs.'+lineTotal.toLocaleString('en-IN'), qcol[4], y);
+      y+=6;
+    });
+    checkPage(10);
+    y+=2; doc.setDrawColor(61,198,232); doc.setLineWidth(0.6); doc.line(margin,y,pageW-margin,y); y+=7;
+    doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text('Grand Total: Rs. '+total.toLocaleString('en-IN'), margin, y);
+    y+=10;
+    const budget = parseFloat(val('q_budget'));
+    if(budget){
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(100,100,100);
+      doc.text('Client Budget: Rs. '+budget.toLocaleString('en-IN'), margin, y); y+=6;
+    }
+  }
+
+  // ---- Footer ----
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(150,150,150);
+    doc.text((state.company.company||'')+'   |   '+(state.company.phone||'')+'   |   '+(state.company.email||''), margin, 292);
+    doc.text('Page '+i+' of '+pageCount, pageW-margin-20, 292);
+  }
+
+  const fname = (state.project.project || 'audio-coverage-report').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+  const pdfBlob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = fname+'.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 1000);
+  showToast('PDF report generated.');
+}
+
+/* ============================================================
+   EXPORT / IMPORT PROJECT FILE
+============================================================ */
+function exportProjectFile(){
+  persistState();
+  const data = { state, products, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (state.project.project||'audioplan-project').replace(/[^a-z0-9]+/gi,'_').toLowerCase()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Project exported.');
+}
+function importProjectFile(){ document.getElementById('importFile').click(); }
+function handleImport(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    try{
+      const data = JSON.parse(evt.target.result);
+      if(data.state) state = data.state;
+      if(data.products) products = data.products;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(PRODUCT_DB_KEY, JSON.stringify(products));
+      hydrateForm();
+      renderProductTable();
+      showToast('Project imported successfully.');
+    }catch(err){
+      alert('Could not read this file. Please check it is a valid AudioPlan export.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+loadState();
+loadProductDB();
+renderProductTable();
+renderReference();
+</script>
+
+<!-- ============================================================
+     CRM INTEGRATION BRIDGE
+     Allows this file to be opened inside an <iframe> (or via
+     window.open) from the AV/CRM suite. On load it announces
+     readiness to its parent/opener; the CRM can then post an
+     "audioplan:prefill" message with project/client details
+     from a specific job, which are merged into Step 01.
+============================================================ -->
+<script>
+(function(){
+  function getHost(){
+    if (window.opener && !window.opener.closed) return window.opener;
+    if (window.parent && window.parent !== window) return window.parent;
+    return null;
+  }
+  function announceReady(){
+    const host = getHost();
+    if(host) host.postMessage({ type: 'audioplan:ready' }, '*');
+  }
+  window.addEventListener('message', function(e){
+    const msg = e.data;
+    if(!msg || msg.type !== 'audioplan:prefill') return;
+    const d = msg.data || {};
+    if(d.project) state.project = Object.assign({}, state.project, d.project);
+    if(d.company) state.company = Object.assign({}, state.company, d.company);
+    hydrateForm();
+    persistState();
+    showToast('Loaded project details from AV/CRM.');
+  });
+  if(document.readyState === 'complete'){
+    announceReady();
+  } else {
+    window.addEventListener('load', announceReady);
+  }
+})();
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CinemaPlan — Home Cinema Design Suite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Disable Tailwind's base reset so it doesn't override CinemaPlan's existing styles —
+  // only utility classes (flex, grid, spacing, rounded, etc.) are used by the Product Catalog page.
+  if (window.tailwind) { tailwind.config = { corePlugins: { preflight: false } }; }
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "three": "https://esm.sh/three@0.158.0",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.15.11?deps=react@18.2.0,react-dom@18.2.0,three@0.158.0",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@9.92.7?deps=react@18.2.0,react-dom@18.2.0,three@0.158.0,@react-three/fiber@8.15.11",
+    "lucide-react": "https://esm.sh/lucide-react@0.383.0?deps=react@18.2.0,react-dom@18.2.0"
+  }
+}
+</script>
+<style>
+:root{
+  --bg:#0B0D10;
+  --panel:#15181D;
+  --panel2:#1C2026;
+  --line:#272B33;
+  --text:#EDEDEF;
+  --muted:#8A909B;
+  --amber:#E8A23D;
+  --blue:#3D7EE8;
+  --green:#4CAF6D;
+  --red:#E25C5C;
+  --radius:10px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  display:flex;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{background:var(--amber); color:#0B0D10;}
+
+/* ===== Sidebar ===== */
+.sidebar{
+  width:230px;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#101317,#0B0D10);
+  border-right:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  padding:24px 0;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  font-family:'Oswald',sans-serif;
+  font-size:20px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:0 24px 6px;
+  color:var(--text);
+}
+.brand span{color:var(--amber);}
+.brand-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+  padding:0 24px 24px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  border-bottom:1px solid var(--line);
+  margin-bottom:8px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 24px;
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  cursor:pointer;
+  border-left:3px solid transparent;
+  transition:all .15s ease;
+  user-select:none;
+}
+.nav-item:hover{color:var(--text); background:rgba(255,255,255,0.02);}
+.nav-item.active{
+  color:var(--amber);
+  border-left-color:var(--amber);
+  background:rgba(232,162,61,0.06);
+}
+.nav-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  width:18px;
+}
+.nav-item.active .nav-num{color:var(--amber);}
+.sidebar-footer{
+  margin-top:auto;
+  padding:16px 24px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+  border-top:1px solid var(--line);
+}
+
+/* ===== Main ===== */
+.main{
+  flex:1;
+  padding:32px 40px 60px;
+  max-width:1100px;
+}
+.page{display:none; animation:fadein .25s ease;}
+.page.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+.page-header{margin-bottom:28px;}
+.page-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--amber);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.page-title{
+  font-family:'Oswald',sans-serif;
+  font-size:32px;
+  font-weight:600;
+  letter-spacing:0.5px;
+}
+.page-desc{color:var(--muted); margin-top:8px; font-size:14px; max-width:620px; line-height:1.6;}
+
+/* ===== Cards / Form ===== */
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px;
+  margin-bottom:20px;
+}
+.card-title{
+  font-family:'Oswald',sans-serif;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--text);
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.card-title::before{
+  content:'';
+  width:6px; height:6px;
+  background:var(--amber);
+  border-radius:50%;
+  flex-shrink:0;
+}
+.grid{display:grid; gap:16px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
+.grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+@media(max-width:760px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+label{
+  display:block;
+  font-size:12px;
+  font-weight:500;
+  color:var(--muted);
+  margin-bottom:6px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+input, select, textarea{
+  width:100%;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:10px 12px;
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  transition:border-color .15s;
+}
+input::placeholder{color:#4A4F58; font-family:'Inter',sans-serif;}
+input:focus, select:focus, textarea:focus{
+  outline:none;
+  border-color:var(--amber);
+}
+.field{margin-bottom:0;}
+.field-row{display:flex; gap:10px; align-items:flex-end;}
+
+/* Buttons */
+.btn{
+  font-family:'Oswald',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:11px 22px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  cursor:pointer;
+  transition:all .15s;
+}
+.btn:hover{border-color:var(--amber); color:var(--amber);}
+.btn-primary{
+  background:var(--amber);
+  border-color:var(--amber);
+  color:#0B0D10;
+}
+.btn-primary:hover{background:#f0b25a; color:#0B0D10;}
+.btn-danger{border-color:var(--red); color:var(--red);}
+.btn-danger:hover{background:var(--red); color:#fff;}
+.btn-sm{padding:7px 14px; font-size:11px;}
+.btn-row{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+
+/* Results / readout */
+.readout{
+  background:var(--panel2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--amber);
+  border-radius:6px;
+  padding:14px 16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  line-height:1.8;
+}
+.readout .label{color:var(--muted); display:inline-block; width:200px;}
+.readout .val{color:var(--text); font-weight:500;}
+.readout .val.warn{color:var(--amber);}
+
+/* Speaker grid display */
+.speaker-table{width:100%; border-collapse:collapse; font-size:13px;}
+.speaker-table th{
+  text-align:left;
+  font-family:'Oswald',sans-serif;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+}
+.speaker-table td{
+  padding:10px 10px;
+  border-bottom:1px solid var(--line);
+  font-family:'JetBrains Mono',monospace;
+}
+.speaker-table tr:last-child td{border-bottom:none;}
+.tag{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:4px;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.tag-bed{background:rgba(61,126,232,0.15); color:var(--blue);}
+.tag-height{background:rgba(232,162,61,0.15); color:var(--amber);}
+.tag-sub{background:rgba(226,92,92,0.15); color:var(--red);}
+
+/* 3D viewport */
+#viewport{
+  width:100%;
+  height:480px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:#06070a;
+  position:relative;
+  overflow:hidden;
+}
+#viewport canvas{display:block;}
+.viewport-hint{
+  position:absolute; bottom:14px; left:16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px; color:var(--muted);
+  background:rgba(0,0,0,0.5);
+  padding:6px 10px; border-radius:4px;
+  pointer-events:none;
+}
+.legend{
+  display:flex; gap:18px; margin-top:14px; flex-wrap:wrap;
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);
+}
+.legend-item{display:flex; align-items:center; gap:6px;}
+.legend-dot{width:10px; height:10px; border-radius:50%;}
+
+/* Product table */
+.product-table{width:100%; border-collapse:collapse; font-size:13px;}
+.product-table th{
+  text-align:left;
+  font-family:'Oswald',sans-serif;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--muted);
+  padding:10px 8px;
+  border-bottom:1px solid var(--line);
+}
+.product-table td{
+  padding:8px;
+  border-bottom:1px solid var(--line);
+}
+.product-table input, .product-table select{padding:7px 8px; font-size:12px;}
+.product-table tr:hover{background:rgba(255,255,255,0.015);}
+.cat-badge{
+  font-family:'Oswald',sans-serif;
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:4px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+  color:var(--muted);
+  display:inline-block;
+}
+
+/* Budget summary */
+.budget-bar{
+  height:10px;
+  background:var(--panel2);
+  border-radius:5px;
+  overflow:hidden;
+  margin:10px 0 16px;
+  border:1px solid var(--line);
+}
+.budget-fill{height:100%; background:linear-gradient(90deg,var(--amber),#f0b25a); transition:width .4s ease;}
+.budget-fill.over{background:linear-gradient(90deg,var(--red),#f08080);}
+
+.total-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 0; font-family:'Oswald',sans-serif; font-size:18px; font-weight:600;
+  border-top:1px solid var(--line); margin-top:8px;
+}
+.total-row .amt{font-family:'JetBrains Mono',monospace; color:var(--amber);}
+
+/* Toast */
+.toast{
+  position:fixed; bottom:24px; right:24px;
+  background:var(--panel2); border:1px solid var(--green);
+  border-left:4px solid var(--green);
+  color:var(--text); padding:14px 20px; border-radius:8px;
+  font-family:'Inter',sans-serif; font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  transform:translateY(20px); opacity:0; pointer-events:none;
+  transition:all .3s ease; z-index:999;
+}
+.toast.show{transform:translateY(0); opacity:1;}
+
+.helper{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;}
+.section-divider{height:1px; background:var(--line); margin:24px 0;}
+
+/* Security note */
+.security-note{
+  display:flex; gap:12px; align-items:flex-start;
+  background:rgba(76,175,109,0.06);
+  border:1px solid rgba(76,175,109,0.25);
+  border-radius:8px; padding:14px 16px; margin-top:18px;
+  font-size:12px; color:var(--muted); line-height:1.6;
+}
+.security-note strong{color:var(--green);}
+
+/* responsive */
+@media(max-width:880px){
+  body{flex-direction:column;}
+  .sidebar{width:100%; height:auto; position:relative; flex-direction:row; overflow-x:auto; padding:12px;}
+  .brand,.brand-sub,.sidebar-footer{display:none;}
+  .nav-item{padding:10px 16px; border-left:none; border-bottom:3px solid transparent; white-space:nowrap;}
+  .nav-item.active{border-bottom-color:var(--amber); border-left-color:transparent;}
+  .main{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="brand">Cinema<span>Plan</span></div>
+  <div class="brand-sub">Design Suite v1.0</div>
+  <div class="nav-item active" data-page="project"><span class="nav-num">01</span>Project</div>
+  <div class="nav-item" data-page="room"><span class="nav-num">02</span>Room &amp; Seating</div>
+  <div class="nav-item" data-page="speakers"><span class="nav-num">03</span>Speaker Layout</div>
+  <div class="nav-item" data-page="screen"><span class="nav-num">04</span>Screen Setup</div>
+  <div class="nav-item" data-page="viewer"><span class="nav-num">05</span>3D Model</div>
+  <div class="nav-item" data-page="catalog"><span class="nav-num">06</span>Product Catalog</div>
+  <div class="nav-item" data-page="quote"><span class="nav-num">07</span>Quote Builder</div>
+  <div class="nav-item" data-page="report"><span class="nav-num">08</span>Generate Report</div>
+  <div class="sidebar-footer">All data stored locally<br>in this browser only.</div>
+</nav>
+
+<main class="main">
+
+  <!-- ===================== PAGE 1: PROJECT ===================== -->
+  <section class="page active" id="page-project">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 01</div>
+      <div class="page-title">Project & Client Details</div>
+      <div class="page-desc">Enter the client and project information that will appear on the cover of your report and quotation.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Client Information</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Client Name</label><input id="p_client" placeholder="e.g. Mr. Sharma"></div>
+        <div class="field"><label>Project / Site Name</label><input id="p_project" placeholder="e.g. Villa Residence — Theater"></div>
+        <div class="field"><label>Site Address</label><input id="p_address" placeholder="City, Area"></div>
+        <div class="field"><label>Contact Number</label><input id="p_phone" placeholder="+91 ..."></div>
+        <div class="field"><label>Email</label><input id="p_email" placeholder="client@email.com"></div>
+        <div class="field"><label>Date</label><input id="p_date" type="date"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your Company Details</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Company / Trade Name</label><input id="c_company" placeholder="Your enterprise name"></div>
+        <div class="field"><label>GSTIN / Tax ID (optional)</label><input id="c_gst" placeholder="e.g. 27ABCDE1234F1Z5"></div>
+        <div class="field"><label>Phone</label><input id="c_phone" placeholder="Your contact number"></div>
+        <div class="field"><label>Email</label><input id="c_email" placeholder="Your email"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+      <button class="btn" onclick="newProject()">Start New Project</button>
+    </div>
+
+    <div class="security-note">
+      <span>🔒</span>
+      <div><strong>Your data stays on this device.</strong> CinemaPlan runs entirely in your browser — no client data, product prices, or reports are uploaded to any server. Use "Export Project File" on the Report page to back up or move a project to another computer.</div>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 2: ROOM ===================== -->
+  <section class="page" id="page-room">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 02</div>
+      <div class="page-title">Room & Seating Geometry</div>
+      <div class="page-desc">These dimensions drive the speaker placement calculations (Dolby Atmos home theater spec) and the screen sizing (THX viewing-angle guidelines).</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Room Dimensions (feet)</div>
+      <div class="grid grid-3">
+        <div class="field"><label>Room Length</label><input id="r_length" type="number" step="0.1" placeholder="e.g. 20" oninput="recalc()"></div>
+        <div class="field"><label>Room Width</label><input id="r_width" type="number" step="0.1" placeholder="e.g. 13" oninput="recalc()"></div>
+        <div class="field"><label>Ceiling Height</label><input id="r_height" type="number" step="0.1" placeholder="e.g. 9" oninput="recalc()"></div>
+      </div>
+      <div class="helper">Length = wall-to-wall from screen wall to rear wall. Width = side wall to side wall.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Primary Listening Position (MLP)</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Distance from Screen Wall</label><input id="r_mlp" type="number" step="0.1" placeholder="e.g. 11.5" oninput="onMlpNumberInput()"></div>
+        <div class="field"><label>Ear Height (seated)</label><input id="r_ear" type="number" step="0.1" value="3.9" oninput="recalc()"></div>
+      </div>
+
+      <div style="margin-top:18px;">
+        <label>Seating Position Slider</label>
+        <div id="mlpSliderWrap" style="position:relative; padding:6px 0 4px;">
+          <div id="mlpZone" style="position:absolute; top:6px; height:8px; background:rgba(76,175,109,0.25); border-radius:4px; pointer-events:none;"></div>
+          <input id="r_mlp_slider" type="range" min="0" max="30" step="0.1" value="0" oninput="onMlpSliderInput(this.value)" style="position:relative; width:100%; accent-color:#E8A23D;">
+        </div>
+        <div id="mlpHint" class="helper">Enter room length to see the suggested seating zone.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('speakers')">Continue to Speaker Layout →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 3: SPEAKERS ===================== -->
+  <section class="page" id="page-speakers">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 03</div>
+      <div class="page-title" id="speakerPageTitle">Speaker Layout</div>
+      <div class="page-desc">Placement angles follow Dolby Atmos home theater installation guidelines for azimuth and elevation, referenced from the Main Listening Position (MLP). Subwoofer placement follows THX guidance for room-mode management.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Channel Configuration</div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Audio Channel Layout</label>
+          <select id="sp_config" onchange="recalc()">
+            <option value="5.1">5.1</option>
+            <option value="5.1.2">5.1.2 Atmos</option>
+            <option value="5.1.4">5.1.4 Atmos</option>
+            <option value="7.1">7.1</option>
+            <option value="7.1.2">7.1.2 Atmos</option>
+            <option value="7.1.4" selected>7.1.4 Atmos</option>
+            <option value="9.1.2">9.1.2 Atmos</option>
+            <option value="9.1.4">9.1.4 Atmos</option>
+            <option value="9.1.6">9.1.6 Atmos</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Subwoofer Count</label>
+          <select id="sp_subs" onchange="recalc()">
+            <option value="1">1 (Single Sub)</option>
+            <option value="2" selected>2 (Dual Sub — recommended)</option>
+            <option value="4">4 (Quad / Multi-sub)</option>
+          </select>
+        </div>
+      </div>
+      <div class="helper">5.1/7.1/9.1 = bed channels (front L/C/R, surrounds, surround backs, front wides). The number after the second dot is the count of Atmos height/ceiling speakers.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Calculated Layout</div>
+      <div id="speakerOutput"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Notes & Standards Reference</div>
+      <div class="readout" style="line-height:2;" id="speakerStandardsRef"></div>
+      <div class="helper" style="margin-top:14px;">Angles are calculated live from your Room & Seating inputs. Adjust ceiling height or MLP distance to see height speaker elevation update.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('screen')">Continue to Screen Setup →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 4: SCREEN ===================== -->
+  <section class="page" id="page-screen">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 04</div>
+      <div class="page-title">Screen / Display Setup — THX Guidelines</div>
+      <div class="page-desc">THX recommends a viewing angle of 26°–36° from the primary seating position for an immersive experience, with 40° as the outer maximum.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Display Type</div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Display Type</label>
+          <select id="s_type" onchange="recalc()">
+            <option value="projector">Projection Screen</option>
+            <option value="flatpanel">Flat Panel / TV</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Screen Aspect Ratio</label>
+          <select id="s_ratio" onchange="recalc()">
+            <option value="1.78">16:9 (1.78:1)</option>
+            <option value="2.35">2.35:1 (Cinemascope)</option>
+            <option value="1.85">1.85:1</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">THX Recommended Screen Size</div>
+      <div id="screenOutput"></div>
+      <div class="helper" style="margin-top:14px;">Based on your seating distance from Room & Seating (Step 02). THX optimal range = 30° viewing angle (sweet spot), acceptable range 26°–36°.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Screen Wall Placement</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Screen Center Height from Floor</label><input id="s_center" type="number" step="0.1" placeholder="e.g. 4" oninput="recalc()"></div>
+        <div class="field"><label>Selected Screen Diagonal (inches) — override</label><input id="s_diag_override" type="number" step="1" placeholder="leave blank to use THX-recommended" oninput="recalc()"></div>
+      </div>
+      <div class="helper">Screen center should align close to ear height of the MLP, per THX guidance, especially for front-row seating.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('viewer')">Continue to 3D Model →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 5: 3D VIEWER ===================== -->
+  <section class="page" id="page-viewer">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 05</div>
+      <div class="page-title">3D Room Visualization</div>
+      <div class="page-desc">An interactive model generated from your room, speaker, and screen data. Drag to rotate, scroll to zoom. This view is captured automatically for the PDF report.</div>
+    </div>
+
+    <div class="card">
+      <div id="viewport">
+        <div id="r3f-root" style="width:100%; height:100%;"></div>
+        <div class="viewport-hint">Drag to rotate · Scroll to zoom · Drag colored markers to reposition speakers</div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#3D7EE8;"></span> Bed channel speakers</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#E8A23D;"></span> Height / Atmos speakers</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#E25C5C;"></span> Subwoofers</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#4CAF6D;"></span> Listening position</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#888;"></span> Screen</div>
+      </div>
+      <div class="helper" id="speakerEditHelper" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="resetCamera()">Reset View</button>
+      <button class="btn" onclick="resetSpeakerPositions()">Reset Speaker Positions to Defaults</button>
+      <button class="btn btn-primary" onclick="saveAndGo('catalog')">Continue to Product Catalog →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 6: PRODUCT CATALOG ===================== -->
+  <section class="page" id="page-catalog">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 06</div>
+      <div class="page-title">Product Catalog</div>
+      <div class="page-desc">Maintain a detailed catalog of every product you spec — brand, model, specifications, cost vs. MRP, tags, and rack IDs. Browse and search here; use the simplified price list on the Quote Builder page to build a specific proposal.</div>
+    </div>
+    <div id="catalog-root"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('quote')">Continue to Quote Builder →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 7: QUOTE ===================== -->
+  <section class="page" id="page-quote">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 07</div>
+      <div class="page-title">Quote Builder & Budget Allocation</div>
+      <div class="page-desc">Maintain your product price list once, reuse it across every project. Set a client budget and auto-allocate products by category up to that budget.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Product Database</div>
+      <div style="overflow-x:auto;">
+        <table class="product-table" id="productTable">
+          <thead>
+            <tr><th style="width:26%;">Product Name</th><th style="width:16%;">Category</th><th style="width:10%;">Price (₹)</th><th style="width:8%;">Qty</th><th style="width:12%;">Line Total</th><th style="width:8%;">Include</th><th style="width:8%;"></th></tr>
+          </thead>
+          <tbody id="productRows"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-sm" onclick="addProductRow()">+ Add Product</button>
+        <button class="btn btn-sm" onclick="saveProductDB()">Save Price List</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Budget-Based Auto Selection</div>
+      <div class="grid grid-2">
+        <div class="field"><label>Client Budget (₹)</label><input id="q_budget" type="number" placeholder="e.g. 500000" oninput="renderBudgetBar()"></div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+          <button class="btn btn-primary" style="width:100%;" onclick="autoAllocate()">Auto-Select Products to Budget</button>
+        </div>
+      </div>
+      <div class="helper">Allocates your saved products across categories (Speakers, AVR/Processor, Screen/Display, Subwoofer, Cables & Mounts, Calibration & Install) using a typical home cinema budget split, picking the best-fit item per category within the remaining budget.</div>
+      <div id="allocationNotes" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quote Summary</div>
+      <div class="budget-bar"><div class="budget-fill" id="budgetFill" style="width:0%;"></div></div>
+      <div class="readout">
+        <div><span class="label">Items Included</span><span class="val" id="qSummaryItems">0</span></div>
+        <div><span class="label">Subtotal</span><span class="val" id="qSummarySubtotal">₹0</span></div>
+        <div><span class="label">Client Budget</span><span class="val" id="qSummaryBudget">—</span></div>
+        <div><span class="label">Remaining / Over Budget</span><span class="val" id="qSummaryDiff">—</span></div>
+      </div>
+      <div class="total-row"><span>Grand Total</span><span class="amt" id="qGrandTotal">₹0</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveAndGo('report')">Continue to Report →</button>
+    </div>
+  </section>
+
+  <!-- ===================== PAGE 8: REPORT ===================== -->
+  <section class="page" id="page-report">
+    <div class="page-header">
+      <div class="page-eyebrow">Step 08</div>
+      <div class="page-title">Generate Client Report</div>
+      <div class="page-desc">Produce a polished PDF combining project details, room geometry, speaker placement table, screen recommendations, the 3D model snapshot, and (optionally) the quotation.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Report Options</div>
+      <div class="grid grid-2">
+        <div class="field">
+          <label><input type="checkbox" id="rep_quote" checked style="width:auto; margin-right:8px;">Include Quotation</label>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="rep_3d" checked style="width:auto; margin-right:8px;">Include 3D Model Snapshot</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Generate</div>
+      <div class="helper" style="margin-bottom:14px;">The report is generated entirely in your browser. Nothing is uploaded.</div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generatePDF()">📄 Generate PDF Report</button>
+        <button class="btn" onclick="exportProjectFile()">⬇ Export Project File (.json)</button>
+        <button class="btn" onclick="importProjectFile()">⬆ Import Project File</button>
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(event)">
+      </div>
+    </div>
+
+    <div class="security-note">
+      <span>🔒</span>
+      <div><strong>Privacy by design.</strong> All calculations, the 3D render, and PDF generation happen locally in your browser using your device's resources. To work on a project across multiple devices, use Export/Import — this creates a single encrypted-at-rest-by-OS .json file you control.</div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   STATE & PERSISTENCE
+============================================================ */
+const STORAGE_KEY = 'cinemaplan_project';
+const PRODUCT_DB_KEY = 'cinemaplan_products';
+
+let state = {
+  project: {},
+  company: {},
+  room: {},
+  screen: {},
+};
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ console.warn('Could not load state', e); }
+  hydrateForm();
+}
+
+function persistState(){
+  // pull current form values into state
+  state.project = {
+    client: val('p_client'), project: val('p_project'), address: val('p_address'),
+    phone: val('p_phone'), email: val('p_email'), date: val('p_date')
+  };
+  state.company = {
+    company: val('c_company'), gst: val('c_gst'), phone: val('c_phone'), email: val('c_email')
+  };
+  state.room = {
+    length: val('r_length'), width: val('r_width'), height: val('r_height'),
+    mlp: val('r_mlp'), ear: val('r_ear')
+  };
+  state.audio = {
+    config: val('sp_config'), subs: val('sp_subs')
+  };
+  state.screen = {
+    type: val('s_type'), ratio: val('s_ratio'), center: val('s_center'), diagOverride: val('s_diag_override')
+  };
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){ console.warn('Could not save state', e); }
+}
+
+function hydrateForm(){
+  const p = state.project||{}, c = state.company||{}, r = state.room||{}, s = state.screen||{}, a = state.audio||{};
+  setVal('p_client', p.client); setVal('p_project', p.project); setVal('p_address', p.address);
+  setVal('p_phone', p.phone); setVal('p_email', p.email); setVal('p_date', p.date);
+  setVal('c_company', c.company); setVal('c_gst', c.gst); setVal('c_phone', c.phone); setVal('c_email', c.email);
+  setVal('r_length', r.length); setVal('r_width', r.width); setVal('r_height', r.height);
+  setVal('r_mlp', r.mlp); setVal('r_ear', r.ear, 3.9);
+  setVal('s_type', s.type); setVal('s_ratio', s.ratio); setVal('s_center', s.center); setVal('s_diag_override', s.diagOverride);
+  setVal('sp_config', a.config, '7.1.4'); setVal('sp_subs', a.subs, '2');
+  updateMlpSlider();
+}
+
+function val(id){ const e=document.getElementById(id); return e? e.value : ''; }
+function setVal(id, v, fallback){
+  const e=document.getElementById(id);
+  if(!e) return;
+  if(v!==undefined && v!==null && v!=='') e.value = v;
+  else if(fallback!==undefined) e.value = fallback;
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function saveProject(){
+  persistState();
+  showToast('Project saved to this browser.');
+}
+function newProject(){
+  if(!confirm('Start a new project? Unsaved changes to the current project will be lost (saved projects remain in Export files).')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = {project:{},company:{},room:{},screen:{}};
+  hydrateForm();
+  recalc();
+  showToast('New project started.');
+}
+function saveAndGo(page){
+  persistState();
+  navTo(page);
+  recalc();
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    persistState();
+    navTo(item.dataset.page);
+  });
+});
+function navTo(page){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+page));
+  if(page==='viewer'){ setTimeout(()=>{ initOrResizeViewer(); render3D(); }, 50); }
+  if(page==='speakers' || page==='screen') recalc();
+  if(page==='quote') { renderProductTable(); renderBudgetBar(); }
+  if(page==='catalog'){ if(window.__mountCatalog) window.__mountCatalog(); }
+}
+
+/* ============================================================
+   ENGINEERING CALCULATIONS — DOLBY ATMOS + THX
+============================================================ */
+function getRoomData(){
+  const L = parseFloat(val('r_length'))||0;
+  const W = parseFloat(val('r_width'))||0;
+  const H = parseFloat(val('r_height'))||0;
+  const D = parseFloat(val('r_mlp'))||0; // distance of MLP from screen wall
+  const ear = parseFloat(val('r_ear'))||3.9;
+  return {L,W,H,D,ear};
+}
+
+/* Channel definitions: which speaker IDs are present for each layout configuration */
+const CHANNEL_DEFS = {
+  '5.1':   { bed:['C','FL','FR','SL','SR'],                         height:[] },
+  '5.1.2': { bed:['C','FL','FR','SL','SR'],                         height:['TFL','TFR'] },
+  '5.1.4': { bed:['C','FL','FR','SL','SR'],                         height:['TFL','TFR','TRL','TRR'] },
+  '7.1':   { bed:['C','FL','FR','SL','SR','SBL','SBR'],             height:[] },
+  '7.1.2': { bed:['C','FL','FR','SL','SR','SBL','SBR'],             height:['TFL','TFR'] },
+  '7.1.4': { bed:['C','FL','FR','SL','SR','SBL','SBR'],             height:['TFL','TFR','TRL','TRR'] },
+  '9.1.2': { bed:['C','FL','FR','SL','SR','SBL','SBR','FWL','FWR'], height:['TFL','TFR'] },
+  '9.1.4': { bed:['C','FL','FR','SL','SR','SBL','SBR','FWL','FWR'], height:['TFL','TFR','TRL','TRR'] },
+  '9.1.6': { bed:['C','FL','FR','SL','SR','SBL','SBR','FWL','FWR'], height:['TFL','TFR','TML','TMR','TRL','TRR'] },
+};
+
+/* Per-channel reference angles (Dolby Atmos home theater placement guidelines).
+   Azimuth: 0deg = straight ahead (toward screen), positive = right side.
+   Elevation: 0deg = ear-height wall mount, >0 = ceiling mount. */
+const CHANNEL_SPECS = {
+  C:   {name:'Center',              azimuth:0,    elevation:0},
+  FL:  {name:'Front Left',          azimuth:-30,  elevation:0},
+  FR:  {name:'Front Right',         azimuth:30,   elevation:0},
+  FWL: {name:'Front Wide Left',     azimuth:-60,  elevation:0},
+  FWR: {name:'Front Wide Right',    azimuth:60,   elevation:0},
+  SL:  {name:'Surround Left',       azimuth:-110, elevation:0},
+  SR:  {name:'Surround Right',      azimuth:110,  elevation:0},
+  SBL: {name:'Surround Back Left',  azimuth:-150, elevation:0},
+  SBR: {name:'Surround Back Right', azimuth:150,  elevation:0},
+  TFL: {name:'Top Front Left',      azimuth:-45,  elevation:45},
+  TFR: {name:'Top Front Right',     azimuth:45,   elevation:45},
+  TML: {name:'Top Middle Left',     azimuth:-60,  elevation:80},
+  TMR: {name:'Top Middle Right',    azimuth:60,   elevation:80},
+  TRL: {name:'Top Rear Left',       azimuth:-135, elevation:45},
+  TRR: {name:'Top Rear Right',      azimuth:135,  elevation:45},
+};
+
+function getAudioConfig(){
+  return {
+    config: val('sp_config') || '7.1.4',
+    subs: parseInt(val('sp_subs')) || 2
+  };
+}
+
+// Places a single bed (ear-height/wall mounted) channel based on its role
+function placeBedChannel(id, az, roomData){
+  const {L,W,D,ear} = roomData;
+  const halfW = W/2;
+  const side = az < 0 ? -1 : (az > 0 ? 1 : 0);
+  switch(id){
+    case 'C':
+      return {x:0, y:ear, z:0};
+    case 'FL': case 'FR': {
+      const fx = D * Math.tan(Math.abs(az)*Math.PI/180);
+      return {x: side * Math.min(fx, halfW-0.7), y:ear, z:0};
+    }
+    case 'FWL': case 'FWR':
+      return {x: side*(halfW-0.5), y:ear+0.5, z: Math.max(0.7, L*0.15)};
+    case 'SL': case 'SR':
+      return {x: side*(halfW-0.5), y:ear+1, z: Math.min(D+1, L-1)};
+    case 'SBL': case 'SBR':
+      return {x: side*(halfW*0.5), y:ear+1, z: L-0.7};
+    default:
+      return {x:0, y:ear, z:0};
+  }
+}
+
+// Places a ceiling-mounted (Atmos height) channel based on azimuth/elevation from MLP
+function placeHeightChannel(az, elev, roomData){
+  const {L,W,H,D,ear} = roomData;
+  const halfW = W/2;
+  const azRad = az*Math.PI/180, elRad = elev*Math.PI/180;
+  const vertDrop = H - ear;
+  const horizDist = vertDrop / Math.tan(elRad);
+  let x = horizDist * Math.sin(azRad);
+  let z = D - horizDist * Math.cos(azRad);
+  x = Math.max(-halfW+0.7, Math.min(halfW-0.7, x));
+  z = Math.max(0.7, Math.min(L-0.7, z));
+  return {x, y:H-0.15, z};
+}
+
+function placeSubwoofers(count, roomData){
+  const {L,W} = roomData;
+  const halfW = W/2;
+  const subs = [];
+  if(count===1){
+    subs.push({id:'SW1', name:'Subwoofer', x:-halfW*0.3, y:0.3, z:1, note:'Off-center on front wall (avoids the center-line bass null)'});
+  } else if(count===2){
+    subs.push({id:'SW1', name:'Subwoofer 1', x:-halfW+1.3, y:0.3, z:1, note:'Front-left corner'});
+    subs.push({id:'SW2', name:'Subwoofer 2', x:halfW-1.3, y:0.3, z:1, note:'Front-right corner'});
+  } else {
+    subs.push({id:'SW1', name:'Subwoofer 1', x:-halfW+1.3, y:0.3, z:1, note:'Front-left corner'});
+    subs.push({id:'SW2', name:'Subwoofer 2', x:halfW-1.3, y:0.3, z:1, note:'Front-right corner'});
+    subs.push({id:'SW3', name:'Subwoofer 3', x:-halfW+1.3, y:0.3, z:L-1, note:'Rear-left corner'});
+    subs.push({id:'SW4', name:'Subwoofer 4', x:halfW-1.3, y:0.3, z:L-1, note:'Rear-right corner'});
+  }
+  return subs.map(s=>({...s, type:'sub', azimuth:null, elevation:null}));
+}
+
+// Returns array of speaker objects with position (x:left-right from center, y:height from floor, z:distance from screen wall) and angle info
+function calcSpeakerLayout(){
+  const roomData = getRoomData();
+  const {L,W,H,D} = roomData;
+  const speakers = [];
+  if(!L || !W || !H || !D) return speakers;
+
+  const {config, subs} = getAudioConfig();
+  const def = CHANNEL_DEFS[config] || CHANNEL_DEFS['7.1.4'];
+
+  def.bed.forEach(id=>{
+    const spec = CHANNEL_SPECS[id];
+    const pos = placeBedChannel(id, spec.azimuth, roomData);
+    speakers.push({id, name:spec.name, type:'bed', ...pos, azimuth:spec.azimuth, elevation:spec.elevation});
+  });
+
+  def.height.forEach(id=>{
+    const spec = CHANNEL_SPECS[id];
+    const pos = placeHeightChannel(spec.azimuth, spec.elevation, roomData);
+    speakers.push({id, name:spec.name, type:'height', ...pos, azimuth:spec.azimuth, elevation:spec.elevation});
+  });
+
+  placeSubwoofers(subs, roomData).forEach(s=>speakers.push(s));
+
+  return speakers;
+}
+
+/* Speaker position overrides — when the installer drags a speaker in the 3D view,
+   its absolute x/y/z is stored here, keyed by speaker id and by a room-signature
+   so overrides reset automatically if room dimensions change drastically. */
+function getSpeakerOverrides(){
+  return state.speakerOverrides || {};
+}
+function setSpeakerOverride(id, pos){
+  if(!state.speakerOverrides) state.speakerOverrides = {};
+  state.speakerOverrides[id] = {x:pos[0], y:pos[1], z:pos[2]};
+  persistState();
+}
+function resetSpeakerPositions(){
+  state.speakerOverrides = {};
+  persistState();
+  showToast('Speaker positions reset to calculated defaults.');
+  recalc();
+}
+
+// Merges calculated defaults with any manual drag overrides — this is what the 3D view and report should use
+function getEffectiveSpeakerLayout(){
+  const base = calcSpeakerLayout();
+  const overrides = getSpeakerOverrides();
+  return base.map(s=>{
+    const o = overrides[s.id];
+    if(o) return {...s, x:o.x, y:o.y, z:o.z, manual:true};
+    return s;
+  });
+}
+
+function calcScreenSize(){
+  const {L,W,D} = getRoomData();
+  if(!D) return null;
+  const ratio = parseFloat(val('s_ratio'))||1.78;
+
+  // THX optimal viewing angle: 30 deg (sweet spot), range 26-36
+  // viewing angle relates to screen width: tan(angle/2) = (width/2)/distance
+  function widthForAngle(angleDeg){
+    const rad = angleDeg*Math.PI/180;
+    return 2 * D * Math.tan(rad/2);
+  }
+  const widthOptimal = widthForAngle(30);
+  const widthMin = widthForAngle(26);
+  const widthMax = widthForAngle(36);
+
+  function diagInches(widthFt, ratio){
+    const heightFt = widthFt/ratio;
+    const diagFt = Math.sqrt(widthFt*widthFt + heightFt*heightFt);
+    return diagFt * 12;
+  }
+  return {
+    widthOptimal, widthMin, widthMax,
+    diagOptimal: diagInches(widthOptimal, ratio),
+    diagMin: diagInches(widthMin, ratio),
+    diagMax: diagInches(widthMax, ratio),
+    ratio
+  };
+}
+
+/* Computes the screen's physical width/height (ft) and recommends/clamps its
+   vertical center position so it never sinks below the floor or pokes
+   through the ceiling, and defaults sensibly based on screen type. */
+function getScreenGeometry(){
+  const screenData = calcScreenSize();
+  if(!screenData) return null;
+  const {H, ear} = getRoomData();
+  const diagInput = parseFloat(val('s_diag_override'));
+  const diag = diagInput || screenData.diagOptimal;
+  const diagFt = diag/12;
+  const ratio = screenData.ratio;
+  const sW = diagFt*ratio/Math.sqrt(1+ratio*ratio);
+  const sH = diagFt/Math.sqrt(1+ratio*ratio);
+
+  const minCenter = sH/2 + 0.2; // keep bottom edge at least ~0.2ft off floor
+  const maxCenter = H ? Math.max(minCenter, H - sH/2 - 0.2) : minCenter; // keep top edge below ceiling
+
+  // Suggested default: flat panels centered near ear/eye height;
+  // projector screens with the bottom edge ~1ft above the floor (typical masking/furniture clearance)
+  let suggested = (val('s_type')==='flatpanel') ? ear : (sH/2 + 1);
+  suggested = Math.max(minCenter, Math.min(suggested, maxCenter));
+
+  const override = parseFloat(val('s_center'));
+  const centerH = (override && !isNaN(override)) ? Math.max(minCenter, Math.min(override, maxCenter)) : suggested;
+
+  return {sW, sH, diag, centerH, suggested, minCenter, maxCenter};
+}
+
+/* ============================================================
+   RECALC — updates speaker page + screen page outputs
+============================================================ */
+function recalc(){
+  persistState();
+  updateMlpSlider();
+  renderSpeakerOutput();
+  renderScreenOutput();
+  if(document.getElementById('page-viewer').classList.contains('active')) render3D();
+}
+
+/* ============================================================
+   MLP SLIDER — suggests a seating zone based on room length
+============================================================ */
+function updateMlpSlider(){
+  const L = parseFloat(val('r_length'))||0;
+  const slider = document.getElementById('r_mlp_slider');
+  const zone = document.getElementById('mlpZone');
+  const hint = document.getElementById('mlpHint');
+  if(!slider) return;
+  if(!L){
+    slider.max = 30;
+    zone.style.display = 'none';
+    hint.textContent = 'Enter room length to see the suggested seating zone.';
+    slider.value = parseFloat(val('r_mlp'))||0;
+    return;
+  }
+  slider.max = L;
+  slider.min = 0;
+  slider.step = 0.1;
+  const recMin = L*0.35, recMax = L*0.45;
+  zone.style.display = 'block';
+  zone.style.left = (recMin/L*100)+'%';
+  zone.style.width = ((recMax-recMin)/L*100)+'%';
+  hint.innerHTML = `Suggested seating distance: <strong>${recMin.toFixed(1)}–${recMax.toFixed(1)} ft</strong> from the screen wall (35–45% of room length) — generally avoids the strongest bass cancellation nulls. Drag the slider or type an exact value.`;
+  const d = parseFloat(val('r_mlp'))||0;
+  slider.value = Math.min(Math.max(d,0), L);
+}
+function onMlpNumberInput(){
+  updateMlpSlider();
+  recalc();
+}
+function onMlpSliderInput(v){
+  document.getElementById('r_mlp').value = parseFloat(v).toFixed(1);
+  recalc();
+}
+
+function renderSpeakerOutput(){
+  const out = document.getElementById('speakerOutput');
+  const {config, subs} = getAudioConfig();
+  const titleEl = document.getElementById('speakerPageTitle');
+  if(titleEl) titleEl.textContent = `Speaker Layout — ${config}${config.split('.').length>2 ? ' Atmos' : ''}`;
+  renderStandardsRef();
+
+  const {L,W,H,D} = getRoomData();
+  if(!L||!W||!H||!D){
+    out.innerHTML = '<div class="helper">Enter your room dimensions and MLP distance in Step 02 to calculate the speaker layout.</div>';
+    return;
+  }
+  const sp = getEffectiveSpeakerLayout();
+  let rows = sp.map(s=>{
+    let tag = s.type==='bed' ? '<span class="tag tag-bed">Bed</span>' : s.type==='height' ? '<span class="tag tag-height">Height</span>' : '<span class="tag tag-sub">Sub</span>';
+    const manualTag = s.manual ? ' <span class="tag" style="background:rgba(76,175,109,0.15); color:var(--green);">Custom</span>' : '';
+    const x = s.x.toFixed(2), y = s.y.toFixed(2), z = s.z.toFixed(2);
+    const az = s.azimuth!==null ? s.azimuth+'°' : '—';
+    const el = s.elevation!==null ? s.elevation+'°' : '—';
+    const offset = (s.x>=0?'+':'') + s.x.toFixed(2)+' ft from center';
+    return `<tr>
+      <td>${s.name}${manualTag}</td><td>${tag}</td>
+      <td>${offset}</td>
+      <td>${z} ft from screen wall</td>
+      <td>${y} ft height</td>
+      <td>Az ${az} / El ${el}</td>
+    </tr>`;
+  }).join('');
+  out.innerHTML = `<div style="overflow-x:auto;"><table class="speaker-table">
+    <thead><tr><th>Speaker</th><th>Channel</th><th>Lateral Position</th><th>Depth Position</th><th>Mounting Height</th><th>Angle from MLP</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function renderStandardsRef(){
+  const refEl = document.getElementById('speakerStandardsRef');
+  if(!refEl) return;
+  const {config, subs} = getAudioConfig();
+  const def = CHANNEL_DEFS[config] || CHANNEL_DEFS['7.1.4'];
+  const groups = [];
+  const bedNames = def.bed.map(id=>CHANNEL_SPECS[id]);
+  const seen = new Set();
+  bedNames.forEach(spec=>{
+    const key = `${Math.abs(spec.azimuth)}-${spec.elevation}`;
+    if(seen.has(key)) return; seen.add(key);
+    groups.push({label: spec.name.replace(/ Left| Right/,' L/R'), val:`±${Math.abs(spec.azimuth)}° azimuth, 0° elevation (ear height)`});
+  });
+  const heightSeen = new Set();
+  def.height.forEach(id=>{
+    const spec = CHANNEL_SPECS[id];
+    const key = `${Math.abs(spec.azimuth)}-${spec.elevation}`;
+    if(heightSeen.has(key)) return; heightSeen.add(key);
+    groups.push({label: spec.name.replace(/ Left| Right/,' L/R'), val:`±${Math.abs(spec.azimuth)}° azimuth, ${spec.elevation}° elevation (ceiling)`});
+  });
+  groups.push({label:`Subwoofer${subs>1?'s':''} (×${subs})`, val:'Corner / off-center placement to reduce room modes (THX)'});
+  refEl.innerHTML = groups.map(g=>`<div><span class="label">${g.label}</span><span class="val">${g.val}</span></div>`).join('');
+}
+
+function renderScreenOutput(){
+  const out = document.getElementById('screenOutput');
+  const data = calcScreenSize();
+  if(!data){
+    out.innerHTML = '<div class="helper">Enter your MLP distance in Step 02 to calculate THX screen sizing.</div>';
+    return;
+  }
+  const override = parseFloat(val('s_diag_override'));
+  const geo = getScreenGeometry();
+  const {H} = getRoomData();
+  out.innerHTML = `<div class="readout">
+    <div><span class="label">THX Optimal (30° viewing angle)</span><span class="val warn">${data.diagOptimal.toFixed(0)}" diagonal</span></div>
+    <div><span class="label">THX Acceptable Range (26°–36°)</span><span class="val">${data.diagMin.toFixed(0)}" – ${data.diagMax.toFixed(0)}"</span></div>
+    <div><span class="label">Required Image Width (optimal)</span><span class="val">${data.widthOptimal.toFixed(2)} ft</span></div>
+    ${override ? `<div><span class="label">Your Selected Screen</span><span class="val">${override}" diagonal</span></div>` : ''}
+    ${geo ? `<div><span class="label">Screen Image Height</span><span class="val">${geo.sH.toFixed(2)} ft</span></div>
+    <div><span class="label">Suggested Center Height</span><span class="val warn">${geo.suggested.toFixed(2)} ft from floor</span></div>
+    <div><span class="label">Center Height Used</span><span class="val">${geo.centerH.toFixed(2)} ft from floor${val('s_center')?'':' (auto)'}</span></div>` : ''}
+  </div>
+  ${geo && H ? `<div class="helper" style="margin-top:10px;">Bottom edge: ${(geo.centerH-geo.sH/2).toFixed(2)} ft &nbsp;|&nbsp; Top edge: ${(geo.centerH+geo.sH/2).toFixed(2)} ft &nbsp;|&nbsp; Ceiling: ${H.toFixed(2)} ft. Leave "Screen Center Height" blank to use the suggested value automatically, or enter your own — it will be kept clear of the floor and ceiling.</div>` : ''}`;
+}
+
+/* ============================================================
+   3D VIEWER — React Three Fiber (loaded as ES module below)
+   This section provides the bridge functions the rest of the
+   vanilla-JS app calls: initOrResizeViewer, render3D, resetCamera,
+   resetSpeakerPositions (already defined above), and a hook for
+   PDF snapshot capture (window.__r3fCapture).
+============================================================ */
+let r3fMounted = false;
+
+function initOrResizeViewer(){
+  if(!r3fMounted){
+    r3fMounted = true;
+    if(window.__mountR3F) window.__mountR3F();
+  }
+  // trigger a re-render with latest data
+  if(window.__r3fUpdate) window.__r3fUpdate();
+}
+
+function render3D(){
+  if(window.__r3fUpdate) window.__r3fUpdate();
+}
+
+function resetCamera(){
+  if(window.__r3fResetCamera) window.__r3fResetCamera();
+}
+
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('page-viewer').classList.contains('active') && window.__r3fResize) window.__r3fResize();
+});
+
+/* ============================================================
+   PRODUCT DATABASE / QUOTE BUILDER
+============================================================ */
+const CATEGORIES = ['Speakers (Bed)','Height/Atmos Speakers','Subwoofer','AVR / Processor','Amplifier','Screen / Display','Source / Streaming','Cables & Connectivity','Mounts & Racks','Acoustic Treatment','Calibration & Install','Other'];
+
+let products = [];
+
+function loadProductDB(){
+  try{
+    const raw = localStorage.getItem(PRODUCT_DB_KEY);
+    products = raw ? JSON.parse(raw) : [];
+  }catch(e){ products = []; }
+  if(products.length===0){
+    products = [
+      {name:'Floor-standing Front L/R Speaker (pair)', category:'Speakers (Bed)', price:85000, qty:1, include:true},
+      {name:'Center Channel Speaker', category:'Speakers (Bed)', price:35000, qty:1, include:true},
+      {name:'Surround Speaker (pair)', category:'Speakers (Bed)', price:45000, qty:1, include:true},
+      {name:'Atmos Height Module (pair)', category:'Height/Atmos Speakers', price:40000, qty:1, include:true},
+      {name:'Powered Subwoofer 12"', category:'Subwoofer', price:55000, qty:2, include:true},
+      {name:'9.2 Channel AVR with Atmos', category:'AVR / Processor', price:120000, qty:1, include:true},
+      {name:'120" Projection Screen', category:'Screen / Display', price:65000, qty:1, include:true},
+      {name:'4K Laser Projector', category:'Screen / Display', price:250000, qty:1, include:true},
+      {name:'4K Streaming Source', category:'Source / Streaming', price:25000, qty:1, include:true},
+      {name:'Speaker Cable & HDMI bundle', category:'Cables & Connectivity', price:18000, qty:1, include:true},
+      {name:'Equipment Rack', category:'Mounts & Racks', price:22000, qty:1, include:true},
+      {name:'Acoustic Panels (set)', category:'Acoustic Treatment', price:60000, qty:1, include:false},
+      {name:'Calibration & Installation Service', category:'Calibration & Install', price:35000, qty:1, include:true},
+    ];
+    saveProductDB();
+  }
+}
+function saveProductDB(){
+  try{ localStorage.setItem(PRODUCT_DB_KEY, JSON.stringify(products)); showToast('Price list saved.'); }
+  catch(e){ console.warn(e); }
+}
+
+function renderProductTable(){
+  const tbody = document.getElementById('productRows');
+  tbody.innerHTML = products.map((p,i)=>{
+    const catOptions = CATEGORIES.map(c=>`<option value="${c}" ${p.category===c?'selected':''}>${c}</option>`).join('');
+    const lineTotal = (p.price * p.qty)||0;
+    return `<tr>
+      <td><input value="${escapeHtml(p.name)}" oninput="updateProduct(${i},'name',this.value)"></td>
+      <td><select onchange="updateProduct(${i},'category',this.value)">${catOptions}</select></td>
+      <td><input type="number" value="${p.price}" oninput="updateProduct(${i},'price',this.value)"></td>
+      <td><input type="number" value="${p.qty}" min="0" oninput="updateProduct(${i},'qty',this.value)"></td>
+      <td style="font-family:'JetBrains Mono',monospace;">₹${lineTotal.toLocaleString('en-IN')}</td>
+      <td style="text-align:center;"><input type="checkbox" ${p.include?'checked':''} style="width:auto;" onchange="updateProduct(${i},'include',this.checked)"></td>
+      <td><button class="btn btn-sm btn-danger" onclick="removeProduct(${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+  renderBudgetBar();
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function updateProduct(i, field, value){
+  if(field==='price' || field==='qty') value = parseFloat(value)||0;
+  products[i][field] = value;
+  if(field!=='include') renderProductTable(); else renderBudgetBar();
+}
+function addProductRow(){
+  products.push({name:'New Product', category:'Other', price:0, qty:1, include:true});
+  renderProductTable();
+}
+function removeProduct(i){
+  products.splice(i,1);
+  renderProductTable();
+}
+
+function renderBudgetBar(){
+  const included = products.filter(p=>p.include);
+  const subtotal = included.reduce((sum,p)=>sum+(p.price*p.qty),0);
+  const budget = parseFloat(val('q_budget'))||0;
+
+  document.getElementById('qSummaryItems').textContent = included.length;
+  document.getElementById('qSummarySubtotal').textContent = '₹'+subtotal.toLocaleString('en-IN');
+  document.getElementById('qSummaryBudget').textContent = budget ? '₹'+budget.toLocaleString('en-IN') : '—';
+  document.getElementById('qGrandTotal').textContent = '₹'+subtotal.toLocaleString('en-IN');
+
+  const diffEl = document.getElementById('qSummaryDiff');
+  const fill = document.getElementById('budgetFill');
+  if(budget){
+    const diff = budget - subtotal;
+    diffEl.textContent = (diff>=0? '₹'+diff.toLocaleString('en-IN')+' remaining' : '₹'+Math.abs(diff).toLocaleString('en-IN')+' over budget');
+    diffEl.className = diff>=0 ? 'val' : 'val warn';
+    const pct = Math.min(100, (subtotal/budget)*100);
+    fill.style.width = pct+'%';
+    fill.classList.toggle('over', subtotal>budget);
+  } else {
+    diffEl.textContent = '—';
+    fill.style.width = Math.min(100,(subtotal/1)) + '%';
+    fill.style.width = '0%';
+  }
+}
+
+/* Budget-based auto allocation:
+   Typical home cinema budget split across categories.
+   For each category, pick the highest-price item that fits within that category's allocated share,
+   then redistribute leftover to next categories in priority order. */
+const BUDGET_SPLIT = {
+  'Screen / Display': 0.28,
+  'Speakers (Bed)': 0.20,
+  'AVR / Processor': 0.14,
+  'Subwoofer': 0.10,
+  'Height/Atmos Speakers': 0.08,
+  'Source / Streaming': 0.05,
+  'Cables & Connectivity': 0.04,
+  'Mounts & Racks': 0.03,
+  'Calibration & Install': 0.05,
+  'Acoustic Treatment': 0.03,
+  'Other': 0.00,
+};
+
+function autoAllocate(){
+  const budget = parseFloat(val('q_budget'))||0;
+  if(!budget){ showToast('Enter a client budget first.'); return; }
+
+  // reset all to not included
+  products.forEach(p=>p.include=false);
+
+  let remaining = budget;
+  const notes = [];
+  const order = Object.keys(BUDGET_SPLIT).sort((a,b)=>BUDGET_SPLIT[b]-BUDGET_SPLIT[a]);
+
+  order.forEach(cat=>{
+    const share = budget * BUDGET_SPLIT[cat];
+    const candidates = products.filter(p=>p.category===cat).sort((a,b)=>b.price-a.price);
+    if(candidates.length===0) return;
+    // pick best-fit: highest price item that fits within share (and within remaining budget)
+    let chosen = candidates.find(p => p.price*p.qty <= share && p.price*p.qty <= remaining);
+    if(!chosen){
+      // fall back to cheapest item that fits remaining budget
+      chosen = candidates.slice().sort((a,b)=>a.price-b.price).find(p=>p.price*p.qty<=remaining);
+    }
+    if(chosen){
+      chosen.include = true;
+      remaining -= chosen.price*chosen.qty;
+      notes.push(`<div><span class="label" style="width:auto; margin-right:8px;">${cat}:</span><span class="val">${escapeHtml(chosen.name)} — ₹${(chosen.price*chosen.qty).toLocaleString('en-IN')}</span></div>`);
+    } else {
+      notes.push(`<div><span class="label" style="width:auto; margin-right:8px;">${cat}:</span><span class="val warn">No item fits remaining budget (₹${remaining.toLocaleString('en-IN')} left)</span></div>`);
+    }
+  });
+
+  // Use any leftover to upgrade categories where possible (try upgrading screen/display first if budget allows)
+  document.getElementById('allocationNotes').innerHTML = `<div class="readout">${notes.join('')}
+    <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--line);"><span class="label" style="width:auto; margin-right:8px;">Unallocated remainder:</span><span class="val">₹${remaining.toLocaleString('en-IN')}</span></div>
+  </div>`;
+
+  renderProductTable();
+  showToast('Products auto-selected based on budget.');
+}
+
+/* ============================================================
+   PDF REPORT GENERATION
+============================================================ */
+async function generatePDF(){
+  persistState();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const pageW = 210, margin = 16;
+  let y = 20;
+
+  function checkPage(needed=10){
+    if(y+needed > 285){ doc.addPage(); y = 20; }
+  }
+  function h1(text){
+    checkPage(14);
+    doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(20,20,20);
+    doc.text(text, margin, y); y+=3;
+    doc.setDrawColor(232,162,61); doc.setLineWidth(0.6);
+    doc.line(margin, y, pageW-margin, y); y+=7;
+  }
+  function kv(label, value){
+    checkPage(6);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90,90,90);
+    doc.text(label, margin, y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(20,20,20);
+    doc.text(String(value!==undefined&&value!==''?value:'—'), margin+55, y);
+    y+=6;
+  }
+
+  // ---- Cover ----
+  doc.setFillColor(11,13,16);
+  doc.rect(0,0,pageW,40,'F');
+  doc.setTextColor(232,162,61); doc.setFont('helvetica','bold'); doc.setFontSize(22);
+  doc.text('Home Cinema Design Report', margin, 24);
+  doc.setTextColor(220,220,220); doc.setFontSize(10); doc.setFont('helvetica','normal');
+  doc.text(state.company.company || 'Pro AV & Home Cinema', margin, 33);
+
+  y = 52;
+  h1('Project Information');
+  kv('Client Name', state.project.client);
+  kv('Project / Site', state.project.project);
+  kv('Site Address', state.project.address);
+  kv('Contact Number', state.project.phone);
+  kv('Email', state.project.email);
+  kv('Date', state.project.date);
+  y+=4;
+
+  h1('Room Geometry');
+  kv('Room Length', (state.room.length||'—')+' ft');
+  kv('Room Width', (state.room.width||'—')+' ft');
+  kv('Ceiling Height', (state.room.height||'—')+' ft');
+  kv('Main Listening Position (from screen wall)', (state.room.mlp||'—')+' ft');
+  kv('Ear Height (seated)', (state.room.ear||'—')+' ft');
+  y+=4;
+
+  // ---- Speaker layout table ----
+  const audioCfg = getAudioConfig();
+  h1(`Speaker Layout — ${audioCfg.config}${audioCfg.config.split('.').length>2?' Atmos':''} (per Dolby home theater placement guidelines)`);
+  const speakers = getEffectiveSpeakerLayout();
+  const colX = [margin, margin+38, margin+78, margin+118, margin+150];
+  ['Speaker','Lateral Pos.','Depth Pos.','Height','Angle (Az/El)'].forEach((t,i)=>doc.text(t, colX[i], y));
+  y+=2; doc.setDrawColor(200,200,200); doc.line(margin,y,pageW-margin,y); y+=5;
+  doc.setFont('helvetica','normal');
+  speakers.forEach(s=>{
+    checkPage(7);
+    const offset = (s.x>=0?'+':'')+s.x.toFixed(2)+' ft';
+    const az = s.azimuth!==null ? s.azimuth+'°':'—';
+    const el = s.elevation!==null ? s.elevation+'°':'—';
+    doc.text(s.name, colX[0], y);
+    doc.text(offset, colX[1], y);
+    doc.text(s.z.toFixed(2)+' ft', colX[2], y);
+    doc.text(s.y.toFixed(2)+' ft', colX[3], y);
+    doc.text(`${az} / ${el}`, colX[4], y);
+    y+=6;
+  });
+  y+=4;
+
+  // ---- Screen ----
+  h1('Screen / Display Recommendation — THX Guidelines');
+  const sd = calcScreenSize();
+  if(sd){
+    kv('THX Optimal Screen Size (30° viewing angle)', sd.diagOptimal.toFixed(0)+' inch diagonal');
+    kv('THX Acceptable Range (26°-36°)', sd.diagMin.toFixed(0)+'" - '+sd.diagMax.toFixed(0)+'"');
+    kv('Required Image Width (optimal)', sd.widthOptimal.toFixed(2)+' ft');
+    const override = parseFloat(val('s_diag_override'));
+    if(override) kv('Selected Screen Size', override+'" diagonal');
+    const geo = getScreenGeometry();
+    if(geo){
+      kv('Screen Image Height', geo.sH.toFixed(2)+' ft');
+      kv('Screen Center Height', geo.centerH.toFixed(2)+' ft from floor'+(val('s_center')?'':' (auto-suggested)'));
+      kv('Bottom / Top Edge Height', geo.centerH.toFixed(2) > 0 ? (geo.centerH-geo.sH/2).toFixed(2)+' ft / '+(geo.centerH+geo.sH/2).toFixed(2)+' ft' : '—');
+    }
+  } else {
+    doc.setFontSize(10); doc.text('Insufficient room data to calculate screen size.', margin, y); y+=6;
+  }
+  y+=4;
+
+  // ---- 3D snapshot ----
+  if(document.getElementById('rep_3d').checked){
+    try{
+      const wasActive = document.getElementById('page-viewer').classList.contains('active');
+      if(!wasActive){
+        document.getElementById('page-viewer').classList.add('active');
+      }
+      initOrResizeViewer();
+      render3D();
+      // give R3F a couple frames to render before capture
+      await new Promise(r=>setTimeout(r, 200));
+      const snap = window.__r3fCapture ? window.__r3fCapture() : null;
+      if(!wasActive){
+        document.getElementById('page-viewer').classList.remove('active');
+      }
+      if(snap && snap.dataUrl && snap.dataUrl.length > 1000){
+        checkPage(90);
+        h1('3D Room Model');
+        const imgW = pageW - margin*2, imgH = imgW * (snap.height/snap.width);
+        doc.addImage(snap.dataUrl, 'PNG', margin, y, imgW, Math.min(imgH,110));
+        y += Math.min(imgH,110) + 8;
+      }
+    }catch(e){
+      console.warn('3D snapshot failed', e);
+    }
+  }
+
+  // ---- Quote ----
+  if(document.getElementById('rep_quote').checked){
+    checkPage(20);
+    h1('Quotation');
+    const included = products.filter(p=>p.include);
+    doc.setFontSize(9); doc.setFont('helvetica','bold');
+    const qcol = [margin, margin+85, margin+118, margin+138, margin+165];
+    ['Product','Category','Price','Qty','Total'].forEach((t,i)=>doc.text(t, qcol[i], y));
+    y+=2; doc.setDrawColor(200,200,200); doc.line(margin,y,pageW-margin,y); y+=5;
+    doc.setFont('helvetica','normal');
+    let total=0;
+    included.forEach(p=>{
+      checkPage(7);
+      const lineTotal = p.price*p.qty;
+      total += lineTotal;
+      doc.text(doc.splitTextToSize(p.name, 80)[0], qcol[0], y);
+      doc.text(p.category, qcol[1], y);
+      doc.text('Rs.'+p.price.toLocaleString('en-IN'), qcol[2], y);
+      doc.text(String(p.qty), qcol[3], y);
+      doc.text('Rs.'+lineTotal.toLocaleString('en-IN'), qcol[4], y);
+      y+=6;
+    });
+    checkPage(10);
+    y+=2; doc.setDrawColor(232,162,61); doc.setLineWidth(0.6); doc.line(margin,y,pageW-margin,y); y+=7;
+    doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text('Grand Total: Rs. '+total.toLocaleString('en-IN'), margin, y);
+    y+=10;
+    const budget = parseFloat(val('q_budget'));
+    if(budget){
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(100,100,100);
+      doc.text('Client Budget: Rs. '+budget.toLocaleString('en-IN'), margin, y); y+=6;
+    }
+  }
+
+  // ---- Footer on every page ----
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(150,150,150);
+    doc.text(`${state.company.company||''}   |   ${state.company.phone||''}   |   ${state.company.email||''}`, margin, 292);
+    doc.text(`Page ${i} of ${pageCount}`, pageW-margin-20, 292);
+  }
+
+  const fname = (state.project.project || 'home-cinema-report').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+  const pdfBlob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = fname+'.pdf';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(blobUrl), 1000);
+  showToast('PDF report generated.');
+}
+
+/* ============================================================
+   EXPORT / IMPORT PROJECT FILE
+============================================================ */
+function exportProjectFile(){
+  persistState();
+  const data = { state, products, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (state.project.project||'cinemaplan-project').replace(/[^a-z0-9]+/gi,'_').toLowerCase()+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Project exported.');
+}
+function importProjectFile(){ document.getElementById('importFile').click(); }
+function handleImport(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt)=>{
+    try{
+      const data = JSON.parse(evt.target.result);
+      if(data.state) state = data.state;
+      if(data.products) products = data.products;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(PRODUCT_DB_KEY, JSON.stringify(products));
+      hydrateForm();
+      renderProductTable();
+      recalc();
+      showToast('Project imported successfully.');
+    }catch(err){
+      alert('Could not read this file. Please check it is a valid CinemaPlan export.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+loadState();
+loadProductDB();
+recalc();
+renderProductTable();
+</script>
+
+<!-- ============================================================
+     R3F 3D VIEWER MODULE
+     This JSX source is transpiled by Babel standalone, then injected
+     as an ES module so `import` statements (resolved via importmap) work.
+============================================================ -->
+<script type="text/babel-jsx" id="r3f-source">
+import React, { useRef, useState, useEffect, useMemo, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { OrbitControls, Html } from '@react-three/drei';
+import * as THREE from 'three';
+
+const COLOR_MAP = { bed: '#3D7EE8', height: '#E8A23D', sub: '#E25C5C' };
+
+// Draggable sphere marker for a speaker. Dragging moves it along the floor plane (X/Z);
+// height (Y) stays fixed but can be nudged via the small +/- controls shown on hover/select.
+function SpeakerMarker({ speaker, roomBounds, onChange, selected, onSelect }) {
+  const meshRef = useRef();
+  const { camera, gl } = useThree();
+  const [dragging, setDragging] = useState(false);
+  const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const raycaster = useRef(new THREE.Raycaster());
+  const pointerVec = useRef(new THREE.Vector2());
+
+  const color = COLOR_MAP[speaker.type] || '#888';
+
+  const onPointerDown = useCallback((e) => {
+    e.stopPropagation();
+    setDragging(true);
+    onSelect(speaker.id);
+    gl.domElement.style.cursor = 'grabbing';
+    planeRef.current.set(new THREE.Vector3(0, 1, 0), -speaker.y);
+  }, [speaker.y, speaker.id, onSelect, gl]);
+
+  useEffect(() => {
+    if (!dragging) return;
+    function onMove(e) {
+      const rect = gl.domElement.getBoundingClientRect();
+      pointerVec.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointerVec.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.current.setFromCamera(pointerVec.current, camera);
+      const hit = new THREE.Vector3();
+      raycaster.current.ray.intersectPlane(planeRef.current, hit);
+      if (hit) {
+        const halfW = roomBounds.W / 2;
+        const clampedX = Math.max(-halfW + 0.3, Math.min(halfW - 0.3, hit.x));
+        const clampedZ = Math.max(0.2, Math.min(roomBounds.L - 0.2, hit.z));
+        onChange(speaker.id, [clampedX, speaker.y, clampedZ]);
+      }
+    }
+    function onUp() {
+      setDragging(false);
+      gl.domElement.style.cursor = 'auto';
+    }
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+  }, [dragging, camera, gl, roomBounds, speaker.id, speaker.y, onChange]);
+
+  return (
+    <group>
+      <mesh
+        ref={meshRef}
+        position={[speaker.x, speaker.y, speaker.z]}
+        onPointerDown={onPointerDown}
+        onPointerOver={(e) => { e.stopPropagation(); gl.domElement.style.cursor = 'grab'; }}
+        onPointerOut={(e) => { if(!dragging) gl.domElement.style.cursor = 'auto'; }}
+      >
+        <sphereGeometry args={[selected ? 0.5 : 0.4, 20, 20]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={selected ? 0.6 : 0.15} />
+      </mesh>
+      {selected && (
+        <Html distanceFactor={8} position={[speaker.x, speaker.y + 0.7, speaker.z]} center>
+          <div style={{
+            background: 'rgba(20,22,26,0.92)', color: '#EDEDEF', padding: '4px 8px',
+            borderRadius: '5px', fontSize: '11px', fontFamily: "'JetBrains Mono',monospace",
+            whiteSpace: 'nowrap', border: '1px solid #E8A23D', pointerEvents: 'none'
+          }}>
+            {speaker.name}
+          </div>
+        </Html>
+      )}
+      {speaker.type === 'height' && (
+        <line>
+          <bufferGeometry attach="geometry">
+            <bufferAttribute
+              attach="attributes-position"
+              count={2}
+              array={new Float32Array([speaker.x, speaker.y, speaker.z, speaker.x, 0, speaker.z])}
+              itemSize={3}
+            />
+          </bufferGeometry>
+          <lineBasicMaterial attach="material" color="#444444" />
+        </line>
+      )}
+    </group>
+  );
+}
+
+function RoomScene({ roomData, speakers, screenData, onSpeakerChange, selectedId, onSelect, version }) {
+  const { L, W, H, D } = roomData;
+
+  const screenMesh = useMemo(() => {
+    if (!screenData) return null;
+    return window.getScreenGeometry ? window.getScreenGeometry() : null;
+  }, [screenData, H, version]);
+
+  return (
+    <>
+      <ambientLight intensity={0.55} />
+      <directionalLight position={[5, 10, 5]} intensity={0.6} />
+
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, L / 2]} receiveShadow>
+        <planeGeometry args={[W, L]} />
+        <meshStandardMaterial color="#1c2026" side={THREE.DoubleSide} />
+      </mesh>
+
+      <mesh position={[0, H / 2, L / 2]}>
+        <boxGeometry args={[W, H, L]} />
+        <meshBasicMaterial color="#272b33" wireframe />
+      </mesh>
+
+      {screenMesh && (
+        <mesh position={[0, screenMesh.centerH, 0.02]}>
+          <planeGeometry args={[screenMesh.sW, screenMesh.sH]} />
+          <meshStandardMaterial color="#888888" side={THREE.DoubleSide} emissive="#222222" />
+        </mesh>
+      )}
+
+      {D > 0 && (
+        <mesh position={[0, 1.5, D]}>
+          <boxGeometry args={[2, 3, 2]} />
+          <meshStandardMaterial color="#4CAF6D" />
+        </mesh>
+      )}
+
+      {speakers.map((s) => (
+        <SpeakerMarker
+          key={s.id}
+          speaker={s}
+          roomBounds={{ W, L }}
+          onChange={onSpeakerChange}
+          selected={selectedId === s.id}
+          onSelect={onSelect}
+        />
+      ))}
+    </>
+  );
+}
+
+function CameraRig({ target, distance, resetSignal }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    const theta = Math.PI / 4, phi = Math.PI / 3.2;
+    camera.position.set(
+      target.x + distance * Math.sin(phi) * Math.sin(theta),
+      target.y + distance * Math.cos(phi),
+      target.z + distance * Math.sin(phi) * Math.cos(theta)
+    );
+    camera.lookAt(target.x, target.y, target.z);
+  }, [resetSignal, target.x, target.y, target.z, distance]);
+  return null;
+}
+
+function App() {
+  const [tick, setTick] = useState(0);
+  const [selectedId, setSelectedId] = useState(null);
+  const [resetSignal, setResetSignal] = useState(0);
+  const glRef = useRef(null);
+
+  useEffect(() => {
+    window.__r3fUpdate = () => setTick((t) => t + 1);
+    window.__r3fResetCamera = () => setResetSignal((s) => s + 1);
+    window.__r3fResize = () => setTick((t) => t + 1);
+    window.__r3fCapture = () => {
+      if (!glRef.current) return null;
+      const canvas = glRef.current;
+      return { dataUrl: canvas.toDataURL('image/png'), width: canvas.width, height: canvas.height };
+    };
+  }, []);
+
+  const roomData = useMemo(() => (window.getRoomData ? window.getRoomData() : { L: 0, W: 0, H: 0, D: 0, ear: 3.9 }), [tick]);
+  const screenData = useMemo(() => (window.calcScreenSize ? window.calcScreenSize() : null), [tick]);
+  const speakers = useMemo(() => (window.getEffectiveSpeakerLayout ? window.getEffectiveSpeakerLayout() : []), [tick]);
+
+  const handleSpeakerChange = useCallback((id, pos) => {
+    if (window.setSpeakerOverride) window.setSpeakerOverride(id, pos);
+    setTick((t) => t + 1);
+    if (window.renderSpeakerOutput) window.renderSpeakerOutput();
+    const helper = document.getElementById('speakerEditHelper');
+    const sp = (window.getEffectiveSpeakerLayout ? window.getEffectiveSpeakerLayout() : []).find(s => s.id === id);
+    if (helper && sp) {
+      helper.textContent = `${sp.name}: ${sp.x.toFixed(2)} ft lateral, ${sp.z.toFixed(2)} ft from screen wall, ${sp.y.toFixed(2)} ft height`;
+    }
+  }, []);
+
+  const { L, W, H } = roomData;
+  const hasRoom = L > 0 && W > 0 && H > 0;
+  const center = hasRoom ? new THREE.Vector3(0, H / 2, L / 2) : new THREE.Vector3(0, 1, 2);
+  const distance = hasRoom ? Math.max(L, W, H) * 1.8 : 25;
+
+  if (!hasRoom) {
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%',
+        color: '#8A909B', fontFamily: "'Inter',sans-serif", fontSize: '13px', textAlign: 'center', padding: '20px'
+      }}>
+        Enter your room dimensions in Step 02 (Room &amp; Seating) to generate the 3D model.
+      </div>
+    );
+  }
+
+  return (
+    <Canvas
+      gl={{ preserveDrawingBuffer: true, antialias: true }}
+      onCreated={({ gl }) => { glRef.current = gl.domElement; gl.setClearColor('#06070a'); }}
+      camera={{ fov: 45, near: 0.1, far: 100 }}
+      onPointerMissed={() => setSelectedId(null)}
+    >
+      <CameraRig target={center} distance={distance} resetSignal={resetSignal} />
+      <RoomScene
+        roomData={roomData}
+        speakers={speakers}
+        screenData={screenData}
+        onSpeakerChange={handleSpeakerChange}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        version={tick}
+      />
+      <OrbitControls
+        target={[center.x, center.y, center.z]}
+        enableDamping
+        dampingFactor={0.08}
+        minDistance={5}
+        maxDistance={Math.max(L, W, H) * 4}
+      />
+    </Canvas>
+  );
+}
+
+window.__mountR3F = function () {
+  const container = document.getElementById('r3f-root');
+  if (!container || container.__mounted) return;
+  container.__mounted = true;
+  const root = createRoot(container);
+  root.render(<App />);
+};
+
+if (document.getElementById('page-viewer')?.classList.contains('active')) {
+  window.__mountR3F();
+}
+</script>
+
+<!-- ============================================================
+     PRODUCT CATALOG MODULE — React, restyled for CinemaPlan's
+     dark theme. Persists via localStorage (works fully offline,
+     no Claude-artifact storage dependency).
+============================================================ -->
+<script type="text/babel-jsx" id="catalog-source">
+import React, { useState, useEffect, useMemo } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Search, Plus, Trash2, Pencil, Download, X } from 'lucide-react';
+
+// CinemaPlan dark theme palette (mirrors the CSS custom properties in :root)
+const COLORS = {
+  bg: '#0B0D10',
+  surface: '#15181D',
+  surfaceAlt: '#1C2026',
+  ink: '#EDEDEF',
+  inkSoft: '#8A909B',
+  accent: '#E8A23D',
+  line: '#272B33',
+  lineSoft: '#1C2026',
+};
+
+const CATEGORY_META = {
+  'Speakers': { code: 'SPK', color: '#5B9BD5' },
+  'Amplifiers & AVR': { code: 'AMP', color: '#E07A6F' },
+  'Projectors & Displays': { code: 'PRJ', color: '#E8A23D' },
+  'Screens': { code: 'SCR', color: '#C9A35C' },
+  'Acoustic Treatment': { code: 'ACU', color: '#6FB58A' },
+  'Soundproofing': { code: 'SPF', color: '#BFA07A' },
+  'Cables & Connectors': { code: 'CAB', color: '#9AA3AE' },
+  'Mounts & Racks': { code: 'RCK', color: '#7C93AA' },
+  'Processors & Control': { code: 'PRC', color: '#A693D6' },
+  'Pro Audio': { code: 'PRO', color: '#E2A05A' },
+  'Other': { code: 'OTH', color: '#9AA0A6' },
+};
+
+const DEFAULT_CATEGORIES = Object.keys(CATEGORY_META);
+
+// localStorage-backed persistence (replaces Claude-artifact-only window.storage API
+// so this works as a fully offline, standalone HTML app)
+const LS = {
+  async get(key){
+    try{
+      const v = localStorage.getItem('cinemaplan_catalog_'+key);
+      return v !== null ? { key, value: v } : null;
+    }catch(e){ return null; }
+  },
+  async set(key, value){
+    try{
+      localStorage.setItem('cinemaplan_catalog_'+key, value);
+      return { key, value };
+    }catch(e){ return null; }
+  }
+};
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function getMeta(category) {
+  return CATEGORY_META[category] || { code: (category || 'GEN').slice(0, 3).toUpperCase(), color: '#8A8F8C' };
+}
+
+function nextRackId(category, products) {
+  const meta = getMeta(category);
+  const nums = products
+    .filter(p => p.category === category)
+    .map(p => {
+      const m = p.rackId && p.rackId.match(/-(\d+)$/);
+      return m ? parseInt(m[1], 10) : 0;
+    });
+  const next = (nums.length ? Math.max(...nums) : 0) + 1;
+  return `${meta.code}-${String(next).padStart(3, '0')}`;
+}
+
+function emptyForm(defaultCategory) {
+  return {
+    category: defaultCategory,
+    brand: '',
+    model: '',
+    description: '',
+    unit: 'pcs',
+    costPrice: '',
+    mrp: '',
+    tags: '',
+    notes: '',
+    specs: [{ label: '', value: '' }],
+  };
+}
+
+function ProductForm({ initial, categories, onSave, onClose, onAddCategory }) {
+  const [form, setForm] = useState(initial);
+  const [newCategory, setNewCategory] = useState('');
+  const [showNewCategory, setShowNewCategory] = useState(false);
+
+  const update = (field, value) => setForm(f => ({ ...f, [field]: value }));
+
+  const updateSpec = (idx, field, value) => {
+    setForm(f => {
+      const specs = f.specs.map((s, i) => (i === idx ? { ...s, [field]: value } : s));
+      return { ...f, specs };
+    });
+  };
+
+  const addSpecRow = () => setForm(f => ({ ...f, specs: [...f.specs, { label: '', value: '' }] }));
+  const removeSpecRow = (idx) => setForm(f => ({ ...f, specs: f.specs.filter((_, i) => i !== idx) }));
+
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    onAddCategory(trimmed);
+    update('category', trimmed);
+    setNewCategory('');
+    setShowNewCategory(false);
+  };
+
+  const handleSubmit = () => {
+    if (!form.brand.trim() && !form.model.trim()) return;
+    onSave({
+      ...form,
+      specs: form.specs.filter(s => s.label.trim() || s.value.trim()),
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: hexToRgba('#000000', 0.6) }}>
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl shadow-xl border" style={{ background: COLORS.surface, borderColor: COLORS.line }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b sticky top-0" style={{ borderColor: COLORS.line, background: COLORS.surface }}>
+          <h2 className="font-semibold text-lg" style={{ fontFamily: "'Oswald',sans-serif", color: COLORS.ink, letterSpacing: '0.5px' }}>
+            {initial.rackId ? `Edit ${initial.rackId}` : 'Add product'}
+          </h2>
+          <button onClick={onClose} className="p-1 rounded hover:opacity-70" style={{ color: COLORS.inkSoft }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          <div>
+            <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Category</label>
+            <div className="flex gap-2 mt-1">
+              <select
+                value={form.category}
+                onChange={e => update('category', e.target.value)}
+                className="flex-1 rounded-md border px-3 py-2 text-sm"
+                style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }}
+              >
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <button
+                onClick={() => setShowNewCategory(s => !s)}
+                className="px-3 py-2 rounded-md border text-sm whitespace-nowrap"
+                style={{ borderColor: COLORS.line, color: COLORS.inkSoft }}
+              >
+                + New
+              </button>
+            </div>
+            {showNewCategory && (
+              <div className="flex gap-2 mt-2">
+                <input
+                  value={newCategory}
+                  onChange={e => setNewCategory(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
+                  placeholder="Category name"
+                  className="flex-1 rounded-md border px-3 py-2 text-sm"
+                  style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }}
+                  autoFocus
+                />
+                <button onClick={handleAddCategory} className="px-3 py-2 rounded-md text-sm font-medium" style={{ background: COLORS.accent, color: '#0B0D10' }}>
+                  Add
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Brand</label>
+              <input value={form.brand} onChange={e => update('brand', e.target.value)} className="w-full mt-1 rounded-md border px-3 py-2 text-sm" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Model</label>
+              <input value={form.model} onChange={e => update('model', e.target.value)} className="w-full mt-1 rounded-md border px-3 py-2 text-sm font-mono" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Description</label>
+            <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={2} className="w-full mt-1 rounded-md border px-3 py-2 text-sm resize-none" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Specifications</label>
+              <button onClick={addSpecRow} className="text-xs font-medium flex items-center gap-1" style={{ color: COLORS.accent }}>
+                <Plus size={12} /> Add spec
+              </button>
+            </div>
+            <div className="space-y-2 mt-1">
+              {form.specs.map((s, i) => (
+                <div key={i} className="flex gap-2">
+                  <input value={s.label} onChange={e => updateSpec(i, 'label', e.target.value)} placeholder="e.g. Power output" className="flex-1 rounded-md border px-3 py-1.5 text-sm" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+                  <input value={s.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="e.g. 120W @ 8Ω" className="flex-1 rounded-md border px-3 py-1.5 text-sm font-mono" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+                  <button onClick={() => removeSpecRow(i)} className="px-2 rounded-md" style={{ color: COLORS.inkSoft }}>
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Cost price</label>
+              <input type="number" value={form.costPrice} onChange={e => update('costPrice', e.target.value)} className="w-full mt-1 rounded-md border px-3 py-2 text-sm font-mono" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>MRP</label>
+              <input type="number" value={form.mrp} onChange={e => update('mrp', e.target.value)} className="w-full mt-1 rounded-md border px-3 py-2 text-sm font-mono" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+            </div>
+            <div>
+              <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Unit</label>
+              <input value={form.unit} onChange={e => update('unit', e.target.value)} className="w-full mt-1 rounded-md border px-3 py-2 text-sm" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Tags</label>
+            <input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="comma separated, e.g. dolby atmos, in-ceiling" className="w-full mt-1 rounded-md border px-3 py-2 text-sm" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+          </div>
+          <div>
+            <label className="text-xs font-medium uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>Notes</label>
+            <textarea value={form.notes} onChange={e => update('notes', e.target.value)} rows={2} className="w-full mt-1 rounded-md border px-3 py-2 text-sm resize-none" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }} />
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 px-5 py-4 border-t sticky bottom-0" style={{ borderColor: COLORS.line, background: COLORS.surface }}>
+          <button onClick={onClose} className="px-4 py-2 rounded-md text-sm font-medium border" style={{ borderColor: COLORS.line, color: COLORS.inkSoft }}>Cancel</button>
+          <button onClick={handleSubmit} className="px-4 py-2 rounded-md text-sm font-semibold" style={{ background: COLORS.accent, color: '#0B0D10' }}>
+            {initial.rackId ? 'Save changes' : 'Add to catalog'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductDatabase() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [modalState, setModalState] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [newCatInput, setNewCatInput] = useState('');
+  const [showNewCat, setShowNewCat] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await LS.get('products');
+        if (res) setProducts(JSON.parse(res.value));
+      } catch (e) {}
+      try {
+        const res = await LS.get('categories');
+        if (res) setCategories(JSON.parse(res.value));
+      } catch (e) {}
+      setLoading(false);
+    })();
+  }, []);
+
+  const saveProducts = async (next) => {
+    setProducts(next);
+    try {
+      await LS.set('products', JSON.stringify(next));
+    } catch (e) { console.error('Storage error', e); }
+  };
+
+  const saveCategories = async (next) => {
+    setCategories(next);
+    try {
+      await LS.set('categories', JSON.stringify(next));
+    } catch (e) { console.error('Storage error', e); }
+  };
+
+  const handleAddCategory = (name) => {
+    if (!categories.includes(name)) saveCategories([...categories, name]);
+  };
+
+  const handleSaveProduct = (formData) => {
+    if (modalState && modalState !== 'new' && modalState.id) {
+      const next = products.map(p => (p.id === modalState.id ? { ...p, ...formData } : p));
+      saveProducts(next);
+    } else {
+      const rackId = nextRackId(formData.category, products);
+      const newProduct = { ...formData, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, rackId };
+      saveProducts([newProduct, ...products]);
+    }
+    setModalState(null);
+  };
+
+  const handleDelete = (id) => {
+    saveProducts(products.filter(p => p.id !== id));
+    setConfirmDeleteId(null);
+  };
+
+  const counts = useMemo(() => {
+    const c = {};
+    products.forEach(p => { c[p.category] = (c[p.category] || 0) + 1; });
+    return c;
+  }, [products]);
+
+  const filtered = useMemo(() => {
+    let list = products;
+    if (activeCategory !== 'All') list = list.filter(p => p.category === activeCategory);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter(p =>
+        [p.brand, p.model, p.description, p.tags, p.rackId, p.category]
+          .filter(Boolean)
+          .some(field => field.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [products, activeCategory, query]);
+
+  const handleExportCsv = () => {
+    const headers = ['Rack ID', 'Category', 'Brand', 'Model', 'Description', 'Unit', 'Cost Price', 'MRP', 'Specs', 'Tags', 'Notes'];
+    const rows = products.map(p => [
+      p.rackId,
+      p.category,
+      p.brand,
+      p.model,
+      p.description || '',
+      p.unit || '',
+      p.costPrice || '',
+      p.mrp || '',
+      (p.specs || []).map(s => `${s.label}: ${s.value}`).join('; '),
+      p.tags || '',
+      p.notes || '',
+    ]);
+    const csv = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'av-product-database.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleAddNewCategorySidebar = () => {
+    const trimmed = newCatInput.trim();
+    if (!trimmed) return;
+    if (!categories.includes(trimmed)) saveCategories([...categories, trimmed]);
+    setNewCatInput('');
+    setShowNewCat(false);
+    setActiveCategory(trimmed);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center" style={{ height: '160px', color: COLORS.inkSoft, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>
+        Loading catalog…
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+        <p className="text-sm" style={{ color: COLORS.inkSoft }}>
+          {products.length} product{products.length !== 1 ? 's' : ''} across {Object.keys(counts).length} categor{Object.keys(counts).length === 1 ? 'y' : 'ies'}
+        </p>
+        <div className="flex gap-2">
+          <button onClick={handleExportCsv} className="flex items-center gap-2 px-4 py-2 rounded-md border text-sm font-medium" style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }}>
+            <Download size={15} /> Export CSV
+          </button>
+          <button onClick={() => setModalState('new')} className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold" style={{ background: COLORS.accent, color: '#0B0D10' }}>
+            <Plus size={15} /> Add product
+          </button>
+        </div>
+      </div>
+
+      <div className="relative mb-5">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: COLORS.inkSoft }} />
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Search by brand, model, spec, tag…"
+          className="w-full rounded-md border pl-10 pr-4 py-2.5 text-sm"
+          style={{ borderColor: COLORS.line, background: COLORS.surfaceAlt, color: COLORS.ink }}
+        />
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-5">
+        <div className="md:w-56 flex-shrink-0">
+          <div className="rounded-lg border overflow-hidden" style={{ borderColor: COLORS.line, background: COLORS.surface }}>
+            <button
+              onClick={() => setActiveCategory('All')}
+              className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-left border-b"
+              style={{ borderColor: COLORS.lineSoft, background: activeCategory === 'All' ? hexToRgba(COLORS.accent, 0.1) : 'transparent', color: COLORS.ink }}
+            >
+              <span>All products</span>
+              <span className="font-mono text-xs" style={{ color: COLORS.inkSoft }}>{products.length}</span>
+            </button>
+            {categories.map(cat => {
+              const meta = getMeta(cat);
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 text-sm text-left border-b last:border-b-0"
+                  style={{ borderColor: COLORS.lineSoft, background: activeCategory === cat ? hexToRgba(COLORS.accent, 0.1) : 'transparent', color: COLORS.ink }}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: meta.color }} />
+                    {cat}
+                  </span>
+                  <span className="font-mono text-xs" style={{ color: COLORS.inkSoft }}>{counts[cat] || 0}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-3">
+            {showNewCat ? (
+              <div className="flex gap-2">
+                <input
+                  autoFocus
+                  value={newCatInput}
+                  onChange={e => setNewCatInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddNewCategorySidebar()}
+                  placeholder="Category name"
+                  className="flex-1 rounded-md border px-3 py-1.5 text-sm"
+                  style={{ borderColor: COLORS.line, color: COLORS.ink, background: COLORS.surfaceAlt }}
+                />
+                <button onClick={handleAddNewCategorySidebar} className="px-3 py-1.5 rounded-md text-sm font-medium" style={{ background: COLORS.accent, color: '#0B0D10' }}>Add</button>
+              </div>
+            ) : (
+              <button onClick={() => setShowNewCat(true)} className="text-sm font-medium flex items-center gap-1" style={{ color: COLORS.accent }}>
+                <Plus size={14} /> New category
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          {filtered.length === 0 ? (
+            <div className="rounded-lg border-2 border-dashed flex flex-col items-center justify-center py-16 text-center" style={{ borderColor: COLORS.line }}>
+              <p className="font-medium" style={{ color: COLORS.ink, fontFamily: "'Oswald',sans-serif" }}>
+                {products.length === 0 ? 'Your catalog is empty' : 'No products match this view'}
+              </p>
+              <p className="text-sm mt-1 max-w-sm" style={{ color: COLORS.inkSoft }}>
+                {products.length === 0
+                  ? 'Add a speaker, projector, acoustic panel — anything you spec into a proposal.'
+                  : 'Try a different search or category.'}
+              </p>
+              {products.length === 0 && (
+                <button onClick={() => setModalState('new')} className="mt-4 flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold" style={{ background: COLORS.accent, color: '#0B0D10' }}>
+                  <Plus size={15} /> Add first product
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {filtered.map(p => {
+                const meta = getMeta(p.category);
+                const specs = (p.specs || []).filter(s => s.label && s.value);
+                return (
+                  <div key={p.id} className="relative rounded-lg border overflow-hidden" style={{ borderColor: COLORS.line, background: COLORS.surface }}>
+                    <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: meta.color }} />
+                    <div className="p-4 pl-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="text-[11px] font-mono tracking-widest" style={{ color: meta.color }}>{p.rackId}</div>
+                          <h3 className="font-semibold mt-0.5 leading-tight" style={{ fontFamily: "'Oswald',sans-serif", color: COLORS.ink, letterSpacing: '0.3px' }}>
+                            {p.brand} {p.model}
+                          </h3>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <button onClick={() => setModalState(p)} className="p-1.5 rounded hover:opacity-70" style={{ color: COLORS.inkSoft }}>
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => setConfirmDeleteId(p.id)} className="p-1.5 rounded hover:opacity-70" style={{ color: COLORS.inkSoft }}>
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {p.description && <p className="text-sm mt-1.5" style={{ color: COLORS.inkSoft }}>{p.description}</p>}
+
+                      {specs.length > 0 && (
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-3 text-xs font-mono">
+                          {specs.map((s, i) => (
+                            <div key={i} className="flex justify-between gap-2">
+                              <span style={{ color: COLORS.inkSoft }}>{s.label}</span>
+                              <span style={{ color: COLORS.ink }} className="text-right">{s.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {p.tags && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {p.tags.split(',').map((t, i) => t.trim() && (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: hexToRgba(meta.color, 0.15), color: meta.color }}>
+                              {t.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-end mt-3 pt-3 border-t" style={{ borderColor: COLORS.lineSoft }}>
+                        <span className="text-[11px] uppercase tracking-wide" style={{ color: COLORS.inkSoft }}>
+                          {p.category}{p.unit ? ` · per ${p.unit}` : ''}
+                        </span>
+                        <div className="text-right font-mono leading-tight">
+                          {p.costPrice && <div className="text-xs" style={{ color: COLORS.inkSoft }}>Cost ₹{Number(p.costPrice).toLocaleString('en-IN')}</div>}
+                          {p.mrp && <div className="text-sm font-semibold" style={{ color: COLORS.accent }}>MRP ₹{Number(p.mrp).toLocaleString('en-IN')}</div>}
+                        </div>
+                      </div>
+
+                      {confirmDeleteId === p.id && (
+                        <div className="mt-3 flex items-center justify-between rounded-md px-3 py-2 text-xs" style={{ background: hexToRgba('#E25C5C', 0.1) }}>
+                          <span style={{ color: '#E25C5C' }}>Remove this product?</span>
+                          <div className="flex gap-2">
+                            <button onClick={() => setConfirmDeleteId(null)} className="font-medium" style={{ color: COLORS.inkSoft }}>Cancel</button>
+                            <button onClick={() => handleDelete(p.id)} className="font-medium" style={{ color: '#E25C5C' }}>Remove</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {modalState && (
+        <ProductForm
+          initial={modalState === 'new' ? emptyForm(categories[0]) : modalState}
+          categories={categories}
+          onSave={handleSaveProduct}
+          onClose={() => setModalState(null)}
+          onAddCategory={handleAddCategory}
+        />
+      )}
+    </div>
+  );
+}
+
+window.__mountCatalog = function () {
+  const container = document.getElementById('catalog-root');
+  if (!container || container.__mounted) return;
+  container.__mounted = true;
+  const root = createRoot(container);
+  root.render(<ProductDatabase />);
+};
+
+if (document.getElementById('page-catalog')?.classList.contains('active')) {
+  window.__mountCatalog();
+}
+</script>
+
+<script>
+// Load @babel/standalone with multiple CDN fallbacks (some networks/extensions block unpkg or esm.sh),
+// then transpile the JSX sources above and inject each as an ES module.
+(function(){
+  const BABEL_SOURCES = [
+    'https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js',
+    'https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js',
+    'https://unpkg.com/@babel/standalone@7.24.7/babel.min.js'
+  ];
+
+  function showFailure(rootId, msg){
+    console.error(msg);
+    const r = document.getElementById(rootId);
+    if (r) r.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:120px;color:#8A909B;font-family:Inter,sans-serif;font-size:13px;text-align:center;padding:20px;line-height:1.6;">This panel could not load required scripts (no internet connection or the CDN is blocked on this network).<br><br>The rest of the app — room/speaker/screen calculations, quote builder, and PDF report — works fully offline.</div>';
+  }
+
+  function loadScript(src){
+    return new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('Failed to load '+src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function loadBabel(){
+    if (typeof Babel !== 'undefined') return true;
+    for (const src of BABEL_SOURCES){
+      try{
+        await loadScript(src);
+        if (typeof Babel !== 'undefined') return true;
+      }catch(e){
+        console.warn(e.message);
+      }
+    }
+    return false;
+  }
+
+  function transpileAndInject(sourceId, rootIdOnError){
+    try {
+      const src = document.getElementById(sourceId).textContent;
+      const out = Babel.transform(src, { presets: ['react'], filename: sourceId+'.jsx' }).code;
+      const blob = new Blob([out], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const s = document.createElement('script');
+      s.type = 'module';
+      s.src = url;
+      s.onerror = () => showFailure(rootIdOnError, 'Failed to load module from '+sourceId+' — check that packages are reachable via esm.sh.');
+      document.body.appendChild(s);
+    } catch(e) {
+      showFailure(rootIdOnError, sourceId+' transpile/mount error: '+e.message);
+    }
+  }
+
+  loadBabel().then(ok=>{
+    if(ok){
+      transpileAndInject('r3f-source', 'r3f-root');
+      transpileAndInject('catalog-source', 'catalog-root');
+    } else {
+      showFailure('r3f-root', 'Babel standalone failed to load from all CDN sources.');
+      showFailure('catalog-root', 'Babel standalone failed to load from all CDN sources.');
+    }
+  });
+})();
+</script>
+
+<!-- ============================================================
+     CRM INTEGRATION BRIDGE
+     Allows this file to be opened inside an <iframe> (or via
+     window.open) from the AV/CRM suite. On load it announces
+     readiness to its parent/opener; the CRM can then post a
+     "cinemaplan:prefill" message with project/client details
+     from a specific job, which are merged into Step 01.
+============================================================ -->
+<script>
+(function(){
+  function getHost(){
+    if (window.opener && !window.opener.closed) return window.opener;
+    if (window.parent && window.parent !== window) return window.parent;
+    return null;
+  }
+  function announceReady(){
+    const host = getHost();
+    if(host) host.postMessage({ type: 'cinemaplan:ready' }, '*');
+  }
+  window.addEventListener('message', function(e){
+    const msg = e.data;
+    if(!msg || msg.type !== 'cinemaplan:prefill') return;
+    const d = msg.data || {};
+    if(d.project) state.project = Object.assign({}, state.project, d.project);
+    if(d.company) state.company = Object.assign({}, state.company, d.company);
+    hydrateForm();
+    persistState();
+    showToast('Loaded project details from AV/CRM.');
+  });
+  if(document.readyState === 'complete'){
+    announceReady();
+  } else {
+    window.addEventListener('load', announceReady);
+  }
+})();
+</script>
+
+</body>
+</html>

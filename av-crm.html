@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AV / CRM — Signal Flow</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#09090b" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="AV/CRM" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+  :root{
+    --bg-0:#09090b;
+    --bg-1:#18181b;
+    --bg-2:#27272a;
+    --zinc-300:#d4d4d8;
+    --zinc-400:#a1a1aa;
+    --zinc-500:#71717a;
+    --zinc-600:#52525b;
+    --zinc-700:#3f3f46;
+    --zinc-800:#27272a;
+    --zinc-900:#18181b;
+    --zinc-950:#09090b;
+    --input-bg:#09090b;
+    --text-strong:#fafafa;
+    --cyan-400:#22d3ee;
+    --cyan-900:#164e63;
+    --accent-text:#22d3ee;
+    --amber-400:#fbbf24;
+    --emerald-400:#34d399;
+    --red-400:#f87171;
+    --blue-400:#60a5fa;
+    --overlay:rgba(0,0,0,0.6);
+    --btn-primary-hover:#67e8f9;
+    --btn-secondary-hover:#e4e4e7;
+  }
+  html[data-theme="light"]{
+    --bg-0:#eef0f3;
+    --zinc-300:#1f2329;
+    --zinc-400:#52525b;
+    --zinc-500:#6b7280;
+    --zinc-600:#9aa0a8;
+    --zinc-700:#d1d5db;
+    --zinc-800:#e5e7eb;
+    --zinc-900:#ffffff;
+    --input-bg:#f1f2f4;
+    --text-strong:#16181d;
+    --cyan-900:#a5f3fc;
+    --accent-text:#0e7490;
+    --overlay:rgba(15,23,30,0.45);
+    --btn-primary-hover:#0891b2;
+    --btn-secondary-hover:#16181d;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg-0); color:var(--text-strong);
+    height:100vh; overflow:hidden;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  body, body *{
+    transition:background-color .15s ease, border-color .15s ease, color .15s ease;
+  }
+  button, input, select, textarea{font-family:inherit;}
+
+  .app{display:flex; height:100vh;}
+
+  /* ---------- sidebar ---------- */
+  .sidebar{display:none; flex-direction:column; width:224px; background:var(--bg-0); border-right:1px solid var(--zinc-800); flex-shrink:0;}
+  @media (min-width:768px){ .sidebar{display:flex;} }
+  .sidebar-header{padding:20px; border-bottom:1px solid var(--zinc-800);}
+  .sidebar-header-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .brand-sub{font-family:ui-monospace,monospace; font-size:11px; color:var(--zinc-500); letter-spacing:0.18em; margin-bottom:4px;}
+  .brand{font-size:18px; font-weight:700; letter-spacing:-0.02em; color:var(--text-strong);}
+  .brand .accent{color:var(--accent-text);}
+
+  .theme-toggle{position:relative; width:40px; height:22px; border-radius:11px; border:1px solid var(--zinc-700);
+    background:var(--zinc-950); cursor:pointer; padding:0; flex-shrink:0; transition:background-color .2s ease, border-color .2s ease;}
+  .theme-toggle::before{
+    content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+    background:var(--cyan-400); transition:transform .2s ease, background-color .2s ease;
+    box-shadow:inset -2px -2px 0 rgba(0,0,0,0.25);
+  }
+  html[data-theme="light"] .theme-toggle{background:var(--zinc-800); border-color:var(--zinc-700);}
+  html[data-theme="light"] .theme-toggle::before{
+    transform:translateX(18px); background:var(--amber-400);
+    box-shadow:inset 2px 2px 0 rgba(255,255,255,0.35);
+  }
+  .theme-toggle-mobile{align-self:center; flex:0 0 auto; width:48px;}
+  .nav{flex:1; padding:8px 0;}
+  .nav-item{display:flex; align-items:center; gap:12px; padding:12px 16px; width:100%; text-align:left;
+    border:none; border-left:2px solid transparent; background:none; color:var(--zinc-500); cursor:pointer;
+    font-size:14px; font-weight:500;}
+  .nav-item:hover{color:var(--zinc-300); background:var(--zinc-900);}
+  .nav-item.active{border-left-color:var(--cyan-400); background:var(--zinc-900); color:var(--text-strong);}
+  .nav-num{font-family:ui-monospace,monospace; font-size:12px; color:var(--zinc-600);}
+  .nav-led{margin-left:auto;}
+  .sidebar-footer{padding:14px 16px; border-top:1px solid var(--zinc-800); font-family:ui-monospace,monospace; font-size:11px; color:var(--zinc-600); display:flex; flex-direction:column; gap:10px;}
+  .data-actions{display:flex; flex-direction:column; gap:6px;}
+  .data-btn{background:none; border:1px solid var(--zinc-700); color:var(--zinc-400); font-size:11px;
+    font-family:ui-monospace,monospace; text-transform:uppercase; letter-spacing:0.08em; padding:6px 10px;
+    border-radius:4px; cursor:pointer; text-align:center;}
+  .data-btn:hover{border-color:var(--cyan-400); color:var(--accent-text);}
+
+  /* ---------- main ---------- */
+  .main{flex:1; overflow-y:auto; padding-bottom:120px;}
+  @media (min-width:768px){ .main{padding-bottom:0;} }
+  .view-container{padding:16px; max-width:1152px; margin:0 auto;}
+  @media (min-width:768px){ .view-container{padding:32px;} }
+
+  /* ---------- mobile bottom bar ---------- */
+  .mobile-bottom{display:none; flex-direction:column; position:fixed; bottom:0; left:0; right:0; z-index:40; background:var(--bg-0);}
+  @media (min-width:768px){ .mobile-bottom{display:none !important;} }
+  @media (max-width:767px){ .mobile-bottom{display:flex;} }
+  .mobile-data-bar{display:flex; gap:8px; padding:8px 16px; border-top:1px solid var(--zinc-800); background:var(--bg-0);}
+  .mobile-data-bar .data-btn{flex:1;}
+  .mobile-nav{display:flex; background:var(--bg-0);
+    border-top:1px solid var(--zinc-800); padding:8px 4px;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  .mobile-nav::-webkit-scrollbar{display:none;}
+  .mnav-item{display:flex; flex-direction:column; align-items:center; gap:4px; padding:4px 14px;
+    background:none; border:none; color:var(--zinc-500); cursor:pointer; font-size:11px;
+    flex-shrink:0; min-width:60px; scroll-snap-align:start;}
+  .mnav-item.active{color:var(--accent-text);}
+
+  /* ---------- PWA install banner ---------- */
+  #pwa-banner{
+    display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    background:var(--zinc-800); border:1px solid var(--cyan-400); border-radius:12px;
+    padding:14px 18px; z-index:9999; box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    max-width:340px; width:calc(100% - 32px);
+    flex-direction:column; gap:10px;
+  }
+  #pwa-banner.show{display:flex;}
+  .pwa-banner-row{display:flex; align-items:center; gap:12px;}
+  .pwa-banner-icon{width:40px; height:40px; border-radius:10px; background:var(--cyan-400); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;}
+  .pwa-banner-text{flex:1;}
+  .pwa-banner-title{font-size:14px; font-weight:600; color:var(--text-strong);}
+  .pwa-banner-sub{font-size:12px; color:var(--zinc-400); margin-top:2px;}
+  .pwa-banner-btns{display:flex; gap:8px;}
+  .pwa-install-btn{flex:1; background:var(--cyan-400); color:#09090b; border:none; border-radius:8px; padding:10px; font-size:13px; font-weight:700; cursor:pointer;}
+  .pwa-dismiss-btn{background:none; border:1px solid var(--zinc-700); color:var(--zinc-400); border-radius:8px; padding:10px 14px; font-size:13px; cursor:pointer;}
+
+  .led{display:inline-block; width:8px; height:8px; border-radius:50%; flex-shrink:0;}
+  .led-zinc{background:var(--zinc-500);}
+  .led-amber{background:var(--amber-400);}
+  .led-cyan{background:var(--cyan-400);}
+  .led-blue{background:var(--blue-400);}
+  .led-emerald{background:var(--emerald-400);}
+  .led-red{background:var(--red-400);}
+
+  .text-zinc{color:var(--zinc-500);}
+  .text-amber{color:var(--amber-400);}
+  .text-cyan{color:var(--accent-text);}
+  .text-blue{color:var(--blue-400);}
+  .text-emerald{color:var(--emerald-400);}
+  .text-red{color:var(--red-400);}
+
+  .view-header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px;}
+  .view-title{font-size:20px; font-weight:700; letter-spacing:-0.02em; color:var(--text-strong);}
+  .view-subtitle{font-size:14px; color:var(--zinc-500); margin-top:4px;}
+  .muted-italic{font-size:14px; color:var(--zinc-600); font-style:italic;}
+
+  .btn-primary{display:inline-flex; align-items:center; gap:8px; background:var(--cyan-400); color:var(--zinc-950);
+    font-weight:600; font-size:14px; padding:8px 16px; border-radius:6px; border:none; cursor:pointer;}
+  .btn-primary:hover{background:var(--btn-primary-hover);}
+  .btn-secondary{background:none; border:none; color:var(--zinc-400); font-size:14px; padding:8px 16px; cursor:pointer;}
+  .btn-secondary:hover{color:var(--btn-secondary-hover);}
+
+  .icon-btn{background:none; border:none; color:var(--zinc-500); cursor:pointer; display:flex; padding:0;}
+  .icon-btn:hover{color:var(--accent-text);}
+  .icon-btn.danger:hover{color:var(--red-400);}
+  .delete-confirm{display:flex; align-items:center; gap:8px;}
+  .confirm-btn{background:none; border:none; font-size:12px; color:var(--red-400); font-weight:500; cursor:pointer; padding:0;}
+  .cancel-btn{background:none; border:none; font-size:12px; color:var(--zinc-500); cursor:pointer; padding:0;}
+
+  /* ---------- dashboard ---------- */
+  .stats-grid{display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:32px;}
+  @media (min-width:640px){ .stats-grid{grid-template-columns:1fr 1fr;} }
+  @media (min-width:1024px){ .stats-grid{grid-template-columns:1fr 1fr 1fr 1fr;} }
+  .stat-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px;}
+  .stat-top{display:flex; align-items:center; justify-content:space-between;}
+  .stat-label{font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--zinc-500); font-family:ui-monospace,monospace;}
+  .stat-value{font-size:24px; font-weight:700; color:var(--text-strong); font-family:ui-monospace,monospace;}
+  .eq-bars{display:flex; align-items:flex-end; gap:3px; height:32px;}
+  .eq-bar{flex:1; border-radius:2px; background:var(--zinc-800);}
+  .eq-amber{background:var(--amber-400) !important;}
+  .eq-cyan{background:var(--cyan-400) !important;}
+  .eq-emerald{background:var(--emerald-400) !important;}
+  .eq-red{background:var(--red-400) !important;}
+
+  .dash-cols{display:grid; grid-template-columns:1fr; gap:24px;}
+  @media (min-width:1024px){ .dash-cols{grid-template-columns:1fr 1fr;} }
+  .col-title{font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--zinc-500); font-family:ui-monospace,monospace; margin-bottom:12px;}
+  .list-col{display:flex; flex-direction:column; gap:8px;}
+
+  .job-row{display:flex; align-items:center; gap:12px; background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:8px; padding:12px 16px;}
+  .job-row-info{flex:1; min-width:0;}
+  .job-row-title{font-size:14px; font-weight:500; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .job-row-sub{font-size:12px; color:var(--zinc-500);}
+  .job-row-meta{text-align:right; flex-shrink:0;}
+  .job-row-date{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-400);}
+  .job-row-value{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
+
+  .comm-row{display:flex; align-items:flex-start; gap:12px; background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:8px; padding:12px 16px;}
+  .comm-icon{color:var(--zinc-500); margin-top:2px; display:flex;}
+  .comm-body{flex:1; min-width:0;}
+  .comm-top{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
+  .comm-client{font-size:14px; font-weight:500; color:var(--text-strong);}
+  .comm-date{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
+  .comm-job{font-size:12px; color:var(--accent-text); margin-top:2px;}
+  .comm-note{font-size:14px; color:var(--zinc-400); margin-top:4px; line-height:1.5;}
+
+  /* ---------- clients ---------- */
+  .search-box{position:relative; max-width:320px; margin-bottom:16px;}
+  .search-icon{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--zinc-500); display:flex;}
+  .search-input{width:100%; background:var(--zinc-900); border:1px solid var(--zinc-700); border-radius:6px;
+    padding:8px 12px 8px 36px; font-size:14px; color:var(--text-strong);}
+  .search-input:focus{outline:none; border-color:var(--cyan-400);}
+
+  .client-grid{display:grid; grid-template-columns:1fr; gap:16px;}
+  @media (min-width:640px){ .client-grid{grid-template-columns:1fr 1fr;} }
+  @media (min-width:1024px){ .client-grid{grid-template-columns:1fr 1fr 1fr;} }
+  .client-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:8px;}
+  .client-top{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
+  .client-name{font-weight:600; color:var(--text-strong); font-size:15px;}
+  .client-company{font-size:12px; color:var(--zinc-500);}
+  .client-actions{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  .badge-type{display:inline-block; font-size:12px; font-family:ui-monospace,monospace; color:var(--accent-text);
+    border:1px solid var(--cyan-900); border-radius:4px; padding:2px 8px; align-self:flex-start;}
+  .contact-list{display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--zinc-400); margin-top:4px;}
+  .contact-row{display:flex; align-items:center; gap:8px;}
+  .contact-link{display:flex; align-items:center; gap:8px; color:var(--zinc-400); text-decoration:none;}
+  .contact-link:hover{color:var(--accent-text);}
+  .lead-badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    font-family:ui-monospace,monospace; color:var(--amber-400); border:1px solid var(--amber-400); border-radius:999px; padding:2px 8px;}
+  .field-checkbox{display:flex; align-items:center; gap:8px; flex-direction:row; cursor:pointer;}
+  .field-checkbox-input{width:auto; flex-shrink:0;}
+  .field-checkbox span{font-size:13px; color:var(--text-strong); text-transform:none; letter-spacing:normal; font-family:inherit;}
+  .tag-list{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;}
+  .tag{font-size:12px; background:var(--zinc-800); color:var(--zinc-400); border-radius:4px; padding:2px 8px;}
+  .client-notes{font-size:12px; color:var(--zinc-500); margin-top:4px; line-height:1.5;}
+  .client-footer{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-600); margin-top:4px;}
+
+  /* ---------- jobs / kanban ---------- */
+  .kanban{display:grid; grid-template-columns:1fr; gap:16px;}
+  @media (min-width:768px){ .kanban{grid-template-columns:repeat(5,1fr);} }
+  .kanban-col{display:flex; flex-direction:column; gap:12px;}
+  .kanban-head{display:flex; align-items:center; justify-content:space-between; padding:0 4px;}
+  .kanban-status{display:flex; align-items:center; gap:8px;}
+  .kanban-status-label{font-size:12px; text-transform:uppercase; letter-spacing:0.06em; font-family:ui-monospace,monospace; color:var(--zinc-400);}
+  .kanban-count{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-600);}
+  .kanban-value{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500); padding:0 4px;}
+  .kanban-cards{display:flex; flex-direction:column; gap:8px; min-height:60px;}
+
+  .job-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;}
+  .job-card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
+  .job-card-title{font-size:14px; font-weight:600; color:var(--text-strong); line-height:1.3;}
+  .job-card-client{font-size:12px; color:var(--zinc-500);}
+  .job-card-meta{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-400);}
+  .job-card-value{font-size:14px; font-family:ui-monospace,monospace; font-weight:700; color:var(--text-strong);}
+  .job-card-footer{display:flex; align-items:center; justify-content:space-between; margin-top:4px;}
+  .job-card-actions{display:flex; align-items:center; gap:8px;}
+  .status-select{background:var(--input-bg); border:1px solid var(--zinc-700); border-radius:4px; font-size:12px; padding:4px 6px; color:var(--zinc-300);}
+  .status-select:focus{outline:none; border-color:var(--cyan-400);}
+
+  /* ---------- inventory (products / services) ---------- */
+  .equip-actions{display:flex; align-items:center; gap:12px; flex-shrink:0;}
+  .equip-status{font-size:12px; font-family:ui-monospace,monospace; text-transform:uppercase; letter-spacing:0.06em;}
+
+  .inv-stats{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .inv-stat-chip{display:flex; align-items:center; gap:8px; background:var(--zinc-900); border:1px solid var(--zinc-800);
+    border-radius:8px; padding:8px 14px; cursor:pointer; color:var(--zinc-400); font-size:12px;}
+  .inv-stat-chip:hover{border-color:var(--zinc-700);}
+  .inv-stat-chip.active{border-color:var(--cyan-400); color:var(--text-strong);}
+  .inv-stat-num{font-family:ui-monospace,monospace; font-size:15px; font-weight:700; color:var(--text-strong);}
+  .inv-stat-label{text-transform:uppercase; letter-spacing:0.08em; font-size:11px;}
+
+  .inv-filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;}
+  .inv-pill{display:inline-flex; align-items:center; gap:6px; background:none; border:1px solid var(--zinc-800);
+    border-radius:999px; padding:6px 14px; font-size:12px; color:var(--zinc-400); cursor:pointer; white-space:nowrap;}
+  .inv-pill:hover{border-color:var(--zinc-700); color:var(--text-strong);}
+  .inv-pill.active{background:var(--cyan-400); border-color:var(--cyan-400); color:var(--zinc-950); font-weight:600;}
+
+  .inv-grid{display:grid; grid-template-columns:1fr; gap:14px;}
+  @media (min-width:640px){ .inv-grid{grid-template-columns:1fr 1fr;} }
+  @media (min-width:1024px){ .inv-grid{grid-template-columns:1fr 1fr 1fr;} }
+  .inv-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:10px; padding:16px;
+    display:flex; flex-direction:column; gap:8px;}
+  .inv-card-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .inv-cat-badge{display:inline-flex; align-items:center; gap:6px; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+    font-family:ui-monospace,monospace; color:var(--zinc-500);}
+  .inv-card-name{font-size:14px; font-weight:600; color:var(--text-strong); line-height:1.3;}
+  .inv-card-ref{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
+  .inv-card-notes{font-size:12px; color:var(--zinc-400); line-height:1.5;}
+  .inv-card-footer{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; padding-top:8px; border-top:1px solid var(--zinc-800);}
+  .inv-empty{display:flex; flex-direction:column; align-items:flex-start; gap:12px;}
+
+  /* ---------- calendar ---------- */
+  .cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:8px;}
+  .cal-month-group{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;}
+  .cal-month{font-family:ui-monospace,monospace; font-size:14px; text-transform:uppercase; letter-spacing:0.12em; color:var(--zinc-300);}
+  .cal-today-btn{background:none; border:1px solid var(--zinc-700); color:var(--zinc-400); font-size:11px;
+    font-family:ui-monospace,monospace; text-transform:uppercase; letter-spacing:0.08em; padding:3px 10px;
+    border-radius:4px; cursor:pointer;}
+  .cal-today-btn:hover{border-color:var(--cyan-400); color:var(--accent-text);}
+  .cal-nav-btn{background:none; border:none; color:var(--zinc-400); cursor:pointer; padding:4px; display:flex;}
+  .cal-nav-btn:hover{color:var(--accent-text);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cal-dow{text-align:center; font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500); padding:4px 0;}
+  .cal-cell{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:6px; min-height:70px; padding:4px; display:flex; flex-direction:column; gap:2px;}
+  .cal-cell.empty{background:var(--input-bg); border:none;}
+  .cal-cell.today{border-color:var(--cyan-400);}
+  .cal-date{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
+  .cal-cell.today .cal-date{color:var(--accent-text); font-weight:700;}
+  .cal-job-chip{font-size:11px; line-height:1.3; border-radius:4px; padding:2px 4px; background:var(--zinc-800);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; border:none; text-align:left;
+    font-family:inherit; width:100%; display:block; transition:filter .1s;}
+  .cal-job-chip:hover{filter:brightness(1.4);}
+  .cal-more{font-size:11px; font-family:ui-monospace,monospace; color:var(--zinc-500); padding:2px 4px;}
+
+  /* ---------- activity ---------- */
+  .comm-filter{margin-bottom:16px; max-width:320px;}
+  .select-base{width:100%; background:var(--zinc-900); border:1px solid var(--zinc-700); border-radius:6px; padding:8px 12px; font-size:14px; color:var(--zinc-300);}
+  .select-base:focus{outline:none; border-color:var(--cyan-400);}
+  .comms-list{display:flex; flex-direction:column; gap:8px;}
+
+  /* ---------- modal / forms ---------- */
+  .modal-overlay{position:fixed; inset:0; background:var(--overlay); display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;}
+  .modal{background:var(--zinc-900); border:1px solid var(--zinc-700); border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid var(--zinc-800); position:sticky; top:0; background:var(--zinc-900);}
+  .modal-title{font-weight:700; color:var(--text-strong); letter-spacing:-0.01em;}
+  .modal-body{padding:16px;}
+  .field{display:block; margin-bottom:12px;}
+  .field-label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--zinc-500); font-family:ui-monospace,monospace; margin-bottom:4px;}
+  .field-input, .field-select, .field-textarea{width:100%; background:var(--input-bg); border:1px solid var(--zinc-700);
+    border-radius:6px; padding:8px 12px; font-size:14px; color:var(--text-strong); font-family:inherit;}
+  .field-input:focus, .field-select:focus, .field-textarea:focus{outline:none; border-color:var(--cyan-400);}
+  .field-textarea{resize:vertical; min-height:64px;}
+  .form-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:16px; border-top:1px solid var(--zinc-800); padding-top:16px;}
+  .empty-msg{font-size:14px; color:var(--zinc-400); margin-bottom:12px;}
+  .cinema-frame-wrap{border:1px solid var(--zinc-800); border-radius:8px; overflow:hidden; background:#0B0D10;}
+  .cinema-frame{display:block; width:100%; height:75vh; min-height:520px; border:none; background:#0B0D10;}
+  .helper-text{font-size:12px; color:var(--zinc-500); margin-top:10px; line-height:1.6;}
+  .helper-text code{font-family:ui-monospace,monospace; background:var(--zinc-800); padding:1px 5px; border-radius:4px; color:var(--zinc-300);}
+
+  /* Pro Audio tab switcher */
+  .proaudio-tabs{display:flex; gap:0; border:1px solid var(--zinc-800); border-radius:8px; overflow:hidden; margin-bottom:14px; width:fit-content;}
+  .proaudio-tab{
+    background:var(--zinc-900); border:none; padding:9px 22px;
+    font-size:13px; font-weight:500; color:var(--zinc-400);
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+    border-right:1px solid var(--zinc-800); transition:all 0.15s;
+  }
+  .proaudio-tab:last-child{border-right:none;}
+  .proaudio-tab:hover{color:var(--text-strong); background:var(--zinc-800);}
+  .proaudio-tab.active{background:var(--cyan-900); color:var(--accent-text); font-weight:600;}
+  .proaudio-panel{display:none;}
+  .proaudio-panel.active{display:block;}
+</style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-header-top">
+          <div>
+            <div class="brand-sub">SIGNAL FLOW</div>
+            <div class="brand">AV<span class="accent">/</span>CRM</div>
+          </div>
+          <button class="theme-toggle" id="theme-toggle" data-action="toggle-theme" title="Toggle day / night mode"></button>
+        </div>
+      </div>
+      <nav class="nav" id="sidebar-nav"></nav>
+      <div class="sidebar-footer">
+        <div id="sidebar-stats"></div>
+        <div class="data-actions">
+          <button class="data-btn" data-action="export-data">Export data</button>
+          <button class="data-btn" data-action="import-data">Import data</button>
+          <input type="file" id="import-file-input" accept="application/json" style="display:none" />
+        </div>
+      </div>
+    </aside>
+    <main class="main"><div id="view" class="view-container"></div></main>
+    <div class="mobile-bottom">
+      <div class="mobile-data-bar">
+        <button class="data-btn" data-action="export-data">Export data</button>
+        <button class="data-btn" data-action="import-data">Import data</button>
+        <button class="theme-toggle theme-toggle-mobile" id="theme-toggle-mobile" data-action="toggle-theme" title="Toggle day / night mode"></button>
+      </div>
+      <nav class="mobile-nav" id="mobile-nav"></nav>
+    </div>
+  </div>
+  <div id="modal-root"></div>
+
+<script>
+/* ================================ constants ================================ */
+
+const NAV = [
+  { id:'dashboard', label:'Dashboard', icon:'dashboard', num:'01' },
+  { id:'clients',   label:'Clients',   icon:'users',     num:'02' },
+  { id:'contacts',  label:'Contacts',  icon:'idcard',    num:'03' },
+  { id:'jobs',      label:'Jobs',      icon:'briefcase', num:'04' },
+  { id:'product',   label:'Product',   icon:'package',   num:'05' },
+  { id:'service',   label:'Services',  icon:'wrench',    num:'06' },
+  { id:'calendar',  label:'Calendar',  icon:'calendar',  num:'07' },
+  { id:'comms',     label:'Activity',  icon:'message',   num:'08' },
+  { id:'cinema',    label:'Cinema Design', icon:'monitor', num:'09' },
+  { id:'audioplan', label:'Pro Audio',  icon:'speaker',   num:'10' },
+];
+
+const JOB_STATUSES = ['Lead','Quoted','Booked','Completed','Paid'];
+const STATUS_LED  = { Lead:'led-zinc',  Quoted:'led-amber',  Booked:'led-cyan',  Completed:'led-blue',  Paid:'led-emerald' };
+const STATUS_TEXT = { Lead:'text-zinc', Quoted:'text-amber', Booked:'text-cyan', Completed:'text-blue', Paid:'text-emerald' };
+
+const CLIENT_TYPES = ['Corporate','Event Planner','Venue','House of Worship','Education','Wedding / Private','Other'];
+
+const CONTACT_CATEGORIES = ['Electrician','Carpenter','POP / False Ceiling','Painter','Civil / Labour','Plumber','Architect','Interior Designer','Other'];
+const CONTACT_CATEGORY_ICONS = {
+  Electrician:'bolt', Carpenter:'hammer', 'POP / False Ceiling':'layers', Painter:'paintroller',
+  'Civil / Labour':'hardhat', Plumber:'droplet', Architect:'ruler', 'Interior Designer':'bulb', Other:'users'
+};
+
+const PRODUCT_CATEGORIES = ['Audio','Video','Lighting','Staging','Cabling & Power'];
+const SERVICE_CATEGORIES = ['Installation','AMC / Maintenance','On-site Support','Consultation & Design','Rental','Logistics & Transport'];
+const INV_LED  = { Available:'led-emerald', Booked:'led-cyan', Maintenance:'led-red' };
+const INV_TEXT = { Available:'text-emerald', Booked:'text-cyan', Maintenance:'text-red' };
+const INV_STATUSES = ['Available','Booked','Maintenance'];
+
+const CATEGORY_ICONS = {
+  Audio:'mic', Video:'monitor', Lighting:'bulb', Staging:'layers', 'Cabling & Power':'plug',
+  Installation:'wrench', 'AMC / Maintenance':'wrench', 'On-site Support':'headset',
+  'Consultation & Design':'edit', Rental:'package', 'Logistics & Transport':'truck'
+};
+
+const INVENTORY_META = {
+  product: {
+    stateKey:'products', label:'Products', addLabel:'Add Product', editLabel:'Edit Product',
+    categories: PRODUCT_CATEGORIES, sectionIcon:'wrench',
+    refLabel:'Serial / asset ID', refShort:'S/N', notesLabel:'Condition / notes', notesPlaceholder:'e.g. Good, Excellent, Needs service',
+    emptyMsg:'No products logged yet.', countNoun:'item'
+  },
+  service: {
+    stateKey:'services', label:'Services', addLabel:'Add Service', editLabel:'Edit Service',
+    categories: SERVICE_CATEGORIES, sectionIcon:'wrench',
+    refLabel:'Reference / contract ID', refShort:'Ref', notesLabel:'Notes', notesPlaceholder:'e.g. Quarterly visit, covers projector lamp',
+    emptyMsg:'No services logged yet.', countNoun:'service'
+  }
+};
+
+const COMM_TYPES = ['Call','Email','Meeting','Note'];
+const COMM_ICONS = { Call:'phone', Email:'mail', Meeting:'users', Note:'message' };
+
+const EQ_HEIGHTS = [35,60,45,80,55,90,40,70,50,85,65,30,75,45,60,40];
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+
+/* ================================ icons ================================ */
+
+const ICONS = {
+  dashboard: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  briefcase: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  package: '<path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+  message: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  x: '<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
+  phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  mappin: '<path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  edit: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  chevronleft: '<path d="m15 18-6-6 6-6"/>',
+  chevronright: '<path d="m9 18 6-6-6-6"/>',
+  activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="m9 8 3 3 3-3"/>',
+  mic: '<path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18.5V22"/><path d="M9 22h6"/>',
+  bulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15 14c.7-.9 2-1.7 2-4a5 5 0 1 0-10 0c0 2.3 1.3 3.1 2 4Z"/>',
+  plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+  layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 12.18a1 1 0 0 1 0 1.83l-8.58 3.9a2 2 0 0 1-1.66 0L3.18 14a1 1 0 0 1 0-1.83"/><path d="m22 17.18a1 1 0 0 1 0 1.83l-8.58 3.9a2 2 0 0 1-1.66 0L3.18 19a1 1 0 0 1 0-1.83"/>',
+  headset: '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3v-7a9 9 0 0 1 18 0v7h-3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  truck: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+  bolt: '<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/>',
+  hammer: '<path d="M3 21h6"/><path d="M5 21v-5l8-8 3 3-8 8"/><path d="m13 8 3-3 3 3-3 3z"/>',
+  paintroller: '<rect x="2" y="4" width="14" height="6" rx="1"/><path d="M9 10v6"/><rect x="6" y="16" width="6" height="5" rx="1"/>',
+  hardhat: '<path d="M4 18v-2a8 8 0 0 1 16 0v2"/><path d="M2 18h20"/><path d="M12 5v4"/>',
+  droplet: '<path d="M12 2.69s5 5.34 5 9.15A5 5 0 0 1 7 11.84c0-3.81 5-9.15 5-9.15Z"/>',
+  ruler: '<path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>',
+  idcard: '<rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M5 17h14"/>',
+  star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  speaker: '<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1"/><path d="M12 6h.01"/>',
+};
+function icon(name, size){
+  size = size || 16;
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block">' + (ICONS[name] || '') + '</svg>';
+}
+function rupeeIcon(){ return '<span style="font-family:ui-monospace,monospace;font-size:14px;">\u20B9</span>'; }
+
+/* ================================ helpers ================================ */
+
+function uid(){ return Math.random().toString(36).slice(2, 10); }
+function fmtINR(n){ return '\u20B9' + Math.round(Number(n) || 0).toLocaleString('en-IN'); }
+function fmtDate(d){
+  if(!d) return '\u2014';
+  const dt = new Date(d + 'T00:00:00');
+  if(isNaN(dt.getTime())) return '\u2014';
+  return dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function esc(str){
+  return String(str === undefined || str === null ? '' : str).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+
+/* ================================ seed data ================================ */
+
+const SEED_CLIENTS = [
+  { id:'c1', name:'Ananya Sharma', company:'Cognizant Pune Events', type:'Corporate',
+    phone:'+91 98230 11122', email:'ananya.sharma@example.com', address:'Hinjawadi Phase 1, Pune',
+    tags:['Recurring','High-value'],
+    notes:'Quarterly town-hall events. Prefers wireless lapel mics and an LED wall for the stage backdrop.' },
+  { id:'c2', name:'Rohan Mehta', company:'Mehta Weddings & Events', type:'Event Planner',
+    phone:'+91 99704 55667', email:'rohan@mehtaweddings.example', address:'Baner, Pune',
+    tags:['Referral source'],
+    notes:'Books 8-10 weddings a year. Always needs uplighting and a dance floor sound system.' },
+  { id:'c3', name:"Fr. Thomas D'Souza", company:"St. Anne's Church", type:'House of Worship',
+    phone:'+91 98765 33221', email:'office@stannespune.example', address:'Pimpri, Pune',
+    tags:['Weekly'],
+    notes:'Weekly Sunday service sound support. Simple 4-mic setup, same time every week.' },
+];
+
+const SEED_CONTACTS = [
+  { id:'ct1', name:'Suresh Pawar', category:'Electrician', company:'Pawar Electricals', phone:'+91 98221 30456', email:'', area:'Pimpri-Chinchwad', leadSource:false,
+    notes:'Handles wiring, DB boxes and conduit work for stage/AV power drops. Reliable on short notice.' },
+  { id:'ct2', name:'Vikram Jadhav', category:'Carpenter', company:'', phone:'+91 99230 87712', email:'', area:'Wakad', leadSource:false,
+    notes:'Custom AV racks, speaker stands, false bottoms for staging.' },
+  { id:'ct3', name:'Imran Shaikh', category:'POP / False Ceiling', company:'Shaikh POP Works', phone:'+91 97658 22341', email:'', area:'Pune', leadSource:false,
+    notes:'POP/Gypsum false ceiling, cove lighting channels, speaker recess cutouts.' },
+  { id:'ct4', name:'Ramesh Gaikwad', category:'Painter', company:'', phone:'+91 90213 44567', email:'', area:'Pimpri', leadSource:false,
+    notes:'Touch-up and full repaint after installation work, matches existing wall colours.' },
+  { id:'ct5', name:'Dattu More', category:'Civil / Labour', company:'More Labour Contractors', phone:'+91 96073 55890', email:'', area:'Chinchwad', leadSource:false,
+    notes:'Provides labour for wall chasing, cable trenches and heavy equipment moving.' },
+  { id:'ct6', name:'Sandeep Kale', category:'Plumber', company:'', phone:'+91 98509 11234', email:'', area:'Pune', leadSource:false,
+    notes:'Backup contact for water-line work near outdoor event setups.' },
+  { id:'ct7', name:'Ar. Priya Deshmukh', category:'Architect', company:'Deshmukh Design Studio', phone:'+91 98225 67890', email:'priya@deshmukhdesign.example', area:'Baner, Pune', leadSource:true,
+    notes:'Refers home theatre and conference room AV scopes on her residential & commercial projects.' },
+  { id:'ct8', name:'Neha Kulkarni', category:'Interior Designer', company:'Kulkarni Interiors', phone:'+91 99750 12398', email:'neha@kulkarniinteriors.example', area:'Aundh, Pune', leadSource:true,
+    notes:'Coordinates closely on false ceiling + lighting layout, often the first call on new villa projects.' },
+];
+
+
+const SEED_JOBS = [
+  { id:'j1', clientId:'c1', title:'Q3 Town Hall - Hinjawadi Campus', eventDate:'2026-06-28', venue:'Cognizant Hinjawadi Auditorium', status:'Booked', value:185000, notes:'Two line arrays, 6 wireless mics, confidence monitors, 12x7ft LED wall.' },
+  { id:'j2', clientId:'c2', title:'Kapoor-Iyer Wedding Reception', eventDate:'2026-07-12', venue:'Hotel Conrad, Pune', status:'Quoted', value:95000, notes:'Outdoor lawn setup. Needs weatherproof speakers and a DJ booth.' },
+  { id:'j3', clientId:'c3', title:'Sunday Service Sound Support', eventDate:'2026-06-21', venue:"St. Anne's Church, Pimpri", status:'Paid', value:3500, notes:'Recurring weekly booking, standard package.' },
+  { id:'j4', clientId:'c1', title:'New Hire Orientation AV', eventDate:'2026-06-18', venue:'Cognizant Hinjawadi Auditorium', status:'Lead', value:45000, notes:'Waiting on headcount and final date confirmation.' },
+  { id:'j5', clientId:'c2', title:'Sharma Engagement Ceremony', eventDate:'2026-06-05', venue:'Banquet Hall, Baner', status:'Completed', value:62000, notes:'Event delivered. Invoice still pending.' },
+];
+
+const SEED_PRODUCTS = [
+  { id:'e1', name:'JBL VRX932LA Line Array (pair)', category:'Audio', serial:'JBL-VX-0231', status:'Booked', condition:'Good' },
+  { id:'e2', name:'Shure ULXD Wireless Mic Set (x4)', category:'Audio', serial:'SH-ULXD-114', status:'Available', condition:'Excellent' },
+  { id:'e3', name:'Behringer X32 Digital Mixer', category:'Audio', serial:'BX32-0099', status:'Available', condition:'Good' },
+  { id:'e4', name:'BenQ Laser Projector 6000lm', category:'Video', serial:'BQ-LP-552', status:'Maintenance', condition:'Needs lamp check' },
+  { id:'e5', name:'12x7ft LED Video Wall Panels', category:'Video', serial:'LW-PNL-1207', status:'Booked', condition:'Good' },
+  { id:'e6', name:'Chauvet Par Light Set (x8)', category:'Lighting', serial:'CHV-PAR-08', status:'Available', condition:'Excellent' },
+  { id:'e7', name:'Truss & Stage Riser Kit', category:'Staging', serial:'TR-STG-01', status:'Available', condition:'Good' },
+  { id:'e8', name:'Cable Snake & Power Distro Kit', category:'Cabling & Power', serial:'CBL-PD-04', status:'Booked', condition:'Good' },
+];
+
+const SEED_SERVICES = [
+  { id:'s1', name:'AV System Installation & Setup', category:'Installation', serial:'SVC-INS-01', status:'Booked', condition:'On-site crew of 3, half-day job' },
+  { id:'s2', name:'Quarterly AMC \u2014 Audio Systems', category:'AMC / Maintenance', serial:'SVC-AMC-04', status:'Available', condition:'Covers mixers, amps, line arrays' },
+  { id:'s3', name:'Event-Day Technical Support', category:'On-site Support', serial:'SVC-SUP-02', status:'Available', condition:'1 engineer for duration of event' },
+  { id:'s4', name:'Acoustic & Layout Consultation', category:'Consultation & Design', serial:'SVC-CON-01', status:'Available', condition:'Site visit + design drawing' },
+  { id:'s5', name:'Projector & Screen Rental', category:'Rental', serial:'SVC-RNT-03', status:'Booked', condition:'Includes delivery & pickup' },
+  { id:'s6', name:'Equipment Transport & Logistics', category:'Logistics & Transport', serial:'SVC-LOG-01', status:'Maintenance', condition:'Van currently in for servicing' },
+];
+
+const SEED_COMMS = [
+  { id:'m1', clientId:'c1', jobId:'j1', type:'Email', date:'2026-06-10', note:'Sent revised quote with the LED wall option, awaiting PO.' },
+  { id:'m2', clientId:'c2', jobId:'j2', type:'Call', date:'2026-06-12', note:'Discussed lawn layout and confirmed the power source location.' },
+  { id:'m3', clientId:'c1', jobId:'j4', type:'Note', date:'2026-06-13', note:'Follow up next week if there is no response on the date confirmation.' },
+];
+
+/* ================================ state ================================ */
+
+let state = {
+  view: 'dashboard',
+  clients: [], contacts: [], jobs: [], products: [], services: [], comms: [],
+  modal: null,        // { type, data }
+  formDraft: {},
+  clientSearch: '',
+  commFilter: 'all',
+  confirmDelete: null, // { type, id }
+  theme: 'dark',
+  cinemaJobId: null,
+  audioJobId: null,
+  proAudioTab: 'coverage',
+  invFilter: {
+    product: { category:'all', status:'all', search:'' },
+    service: { category:'all', status:'all', search:'' }
+  },
+  contactFilter: { category:'all', search:'', leadOnly:false },
+  calMonth: (function(){ const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })()
+};
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', state.theme);
+  const label = state.theme === 'light' ? 'Switch to night mode' : 'Switch to day mode';
+  const toggle = document.getElementById('theme-toggle');
+  const toggleMobile = document.getElementById('theme-toggle-mobile');
+  if(toggle) toggle.setAttribute('title', label);
+  if(toggleMobile) toggleMobile.setAttribute('title', label);
+}
+
+function loadData(){
+  state.clients   = JSON.parse(JSON.stringify(SEED_CLIENTS));
+  state.contacts  = JSON.parse(JSON.stringify(SEED_CONTACTS));
+  state.jobs      = JSON.parse(JSON.stringify(SEED_JOBS));
+  state.products  = JSON.parse(JSON.stringify(SEED_PRODUCTS));
+  state.services  = JSON.parse(JSON.stringify(SEED_SERVICES));
+  state.comms     = JSON.parse(JSON.stringify(SEED_COMMS));
+}
+
+function exportData(){
+  const payload = {
+    clients: state.clients,
+    contacts: state.contacts,
+    jobs: state.jobs,
+    products: state.products,
+    services: state.services,
+    comms: state.comms,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'av-crm-data.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+function importDataFromFile(file){
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.clients) state.clients = data.clients;
+      if(data.contacts) state.contacts = data.contacts;
+      if(data.jobs) state.jobs = data.jobs;
+      if(data.products) state.products = data.products;
+      else if(data.equipment) state.products = data.equipment; // legacy export compatibility
+      if(data.services) state.services = data.services;
+      if(data.comms) state.comms = data.comms;
+      state.modal = null;
+      state.confirmDelete = null;
+      render();
+    }catch(e){
+      window.alert('Could not read that file. Make sure it is a JSON file exported from AV/CRM.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ================================ CRUD ================================ */
+
+function saveClient(data){
+  if(data.id){ state.clients = state.clients.map(c => c.id === data.id ? Object.assign({}, data) : c); }
+  else { state.clients.push(Object.assign({}, data, { id: uid() })); }
+  state.modal = null; render();
+}
+function deleteClient(id){
+  state.clients = state.clients.filter(c => c.id !== id);
+  state.confirmDelete = null; render();
+}
+
+function saveContact(data){
+  if(data.id){ state.contacts = state.contacts.map(c => c.id === data.id ? Object.assign({}, data) : c); }
+  else { state.contacts.push(Object.assign({}, data, { id: uid() })); }
+  state.modal = null; render();
+}
+function deleteContact(id){
+  state.contacts = state.contacts.filter(c => c.id !== id);
+  state.confirmDelete = null; render();
+}
+
+function saveJob(data){
+  if(data.id){ state.jobs = state.jobs.map(j => j.id === data.id ? Object.assign({}, data) : j); }
+  else { state.jobs.push(Object.assign({}, data, { id: uid() })); }
+  state.modal = null; render();
+}
+function deleteJob(id){
+  state.jobs = state.jobs.filter(j => j.id !== id);
+  state.confirmDelete = null; render();
+}
+
+function saveInvItem(kind, data){
+  const key = INVENTORY_META[kind].stateKey;
+  if(data.id){ state[key] = state[key].map(x => x.id === data.id ? Object.assign({}, data) : x); }
+  else { state[key].push(Object.assign({}, data, { id: uid() })); }
+  state.modal = null; render();
+}
+function deleteInvItem(kind, id){
+  const key = INVENTORY_META[kind].stateKey;
+  state[key] = state[key].filter(x => x.id !== id);
+  state.confirmDelete = null; render();
+}
+
+function saveComm(data){
+  if(data.id){ state.comms = state.comms.map(m => m.id === data.id ? Object.assign({}, data) : m); }
+  else { state.comms.push(Object.assign({}, data, { id: uid() })); }
+  state.modal = null; render();
+}
+
+/* ================================ small renderers ================================ */
+
+function eqBarsHtml(pct, colorClass){
+  const clamped = Math.min(100, Math.max(0, pct || 0));
+  const activeCount = Math.round((clamped / 100) * EQ_HEIGHTS.length);
+  return '<div class="eq-bars">' + EQ_HEIGHTS.map(function(h, i){
+    return '<div class="eq-bar ' + (i < activeCount ? colorClass : '') + '" style="height:' + h + '%"></div>';
+  }).join('') + '</div>';
+}
+
+function statCard(iconName, label, value, pct, colorClass){
+  const iconHtml = iconName === 'rupee' ? rupeeIcon() : icon(iconName, 14);
+  return '<div class="stat-card">' +
+    '<div class="stat-top"><span class="stat-label">' + esc(label) + '</span><span class="text-zinc">' + iconHtml + '</span></div>' +
+    '<div class="stat-value">' + esc(value) + '</div>' +
+    eqBarsHtml(pct, colorClass) +
+    '</div>';
+}
+
+function jobRowHtml(j){
+  const client = state.clients.find(function(c){ return c.id === j.clientId; });
+  return '<div class="job-row">' +
+    '<span class="led ' + STATUS_LED[j.status] + '"></span>' +
+    '<div class="job-row-info">' +
+      '<div class="job-row-title">' + esc(j.title) + '</div>' +
+      '<div class="job-row-sub">' + esc(client ? (client.company || client.name) : 'No client') + '</div>' +
+    '</div>' +
+    '<div class="job-row-meta">' +
+      '<div class="job-row-date">' + fmtDate(j.eventDate) + '</div>' +
+      '<div class="job-row-value">' + fmtINR(j.value) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function commRowHtml(m){
+  const client = state.clients.find(function(c){ return c.id === m.clientId; });
+  const job = state.jobs.find(function(j){ return j.id === m.jobId; });
+  const iconName = COMM_ICONS[m.type] || 'message';
+  return '<div class="comm-row">' +
+    '<span class="comm-icon">' + icon(iconName, 16) + '</span>' +
+    '<div class="comm-body">' +
+      '<div class="comm-top"><span class="comm-client">' + esc(client ? client.name : 'Unknown client') + '</span><span class="comm-date">' + fmtDate(m.date) + '</span></div>' +
+      (job ? '<div class="comm-job">' + esc(job.title) + '</div>' : '') +
+      '<p class="comm-note">' + esc(m.note) + '</p>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ================================ views ================================ */
+
+function renderDashboard(){
+  const totalJobsValue = state.jobs.reduce(function(s,j){ return s + Number(j.value || 0); }, 0) || 1;
+  const pipelineValue = state.jobs.filter(function(j){ return j.status !== 'Paid'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
+  const bookedValue = state.jobs.filter(function(j){ return j.status === 'Booked'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
+  const outstandingValue = state.jobs.filter(function(j){ return j.status === 'Completed'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
+  const productBookedPct = state.products.length ? Math.round(state.products.filter(function(e){ return e.status === 'Booked'; }).length / state.products.length * 100) : 0;
+
+  const upcoming = state.jobs.filter(function(j){ return j.status !== 'Paid'; })
+    .slice().sort(function(a,b){ return (a.eventDate||'').localeCompare(b.eventDate||''); }).slice(0,5);
+  const recent = state.comms.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).slice(0,5);
+
+  return '' +
+  '<div class="view-header"><div><h2 class="view-title">Dashboard</h2><p class="view-subtitle">Signal overview of your AV business</p></div></div>' +
+  '<div class="stats-grid">' +
+    statCard('activity', 'Pipeline Value', fmtINR(pipelineValue), pipelineValue/totalJobsValue*100, 'eq-amber') +
+    statCard('briefcase', 'Booked Revenue', fmtINR(bookedValue), bookedValue/totalJobsValue*100, 'eq-cyan') +
+    statCard('rupee', 'Awaiting Invoice', fmtINR(outstandingValue), outstandingValue/totalJobsValue*100, 'eq-red') +
+    statCard('package', 'Products In Use', productBookedPct + '%', productBookedPct, 'eq-emerald') +
+  '</div>' +
+  '<div class="dash-cols">' +
+    '<div>' +
+      '<div class="col-title">Upcoming Jobs</div>' +
+      '<div class="list-col">' + (upcoming.length === 0
+        ? '<p class="muted-italic">Nothing scheduled. Add a job to fill the calendar.</p>'
+        : upcoming.map(jobRowHtml).join('')) + '</div>' +
+    '</div>' +
+    '<div>' +
+      '<div class="col-title">Recent Activity</div>' +
+      '<div class="list-col">' + (recent.length === 0
+        ? '<p class="muted-italic">No activity logged yet.</p>'
+        : recent.map(commRowHtml).join('')) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function clientCardHtml(c){
+  const jobCount = state.jobs.filter(function(j){ return j.clientId === c.id; }).length;
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'client' && state.confirmDelete.id === c.id;
+  return '<div class="client-card">' +
+    '<div class="client-top">' +
+      '<div><div class="client-name">' + esc(c.name) + '</div><div class="client-company">' + esc(c.company) + '</div></div>' +
+      '<div class="client-actions">' +
+        '<button class="icon-btn" data-action="open-modal" data-type="client" data-id="' + c.id + '">' + icon('edit',14) + '</button>' +
+        (isConfirm
+          ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="client" data-id="' + c.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+          : '<button class="icon-btn danger" data-action="delete-request" data-type="client" data-id="' + c.id + '">' + icon('trash',14) + '</button>') +
+      '</div>' +
+    '</div>' +
+    '<span class="badge-type">' + esc(c.type) + '</span>' +
+    '<div class="contact-list">' +
+      (c.phone ? '<div class="contact-row">' + icon('phone',12) + ' ' + esc(c.phone) + '</div>' : '') +
+      (c.email ? '<div class="contact-row">' + icon('mail',12) + ' ' + esc(c.email) + '</div>' : '') +
+      (c.address ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.address) + '</div>' : '') +
+    '</div>' +
+    (c.tags && c.tags.length ? '<div class="tag-list">' + c.tags.map(function(t){ return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+    (c.notes ? '<p class="client-notes">' + esc(c.notes) + '</p>' : '') +
+    '<div class="client-footer">' + jobCount + ' job' + (jobCount !== 1 ? 's' : '') + '</div>' +
+  '</div>';
+}
+
+function clientGridHtml(){
+  const q = state.clientSearch.toLowerCase();
+  const filtered = state.clients.filter(function(c){
+    if(!q) return true;
+    return (c.name + ' ' + c.company + ' ' + (c.tags || []).join(' ')).toLowerCase().indexOf(q) !== -1;
+  });
+  if(filtered.length === 0) return '<p class="muted-italic">No clients match that search.</p>';
+  return '<div class="client-grid">' + filtered.map(clientCardHtml).join('') + '</div>';
+}
+function renderClientsListOnly(){
+  const wrap = document.getElementById('client-grid-wrap');
+  if(wrap) wrap.innerHTML = clientGridHtml();
+}
+
+function renderClients(){
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Clients</h2><p class="view-subtitle">' + state.clients.length + ' client' + (state.clients.length !== 1 ? 's' : '') + ' on file</p></div>' +
+    '<button class="btn-primary" data-action="open-modal" data-type="client" data-id="">' + icon('plus',16) + 'New Client</button>' +
+  '</div>' +
+  '<div class="search-box">' +
+    '<span class="search-icon">' + icon('search',14) + '</span>' +
+    '<input id="client-search" class="search-input" type="text" placeholder="Search clients, companies, tags..." value="' + esc(state.clientSearch) + '"/>' +
+  '</div>' +
+  '<div id="client-grid-wrap">' + clientGridHtml() + '</div>';
+}
+
+/* ---------- contacts (trades, vendors, lead sources) ---------- */
+
+function contactCardHtml(c){
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'contact' && state.confirmDelete.id === c.id;
+  const catIcon = CONTACT_CATEGORY_ICONS[c.category] || 'users';
+  return '<div class="inv-card">' +
+    '<div class="inv-card-top">' +
+      '<span class="inv-cat-badge">' + icon(catIcon,13) + esc(c.category) + '</span>' +
+      (c.leadSource ? '<span class="lead-badge" title="Lead source">' + icon('star',13) + 'Lead source</span>' : '') +
+    '</div>' +
+    '<div class="inv-card-name">' + esc(c.name) + '</div>' +
+    (c.company ? '<div class="inv-card-ref">' + esc(c.company) + '</div>' : '') +
+    '<div class="contact-list">' +
+      (c.phone ? '<div class="contact-row"><a class="contact-link" href="tel:' + esc(c.phone.replace(/[^+\d]/g,'')) + '">' + icon('phone',12) + ' ' + esc(c.phone) + '</a></div>' : '') +
+      (c.email ? '<div class="contact-row"><a class="contact-link" href="mailto:' + esc(c.email) + '">' + icon('mail',12) + ' ' + esc(c.email) + '</a></div>' : '') +
+      (c.area ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.area) + '</div>' : '') +
+    '</div>' +
+    (c.notes ? '<div class="inv-card-notes">' + esc(c.notes) + '</div>' : '') +
+    '<div class="inv-card-footer" style="border-top:none; padding-top:0; justify-content:flex-end;">' +
+      '<div class="equip-actions">' +
+        '<button class="icon-btn" data-action="open-modal" data-type="contact" data-id="' + c.id + '">' + icon('edit',14) + '</button>' +
+        (isConfirm
+          ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="contact" data-id="' + c.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+          : '<button class="icon-btn danger" data-action="delete-request" data-type="contact" data-id="' + c.id + '">' + icon('trash',14) + '</button>') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function contactFilteredItems(){
+  const f = state.contactFilter;
+  const q = f.search.toLowerCase();
+  return state.contacts.filter(function(c){
+    if(f.category !== 'all' && c.category !== f.category) return false;
+    if(f.leadOnly && !c.leadSource) return false;
+    if(q && (c.name + ' ' + (c.company||'') + ' ' + (c.area||'') + ' ' + (c.notes||'') + ' ' + c.category).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+}
+
+function contactGridHtml(){
+  const items = contactFilteredItems();
+  if(items.length === 0){
+    return '<div class="inv-empty">' +
+      '<p class="muted-italic">' + (state.contacts.length === 0 ? 'No contacts saved yet.' : 'No contacts match these filters.') + '</p>' +
+      (state.contacts.length !== 0 ? '<button class="data-btn" data-action="contact-clear-filters">Clear filters</button>' : '') +
+    '</div>';
+  }
+  return '<div class="inv-grid">' + items.map(contactCardHtml).join('') + '</div>';
+}
+function renderContactGridOnly(){
+  const wrap = document.getElementById('contact-grid-wrap');
+  if(wrap) wrap.innerHTML = contactGridHtml();
+}
+
+function renderContacts(){
+  const all = state.contacts;
+  const f = state.contactFilter;
+  const leadCount = all.filter(function(c){ return c.leadSource; }).length;
+
+  const statChips = '<div class="inv-stats">' +
+    '<button class="inv-stat-chip ' + (!f.leadOnly ? 'active' : '') + '" data-action="contact-filter-lead" data-value="0">' +
+      '<span class="inv-stat-num">' + all.length + '</span><span class="inv-stat-label">Total</span></button>' +
+    '<button class="inv-stat-chip ' + (f.leadOnly ? 'active' : '') + '" data-action="contact-filter-lead" data-value="1">' +
+      icon('star',13) + '<span class="inv-stat-num">' + leadCount + '</span><span class="inv-stat-label">Lead Sources</span></button>' +
+  '</div>';
+
+  const pills = ['<button class="inv-pill ' + (f.category === 'all' ? 'active' : '') + '" data-action="contact-filter-category" data-value="all">All trades</button>']
+    .concat(CONTACT_CATEGORIES.map(function(cat){
+      return '<button class="inv-pill ' + (f.category === cat ? 'active' : '') + '" data-action="contact-filter-category" data-value="' + esc(cat) + '">' + icon(CONTACT_CATEGORY_ICONS[cat] || 'users', 12) + esc(cat) + '</button>';
+    }));
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Contacts</h2><p class="view-subtitle">' + all.length + ' trade contact' + (all.length !== 1 ? 's' : '') + ' \u2014 electricians, carpenters, civil work, architects &amp; more</p></div>' +
+    '<button class="btn-primary" data-action="open-modal" data-type="contact" data-id="">' + icon('plus',16) + 'Add Contact</button>' +
+  '</div>' +
+  statChips +
+  '<div class="search-box">' +
+    '<span class="search-icon">' + icon('search',14) + '</span>' +
+    '<input id="contact-search" class="search-input" type="text" placeholder="Search contacts, firms, areas..." value="' + esc(f.search) + '"/>' +
+  '</div>' +
+  '<div class="inv-filters">' + pills.join('') + '</div>' +
+  '<div id="contact-grid-wrap">' + contactGridHtml() + '</div>';
+}
+
+function jobCardHtml(job){
+  const client = state.clients.find(function(c){ return c.id === job.clientId; });
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'job' && state.confirmDelete.id === job.id;
+  return '<div class="job-card">' +
+    '<div class="job-card-top"><div class="job-card-title">' + esc(job.title) + '</div><span class="led ' + STATUS_LED[job.status] + '" style="margin-top:4px;"></span></div>' +
+    '<div class="job-card-client">' + esc(client ? (client.company || client.name) : 'No client') + '</div>' +
+    '<div class="job-card-meta">' + fmtDate(job.eventDate) + ' \u00B7 ' + esc(job.venue || '\u2014') + '</div>' +
+    '<div class="job-card-value">' + fmtINR(job.value) + '</div>' +
+    '<div class="job-card-footer">' +
+      '<select class="status-select job-status-select" data-id="' + job.id + '">' +
+        JOB_STATUSES.map(function(s){ return '<option value="' + s + '" ' + (s === job.status ? 'selected' : '') + '>' + s + '</option>'; }).join('') +
+      '</select>' +
+      '<div class="job-card-actions">' +
+        '<button class="icon-btn" data-action="open-cinema" data-id="' + job.id + '" title="Open in Cinema Design">' + icon('monitor',14) + '</button>' +
+        '<button class="icon-btn" data-action="open-audioplan" data-id="' + job.id + '" title="Open in Pro Audio">' + icon('speaker',14) + '</button>' +
+        '<button class="icon-btn" data-action="open-modal" data-type="job" data-id="' + job.id + '">' + icon('edit',14) + '</button>' +
+        (isConfirm
+          ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="job" data-id="' + job.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+          : '<button class="icon-btn danger" data-action="delete-request" data-type="job" data-id="' + job.id + '">' + icon('trash',14) + '</button>') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderJobs(){
+  const cols = JOB_STATUSES.map(function(status){
+    const colJobs = state.jobs.filter(function(j){ return j.status === status; });
+    const colValue = colJobs.reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
+    return '<div class="kanban-col">' +
+      '<div class="kanban-head">' +
+        '<div class="kanban-status"><span class="led ' + STATUS_LED[status] + '"></span><span class="kanban-status-label">' + status + '</span></div>' +
+        '<span class="kanban-count">' + colJobs.length + '</span>' +
+      '</div>' +
+      '<div class="kanban-value">' + fmtINR(colValue) + '</div>' +
+      '<div class="kanban-cards">' +
+        (colJobs.length === 0 ? '<div class="muted-italic" style="font-size:12px;padding:0 4px;">No jobs</div>' : colJobs.map(jobCardHtml).join('')) +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Jobs</h2><p class="view-subtitle">Pipeline from first contact through to payment</p></div>' +
+    '<button class="btn-primary" data-action="open-modal" data-type="job" data-id="">' + icon('plus',16) + 'New Job</button>' +
+  '</div>' +
+  '<div class="kanban">' + cols + '</div>';
+}
+
+function invCardHtml(kind, item){
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === kind && state.confirmDelete.id === item.id;
+  const meta = INVENTORY_META[kind];
+  const catIcon = CATEGORY_ICONS[item.category] || meta.sectionIcon;
+  return '<div class="inv-card">' +
+    '<div class="inv-card-top">' +
+      '<span class="inv-cat-badge">' + icon(catIcon,13) + esc(item.category) + '</span>' +
+      '<span class="led ' + INV_LED[item.status] + '" title="' + esc(item.status) + '"></span>' +
+    '</div>' +
+    '<div class="inv-card-name">' + esc(item.name) + '</div>' +
+    (item.serial ? '<div class="inv-card-ref">' + esc(meta.refShort) + ': ' + esc(item.serial) + '</div>' : '') +
+    (item.condition ? '<div class="inv-card-notes">' + esc(item.condition) + '</div>' : '') +
+    '<div class="inv-card-footer">' +
+      '<span class="equip-status ' + INV_TEXT[item.status] + '">' + item.status + '</span>' +
+      '<div class="equip-actions">' +
+        '<button class="icon-btn" data-action="open-modal" data-type="' + kind + '" data-id="' + item.id + '">' + icon('edit',14) + '</button>' +
+        (isConfirm
+          ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="' + kind + '" data-id="' + item.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+          : '<button class="icon-btn danger" data-action="delete-request" data-type="' + kind + '" data-id="' + item.id + '">' + icon('trash',14) + '</button>') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function invFilteredItems(kind){
+  const meta = INVENTORY_META[kind];
+  const f = state.invFilter[kind];
+  const q = f.search.toLowerCase();
+  return state[meta.stateKey].filter(function(item){
+    if(f.category !== 'all' && item.category !== f.category) return false;
+    if(f.status !== 'all' && item.status !== f.status) return false;
+    if(q && (item.name + ' ' + (item.serial||'') + ' ' + (item.condition||'') + ' ' + item.category).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+}
+
+function invGridHtml(kind){
+  const meta = INVENTORY_META[kind];
+  const items = invFilteredItems(kind);
+  if(items.length === 0){
+    return '<div class="inv-empty">' +
+      '<p class="muted-italic">' + (state[meta.stateKey].length === 0 ? esc(meta.emptyMsg) : 'No ' + meta.countNoun + 's match these filters.') + '</p>' +
+      (state[meta.stateKey].length !== 0 ? '<button class="data-btn" data-action="inv-clear-filters" data-kind="' + kind + '">Clear filters</button>' : '') +
+    '</div>';
+  }
+  return '<div class="inv-grid">' + items.map(function(item){ return invCardHtml(kind, item); }).join('') + '</div>';
+}
+
+function renderInvGridOnly(kind){
+  const wrap = document.getElementById('inv-grid-wrap-' + kind);
+  if(wrap) wrap.innerHTML = invGridHtml(kind);
+}
+
+function invStatsHtml(kind){
+  const meta = INVENTORY_META[kind];
+  const all = state[meta.stateKey];
+  const f = state.invFilter[kind];
+  const counts = {};
+  INV_STATUSES.forEach(function(s){ counts[s] = all.filter(function(i){ return i.status === s; }).length; });
+  const chips = [
+    '<button class="inv-stat-chip ' + (f.status === 'all' ? 'active' : '') + '" data-action="inv-filter-status" data-kind="' + kind + '" data-value="all">' +
+      '<span class="inv-stat-num">' + all.length + '</span><span class="inv-stat-label">Total</span></button>'
+  ].concat(INV_STATUSES.map(function(s){
+    return '<button class="inv-stat-chip ' + (f.status === s ? 'active' : '') + '" data-action="inv-filter-status" data-kind="' + kind + '" data-value="' + s + '">' +
+      '<span class="led ' + INV_LED[s] + '"></span><span class="inv-stat-num">' + counts[s] + '</span><span class="inv-stat-label">' + s + '</span></button>';
+  }));
+  return '<div class="inv-stats">' + chips.join('') + '</div>';
+}
+
+function invToolbarHtml(kind){
+  const meta = INVENTORY_META[kind];
+  const f = state.invFilter[kind];
+  const pills = ['<button class="inv-pill ' + (f.category === 'all' ? 'active' : '') + '" data-action="inv-filter-category" data-kind="' + kind + '" data-value="all">All categories</button>']
+    .concat(meta.categories.map(function(cat){
+      return '<button class="inv-pill ' + (f.category === cat ? 'active' : '') + '" data-action="inv-filter-category" data-kind="' + kind + '" data-value="' + esc(cat) + '">' + icon(CATEGORY_ICONS[cat] || meta.sectionIcon, 12) + esc(cat) + '</button>';
+    }));
+  return '' +
+  '<div class="search-box">' +
+    '<span class="search-icon">' + icon('search',14) + '</span>' +
+    '<input id="inv-search-' + kind + '" class="search-input" type="text" placeholder="Search ' + esc(meta.label.toLowerCase()) + '...' + '" value="' + esc(f.search) + '"/>' +
+  '</div>' +
+  '<div class="inv-filters">' + pills.join('') + '</div>';
+}
+
+function renderInventory(kind){
+  const meta = INVENTORY_META[kind];
+  const items = state[meta.stateKey];
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + esc(meta.label) + '</h2><p class="view-subtitle">' + items.length + ' ' + meta.countNoun + (items.length !== 1 ? 's' : '') + ' in inventory</p></div>' +
+    '<button class="btn-primary" data-action="open-modal" data-type="' + kind + '" data-id="">' + icon('plus',16) + esc(meta.addLabel) + '</button>' +
+  '</div>' +
+  invStatsHtml(kind) +
+  invToolbarHtml(kind) +
+  '<div id="inv-grid-wrap-' + kind + '">' + invGridHtml(kind) + '</div>';
+}
+
+function renderCalendar(){
+  const y = state.calMonth.y, m = state.calMonth.m;
+  const first = new Date(y, m, 1);
+  const startDay = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const cells = [];
+  for(let i = 0; i < startDay; i++) cells.push(null);
+  for(let d = 1; d <= daysInMonth; d++) cells.push(d);
+  while(cells.length % 7 !== 0) cells.push(null);
+
+  const now = new Date();
+  const isCurrentMonth = (y === now.getFullYear() && m === now.getMonth());
+  const MAX_CHIPS = 3;
+
+  const cellsHtml = cells.map(function(d){
+    if(d === null) return '<div class="cal-cell empty"></div>';
+    const dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const dayJobs = state.jobs.filter(function(j){ return j.eventDate === dateStr; });
+    const isToday = dateStr === todayStr();
+    const shown = dayJobs.slice(0, MAX_CHIPS);
+    const extra = dayJobs.length - shown.length;
+    const chipsHtml = shown.map(function(j){
+      return '<button class="cal-job-chip ' + STATUS_TEXT[j.status] + '" data-action="open-modal" data-type="job" data-id="' + j.id + '" title="' + esc(j.title) + '">' + esc(j.title) + '</button>';
+    }).join('') + (extra > 0 ? '<div class="cal-more">+' + extra + ' more</div>' : '');
+    return '<div class="cal-cell ' + (isToday ? 'today' : '') + '">' +
+      '<span class="cal-date">' + d + '</span>' +
+      chipsHtml +
+    '</div>';
+  }).join('');
+
+  return '' +
+  '<div class="view-header"><div><h2 class="view-title">Calendar</h2><p class="view-subtitle">Job dates at a glance</p></div></div>' +
+  '<div class="cal-header">' +
+    '<button class="cal-nav-btn" data-action="cal-prev">' + icon('chevronleft',20) + '</button>' +
+    '<div class="cal-month-group">' +
+      '<span class="cal-month">' + MONTH_NAMES[m] + ' ' + y + '</span>' +
+      (isCurrentMonth ? '' : '<button class="cal-today-btn" data-action="cal-today">Today</button>') +
+    '</div>' +
+    '<button class="cal-nav-btn" data-action="cal-next">' + icon('chevronright',20) + '</button>' +
+  '</div>' +
+  '<div class="cal-grid">' +
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d){ return '<div class="cal-dow">' + d + '</div>'; }).join('') +
+    cellsHtml +
+  '</div>';
+}
+
+function commsListHtml(){
+  const filtered = state.comms.filter(function(m){ return state.commFilter === 'all' || m.clientId === state.commFilter; })
+    .slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  if(filtered.length === 0) return '<p class="muted-italic">No activity logged yet.</p>';
+  return '<div class="comms-list">' + filtered.map(commRowHtml).join('') + '</div>';
+}
+function renderCommsListOnly(){
+  const wrap = document.getElementById('comms-list-wrap');
+  if(wrap) wrap.innerHTML = commsListHtml();
+}
+
+function renderComms(){
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Activity</h2><p class="view-subtitle">Communication log across all clients</p></div>' +
+    '<button class="btn-primary" data-action="open-modal" data-type="comm" data-id="">' + icon('plus',16) + 'Log Entry</button>' +
+  '</div>' +
+  '<div class="comm-filter">' +
+    '<select id="comm-filter-select" class="select-base">' +
+      '<option value="all" ' + (state.commFilter === 'all' ? 'selected' : '') + '>All clients</option>' +
+      state.clients.map(function(c){ return '<option value="' + c.id + '" ' + (c.id === state.commFilter ? 'selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') +
+    '</select>' +
+  '</div>' +
+  '<div id="comms-list-wrap">' + commsListHtml() + '</div>';
+}
+
+function buildCinemaPrefill(jobId){
+  const job = state.jobs.find(function(j){ return j.id === jobId; });
+  const client = job ? state.clients.find(function(c){ return c.id === job.clientId; }) : null;
+  return {
+    project: {
+      client: client ? client.name : '',
+      project: job ? job.title : '',
+      address: job ? (job.venue || (client ? client.address : '') || '') : '',
+      phone: client ? (client.phone || '') : '',
+      email: client ? (client.email || '') : '',
+      date: job ? (job.eventDate || '') : ''
+    }
+  };
+}
+
+function renderCinema(){
+  const job = state.cinemaJobId ? state.jobs.find(function(j){ return j.id === state.cinemaJobId; }) : null;
+  const subtitle = job
+    ? 'Opened from job \u201C' + esc(job.title) + '\u201D \u2014 project &amp; client details are sent across automatically'
+    : 'Room layout, Dolby Atmos speaker placement, THX screen sizing, 3D model, product catalog and client quotes';
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Cinema Design</h2><p class="view-subtitle">' + subtitle + '</p></div>' +
+    '<a class="data-btn" href="cinemaplan.html" target="_blank" rel="noopener" style="text-decoration:none; padding:10px 16px;">Open in new tab \u2197</a>' +
+  '</div>' +
+  '<div class="cinema-frame-wrap">' +
+    '<iframe id="cinema-frame" class="cinema-frame" src="cinemaplan.html" title="CinemaPlan Design Suite"></iframe>' +
+  '</div>' +
+  '<p class="helper-text">CinemaPlan opens from <code>cinemaplan.html</code> \u2014 keep that file in the same folder as this AV/CRM file. ' +
+    'The 3D model, fonts and PDF export need an internet connection to load their libraries; everything else in this CRM works offline.</p>';
+}
+
+function buildAudioPlanPrefill(jobId){
+  const job = state.jobs.find(function(j){ return j.id === jobId; });
+  const client = job ? state.clients.find(function(c){ return c.id === job.clientId; }) : null;
+  return {
+    project: {
+      client: client ? client.name : '',
+      project: job ? job.title : '',
+      address: job ? (job.venue || (client ? client.address : '') || '') : '',
+      phone: client ? (client.phone || '') : '',
+      email: client ? (client.email || '') : '',
+      date: job ? (job.eventDate || '') : ''
+    }
+  };
+}
+
+function renderAudioPlan(){
+  const job = state.audioJobId ? state.jobs.find(function(j){ return j.id === state.audioJobId; }) : null;
+  const subtitle = job
+    ? 'Opened from job \u201C' + esc(job.title) + '\u201D \u2014 project &amp; client details prefilled in AudioPlan'
+    : 'Coverage designer &amp; engineering calculator \u2014 two tools, one module';
+
+  const activeTab = state.proAudioTab || 'coverage';
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Pro Audio</h2><p class="view-subtitle">' + subtitle + '</p></div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<a class="data-btn" href="audioplan.html" target="_blank" rel="noopener" style="text-decoration:none;padding:10px 14px;" title="Open AudioPlan in new tab">Coverage \u2197</a>' +
+      '<a class="data-btn" href="audiocalc.html" target="_blank" rel="noopener" style="text-decoration:none;padding:10px 14px;" title="Open AudioCalc in new tab">Calc \u2197</a>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="proaudio-tabs">' +
+    '<button class="proaudio-tab ' + (activeTab === 'coverage' ? 'active' : '') + '" data-action="proaudio-tab" data-tab="coverage">' +
+      icon('speaker', 14) + 'Coverage Designer</button>' +
+    '<button class="proaudio-tab ' + (activeTab === 'calc' ? 'active' : '') + '" data-action="proaudio-tab" data-tab="calc">' +
+      icon('bolt', 14) + 'Engineering Calculator</button>' +
+  '</div>' +
+
+  '<div class="proaudio-panel ' + (activeTab === 'coverage' ? 'active' : '') + '" id="proaudio-panel-coverage">' +
+    '<div class="cinema-frame-wrap">' +
+      '<iframe id="audioplan-frame" class="cinema-frame" src="audioplan.html" title="AudioPlan Coverage Design Suite"></iframe>' +
+    '</div>' +
+    '<p class="helper-text">AudioPlan \u2014 in-ceiling &amp; on-wall coverage, hex/square grid layouts, zone planner, quote builder and PDF report. Loads from <code>audioplan.html</code> in the same folder.</p>' +
+  '</div>' +
+
+  '<div class="proaudio-panel ' + (activeTab === 'calc' ? 'active' : '') + '" id="proaudio-panel-calc">' +
+    '<div class="cinema-frame-wrap">' +
+      '<iframe id="audiocalc-frame" class="cinema-frame" src="audiocalc.html" title="AudioCalc Engineering Calculator"></iframe>' +
+    '</div>' +
+    '<p class="helper-text">AudioCalc \u2014 SPL/distance, amp power, 100V line loading, RT60, coverage, delay alignment &amp; impedance. Loads from <code>audiocalc.html</code>. Runs fully offline.</p>' +
+  '</div>';
+}
+
+const VIEW_RENDERERS = {
+  dashboard: renderDashboard,
+  clients: renderClients,
+  contacts: renderContacts,
+  jobs: renderJobs,
+  product: function(){ return renderInventory('product'); },
+  service: function(){ return renderInventory('service'); },
+  calendar: renderCalendar,
+  comms: renderComms,
+  cinema: renderCinema,
+  audioplan: renderAudioPlan,
+};
+
+/* ================================ forms ================================ */
+
+function fieldInput(label, field, value, type, extra){
+  return '<label class="field"><span class="field-label">' + esc(label) + '</span>' +
+    '<input class="field-input" type="' + (type || 'text') + '" data-field="' + field + '" value="' + esc(value === undefined ? '' : value) + '" ' + (extra || '') + '/></label>';
+}
+function fieldTextarea(label, field, value, rows){
+  return '<label class="field"><span class="field-label">' + esc(label) + '</span>' +
+    '<textarea class="field-textarea" data-field="' + field + '" rows="' + (rows || 3) + '">' + esc(value || '') + '</textarea></label>';
+}
+function fieldSelect(label, field, options, value){
+  const opts = options.map(function(o){
+    const val = (typeof o === 'object') ? o.value : o;
+    const text = (typeof o === 'object') ? o.label : o;
+    return '<option value="' + esc(val) + '" ' + (val === value ? 'selected' : '') + '>' + esc(text) + '</option>';
+  }).join('');
+  return '<label class="field"><span class="field-label">' + esc(label) + '</span>' +
+    '<select class="field-select" data-field="' + field + '">' + opts + '</select></label>';
+}
+function fieldCheckbox(label, field, checked){
+  return '<label class="field field-checkbox">' +
+    '<input class="field-checkbox-input" type="checkbox" data-field="' + field + '" ' + (checked ? 'checked' : '') + '/>' +
+    '<span>' + esc(label) + '</span></label>';
+}
+
+function clientFormHtml(d){
+  return '' +
+    fieldInput('Name','name',d.name) +
+    fieldInput('Company / Organization','company',d.company) +
+    fieldSelect('Client type','type',CLIENT_TYPES,d.type) +
+    fieldInput('Phone','phone',d.phone) +
+    fieldInput('Email','email',d.email,'email') +
+    fieldInput('Address','address',d.address) +
+    fieldInput('Tags (comma separated)','tags',d.tags,'text','placeholder="Recurring, High-value"') +
+    fieldTextarea('Notes','notes',d.notes);
+}
+
+function contactFormHtml(d){
+  return '' +
+    fieldInput('Name','name',d.name) +
+    fieldSelect('Trade / category','category',CONTACT_CATEGORIES,d.category) +
+    fieldInput('Company / Firm (optional)','company',d.company) +
+    fieldInput('Phone','phone',d.phone) +
+    fieldInput('Email (optional)','email',d.email,'email') +
+    fieldInput('Area / location','area',d.area,'text','placeholder="e.g. Wakad, Pune"') +
+    fieldCheckbox('This contact can refer/send me leads','leadSource',d.leadSource) +
+    fieldTextarea('Notes','notes',d.notes);
+}
+
+function jobFormHtml(d){
+  if(state.clients.length === 0){
+    return '<p class="empty-msg">Add a client first before creating a job.</p><div class="form-actions"><button type="button" class="btn-secondary" data-action="close-modal">Close</button></div>';
+  }
+  const clientOptions = state.clients.map(function(c){ return { value: c.id, label: c.name + ' \u2014 ' + c.company }; });
+  return '' +
+    fieldInput('Job title','title',d.title) +
+    fieldSelect('Client','clientId',clientOptions,d.clientId) +
+    fieldInput('Event date','eventDate',d.eventDate,'date') +
+    fieldInput('Venue','venue',d.venue) +
+    fieldSelect('Status','status',JOB_STATUSES,d.status) +
+    fieldInput('Value (\u20B9)','value',d.value,'number','min="0"') +
+    fieldTextarea('Notes','notes',d.notes);
+}
+
+function invFormHtml(kind, d){
+  const meta = INVENTORY_META[kind];
+  return '' +
+    fieldInput('Item name','name',d.name) +
+    fieldSelect('Category','category',meta.categories,d.category) +
+    fieldInput(meta.refLabel,'serial',d.serial) +
+    fieldSelect('Status','status',Object.keys(INV_LED),d.status) +
+    fieldInput(meta.notesLabel,'condition',d.condition,'text','placeholder="' + meta.notesPlaceholder + '"');
+}
+
+function commFormHtml(d){
+  if(state.clients.length === 0){
+    return '<p class="empty-msg">Add a client first before logging activity.</p><div class="form-actions"><button type="button" class="btn-secondary" data-action="close-modal">Close</button></div>';
+  }
+  const clientOptions = state.clients.map(function(c){ return { value: c.id, label: c.name + ' \u2014 ' + c.company }; });
+  const clientJobs = state.jobs.filter(function(j){ return j.clientId === d.clientId; });
+  const jobOptionsHtml = '<option value="">None</option>' + clientJobs.map(function(j){
+    return '<option value="' + j.id + '" ' + (j.id === d.jobId ? 'selected' : '') + '>' + esc(j.title) + '</option>';
+  }).join('');
+  return '' +
+    fieldSelect('Client','clientId',clientOptions,d.clientId) +
+    '<label class="field"><span class="field-label">Related job (optional)</span><select class="field-select" id="field-jobId" data-field="jobId">' + jobOptionsHtml + '</select></label>' +
+    fieldSelect('Type','type',COMM_TYPES,d.type) +
+    fieldInput('Date','date',d.date,'date') +
+    fieldTextarea('Note','note',d.note);
+}
+
+function buildDraft(type, data){
+  if(type === 'client'){
+    return data ? Object.assign({}, data, { tags: (data.tags || []).join(', ') })
+      : { name:'', company:'', type:CLIENT_TYPES[0], phone:'', email:'', address:'', tags:'', notes:'', id:null };
+  }
+  if(type === 'job'){
+    return data ? Object.assign({}, data)
+      : { title:'', clientId: (state.clients[0] && state.clients[0].id) || '', eventDate:todayStr(), venue:'', status:'Lead', value:'', notes:'', id:null };
+  }
+  if(type === 'product' || type === 'service'){
+    return data ? Object.assign({}, data)
+      : { name:'', category:INVENTORY_META[type].categories[0], serial:'', status:'Available', condition:'', id:null };
+  }
+  if(type === 'contact'){
+    return data ? Object.assign({}, data, { leadSource: !!data.leadSource })
+      : { name:'', category:CONTACT_CATEGORIES[0], company:'', phone:'', email:'', area:'', leadSource:false, notes:'', id:null };
+  }
+  if(type === 'comm'){
+    return data ? Object.assign({}, data)
+      : { clientId: (state.clients[0] && state.clients[0].id) || '', jobId:'', type:'Call', date:todayStr(), note:'', id:null };
+  }
+  return {};
+}
+
+function renderModal(){
+  const root = document.getElementById('modal-root');
+  if(!state.modal){ root.innerHTML = ''; return; }
+  const type = state.modal.type, data = state.modal.data;
+  let title = '', bodyHtml = '', showActions = true;
+
+  if(type === 'client'){
+    title = data ? 'Edit Client' : 'New Client';
+    bodyHtml = clientFormHtml(state.formDraft);
+  } else if(type === 'job'){
+    title = data ? 'Edit Job' : 'New Job';
+    bodyHtml = jobFormHtml(state.formDraft);
+    if(state.clients.length === 0) showActions = false;
+  } else if(type === 'product' || type === 'service'){
+    title = data ? INVENTORY_META[type].editLabel : INVENTORY_META[type].addLabel;
+    bodyHtml = invFormHtml(type, state.formDraft);
+  } else if(type === 'contact'){
+    title = data ? 'Edit Contact' : 'Add Contact';
+    bodyHtml = contactFormHtml(state.formDraft);
+  } else if(type === 'comm'){
+    title = 'Log Activity';
+    bodyHtml = commFormHtml(state.formDraft);
+    if(state.clients.length === 0) showActions = false;
+  }
+
+  const actionsHtml = showActions
+    ? '<div class="form-actions"><button type="button" class="btn-secondary" data-action="close-modal">Cancel</button><button type="submit" class="btn-primary">Save</button></div>'
+    : '';
+
+  root.innerHTML = '' +
+  '<div class="modal-overlay">' +
+    '<div class="modal">' +
+      '<div class="modal-head"><h3 class="modal-title">' + esc(title) + '</h3><button class="icon-btn" data-action="close-modal">' + icon('x',18) + '</button></div>' +
+      '<div class="modal-body"><form id="entity-form">' + bodyHtml + actionsHtml + '</form></div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ================================ event handling ================================ */
+
+function onBodyClick(e){
+  if(e.target.classList && e.target.classList.contains('modal-overlay')){
+    state.modal = null; render(); return;
+  }
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+
+  switch(action){
+    case 'set-view':
+      state.view = el.dataset.view;
+      state.confirmDelete = null;
+      render();
+      break;
+    case 'open-modal': {
+      const type = el.dataset.type;
+      const id = el.dataset.id;
+      let data = null;
+      if(id){
+        if(type === 'client') data = state.clients.find(function(c){ return c.id === id; });
+        if(type === 'contact') data = state.contacts.find(function(c){ return c.id === id; });
+        if(type === 'job') data = state.jobs.find(function(j){ return j.id === id; });
+        if(type === 'product' || type === 'service') data = state[INVENTORY_META[type].stateKey].find(function(x){ return x.id === id; });
+        if(type === 'comm') data = state.comms.find(function(m){ return m.id === id; });
+      }
+      state.modal = { type: type, data: data || null };
+      state.formDraft = buildDraft(type, data || null);
+      render();
+      break;
+    }
+    case 'close-modal':
+      state.modal = null;
+      render();
+      break;
+    case 'cal-prev':
+      if(state.calMonth.m === 0) state.calMonth = { y: state.calMonth.y - 1, m: 11 };
+      else state.calMonth.m -= 1;
+      render();
+      break;
+    case 'cal-next':
+      if(state.calMonth.m === 11) state.calMonth = { y: state.calMonth.y + 1, m: 0 };
+      else state.calMonth.m += 1;
+      render();
+      break;
+    case 'cal-today':
+      state.calMonth = (function(){ const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })();
+      render();
+      break;
+    case 'delete-request':
+      state.confirmDelete = { type: el.dataset.type, id: el.dataset.id };
+      render();
+      break;
+    case 'delete-cancel':
+      state.confirmDelete = null;
+      render();
+      break;
+    case 'delete-confirm': {
+      const t = el.dataset.type, id = el.dataset.id;
+      if(t === 'client') deleteClient(id);
+      else if(t === 'contact') deleteContact(id);
+      else if(t === 'job') deleteJob(id);
+      else if(t === 'product' || t === 'service') deleteInvItem(t, id);
+      break;
+    }
+    case 'export-data':
+      exportData();
+      break;
+    case 'import-data':
+      document.getElementById('import-file-input').click();
+      break;
+    case 'toggle-theme':
+      state.theme = state.theme === 'light' ? 'dark' : 'light';
+      applyTheme();
+      break;
+    case 'open-cinema':
+      state.cinemaJobId = el.dataset.id || null;
+      state.view = 'cinema';
+      render();
+      break;
+    case 'open-audioplan':
+      state.audioJobId = el.dataset.id || null;
+      state.proAudioTab = 'coverage';
+      state.view = 'audioplan';
+      render();
+      break;
+    case 'proaudio-tab':
+      state.proAudioTab = el.dataset.tab;
+      // toggle panels and tabs in-place without full re-render (avoids iframe reload)
+      document.querySelectorAll('.proaudio-tab').forEach(function(t){
+        t.classList.toggle('active', t.dataset.tab === el.dataset.tab);
+      });
+      document.querySelectorAll('.proaudio-panel').forEach(function(p){
+        p.classList.toggle('active', p.id === 'proaudio-panel-' + el.dataset.tab);
+      });
+      break;
+    case 'inv-filter-category':
+      state.invFilter[el.dataset.kind].category = el.dataset.value;
+      render();
+      break;
+    case 'inv-filter-status':
+      state.invFilter[el.dataset.kind].status = el.dataset.value;
+      render();
+      break;
+    case 'inv-clear-filters':
+      state.invFilter[el.dataset.kind] = { category:'all', status:'all', search:'' };
+      render();
+      break;
+    case 'contact-filter-category':
+      state.contactFilter.category = el.dataset.value;
+      render();
+      break;
+    case 'contact-filter-lead':
+      state.contactFilter.leadOnly = el.dataset.value === '1';
+      render();
+      break;
+    case 'contact-clear-filters':
+      state.contactFilter = { category:'all', search:'', leadOnly:false };
+      render();
+      break;
+  }
+}
+
+function onBodyChange(e){
+  const t = e.target;
+  if(t.id === 'import-file-input'){
+    if(t.files && t.files[0]) importDataFromFile(t.files[0]);
+    t.value = '';
+    return;
+  }
+  if(t.classList && t.classList.contains('job-status-select')){
+    const job = state.jobs.find(function(j){ return j.id === t.dataset.id; });
+    if(job){ job.status = t.value; render(); }
+    return;
+  }
+  if(t.id === 'comm-filter-select'){
+    state.commFilter = t.value;
+    renderCommsListOnly();
+    return;
+  }
+  const field = t.dataset.field;
+  if(field && state.modal){
+    state.formDraft[field] = (t.type === 'checkbox') ? t.checked : t.value;
+    if(state.modal.type === 'comm' && field === 'clientId'){
+      state.formDraft.jobId = '';
+      const jobSelect = document.getElementById('field-jobId');
+      if(jobSelect){
+        const clientJobs = state.jobs.filter(function(j){ return j.clientId === t.value; });
+        jobSelect.innerHTML = '<option value="">None</option>' + clientJobs.map(function(j){
+          return '<option value="' + j.id + '">' + esc(j.title) + '</option>';
+        }).join('');
+      }
+    }
+  }
+}
+
+function onBodyInput(e){
+  const t = e.target;
+  if(t.id === 'client-search'){
+    state.clientSearch = t.value;
+    renderClientsListOnly();
+    return;
+  }
+  if(t.id === 'inv-search-product'){
+    state.invFilter.product.search = t.value;
+    renderInvGridOnly('product');
+    return;
+  }
+  if(t.id === 'inv-search-service'){
+    state.invFilter.service.search = t.value;
+    renderInvGridOnly('service');
+    return;
+  }
+  if(t.id === 'contact-search'){
+    state.contactFilter.search = t.value;
+    renderContactGridOnly();
+    return;
+  }
+  const field = t.dataset.field;
+  if(field && state.modal){
+    state.formDraft[field] = (t.type === 'checkbox') ? t.checked : t.value;
+  }
+}
+
+function onBodySubmit(e){
+  if(e.target.id !== 'entity-form') return;
+  e.preventDefault();
+  if(!state.modal) return;
+  const type = state.modal.type;
+  const draft = Object.assign({}, state.formDraft);
+  if(type === 'client'){
+    draft.tags = (draft.tags || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    saveClient(draft);
+  } else if(type === 'job'){
+    draft.value = Number(draft.value) || 0;
+    saveJob(draft);
+  } else if(type === 'product' || type === 'service'){
+    saveInvItem(type, draft);
+  } else if(type === 'contact'){
+    saveContact(draft);
+  } else if(type === 'comm'){
+    saveComm(draft);
+  }
+}
+
+/* ================================ nav + render ================================ */
+
+function buildNav(){
+  document.getElementById('sidebar-nav').innerHTML = NAV.map(function(item){
+    return '<button class="nav-item" data-action="set-view" data-view="' + item.id + '">' +
+      '<span class="nav-num">' + item.num + '</span>' + icon(item.icon,16) + '<span>' + item.label + '</span>' +
+      '<span class="led led-cyan nav-led" style="visibility:hidden"></span>' +
+    '</button>';
+  }).join('');
+  document.getElementById('mobile-nav').innerHTML = NAV.map(function(item){
+    return '<button class="mnav-item" data-action="set-view" data-view="' + item.id + '">' + icon(item.icon,18) + '<span>' + item.label + '</span></button>';
+  }).join('');
+}
+
+function updateNavActive(){
+  const navItems = document.querySelectorAll('#sidebar-nav .nav-item');
+  navItems.forEach(function(el, i){
+    const active = NAV[i].id === state.view;
+    el.classList.toggle('active', active);
+    const led = el.querySelector('.nav-led');
+    if(led) led.style.visibility = active ? 'visible' : 'hidden';
+  });
+  const mnavItems = document.querySelectorAll('#mobile-nav .mnav-item');
+  mnavItems.forEach(function(el, i){
+    const active = NAV[i].id === state.view;
+    el.classList.toggle('active', active);
+    if(active) el.scrollIntoView({ block:'nearest', inline:'nearest' });
+  });
+}
+
+function updateSidebarFooter(){
+  document.getElementById('sidebar-stats').textContent =
+    state.clients.length + ' clients \u00B7 ' + state.contacts.length + ' contacts \u00B7 ' + state.jobs.length + ' jobs \u00B7 ' + state.products.length + ' products \u00B7 ' + state.services.length + ' services';
+}
+
+function render(){
+  document.getElementById('view').innerHTML = VIEW_RENDERERS[state.view]();
+  updateNavActive();
+  updateSidebarFooter();
+  renderModal();
+}
+
+/* ================================ init ================================ */
+
+function init(){
+  loadData();
+  try{
+    if(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches){
+      state.theme = 'light';
+    }
+  }catch(e){}
+  applyTheme();
+  buildNav();
+  document.body.addEventListener('click', onBodyClick);
+  document.body.addEventListener('change', onBodyChange);
+  document.body.addEventListener('input', onBodyInput);
+  document.body.addEventListener('submit', onBodySubmit);
+  window.addEventListener('message', function(e){
+    const msg = e.data;
+    if(!msg) return;
+    if(msg.type === 'cinemaplan:ready'){
+      if(state.cinemaJobId && e.source){
+        e.source.postMessage({ type:'cinemaplan:prefill', data: buildCinemaPrefill(state.cinemaJobId) }, '*');
+      }
+      return;
+    }
+    if(msg.type === 'audioplan:ready'){
+      if(state.audioJobId && e.source){
+        e.source.postMessage({ type:'audioplan:prefill', data: buildAudioPlanPrefill(state.audioJobId) }, '*');
+      }
+      return;
+    }
+  });
+  render();
+}
+
+init();
+</script>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+  <div class="pwa-banner-row">
+    <div class="pwa-banner-icon">📡</div>
+    <div class="pwa-banner-text">
+      <div class="pwa-banner-title">Install AV/CRM</div>
+      <div class="pwa-banner-sub">Add to home screen — works offline</div>
+    </div>
+  </div>
+  <div class="pwa-banner-btns">
+    <button class="pwa-install-btn" id="pwa-install-btn">Install App</button>
+    <button class="pwa-dismiss-btn" id="pwa-dismiss-btn">Not now</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PWA — Service Worker + Install Prompt
+============================================================ */
+
+// Register service worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(function(reg){
+    console.log('[PWA] Service worker registered:', reg.scope);
+  }).catch(function(err){
+    console.log('[PWA] Service worker registration failed:', err);
+  });
+}
+
+// Capture the install prompt (Android Chrome fires this)
+let _deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _deferredPrompt = e;
+  // Show our custom banner after a short delay
+  setTimeout(function(){
+    document.getElementById('pwa-banner').classList.add('show');
+  }, 2000);
+});
+
+document.getElementById('pwa-install-btn').addEventListener('click', function(){
+  document.getElementById('pwa-banner').classList.remove('show');
+  if(_deferredPrompt){
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(result){
+      console.log('[PWA] Install choice:', result.outcome);
+      _deferredPrompt = null;
+    });
+  }
+});
+
+document.getElementById('pwa-dismiss-btn').addEventListener('click', function(){
+  document.getElementById('pwa-banner').classList.remove('show');
+  // Don't show again this session
+  _deferredPrompt = null;
+});
+
+// Hide banner if already installed
+window.addEventListener('appinstalled', function(){
+  document.getElementById('pwa-banner').classList.remove('show');
+  console.log('[PWA] App installed');
+});
+</script>
+</body>
+</html>
