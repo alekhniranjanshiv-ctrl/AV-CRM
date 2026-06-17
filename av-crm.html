@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AV / CRM — Signal Flow</title>
 
+<!-- SheetJS for Excel import/export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <!-- PWA -->
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#09090b" />
@@ -159,7 +162,26 @@
   .mnav-item.active::before{content:''; position:absolute; top:0; left:50%; transform:translateX(-50%);
     width:24px; height:3px; border-radius:0 0 3px 3px; background:var(--cyan-400);}
 
-  /* ---------- PWA install banner ---------- */
+  /* ---------- clear-data confirmation modal ---------- */
+  .clear-modal-overlay{position:fixed; inset:0; background:var(--overlay); display:flex; align-items:center; justify-content:center; padding:20px; z-index:80;}
+  .clear-modal{background:var(--zinc-900); border:1px solid var(--zinc-700); border-radius:14px; width:100%; max-width:420px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+  .clear-modal-icon{width:52px; height:52px; border-radius:50%; background:rgba(239,68,68,0.12); border:2px solid rgba(239,68,68,0.3); display:flex; align-items:center; justify-content:center; margin:28px auto 16px; color:#ef4444; font-size:22px;}
+  .clear-modal-head{text-align:center; padding:0 24px 20px;}
+  .clear-modal-title{font-size:18px; font-weight:700; color:var(--text-strong); margin-bottom:8px;}
+  .clear-modal-sub{font-size:13px; color:var(--zinc-400); line-height:1.6;}
+  .clear-modal-backup{background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); border-radius:8px; padding:12px 16px; margin:0 20px 16px; display:flex; align-items:center; gap:10px;}
+  .clear-modal-backup-icon{font-size:18px; flex-shrink:0;}
+  .clear-modal-backup-text{font-size:12px; color:var(--zinc-300); line-height:1.5;}
+  .clear-modal-backup-text strong{color:#4ade80; display:block; margin-bottom:2px;}
+  .clear-modal-counts{background:var(--zinc-800); border-radius:8px; padding:12px 16px; margin:0 20px 20px; display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .clear-modal-count{font-size:12px; color:var(--zinc-400); display:flex; align-items:center; gap:6px;}
+  .clear-modal-count strong{color:var(--text-strong); font-family:ui-monospace,monospace; min-width:20px; text-align:right;}
+  .clear-modal-footer{display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--zinc-800);}
+  .clear-modal-cancel{padding:16px; background:none; border:none; border-right:1px solid var(--zinc-800); color:var(--zinc-300); font-size:15px; font-weight:500; cursor:pointer; transition:background 0.15s;}
+  .clear-modal-cancel:hover{background:var(--zinc-800);}
+  .clear-modal-confirm{padding:16px; background:none; border:none; color:#ef4444; font-size:15px; font-weight:700; cursor:pointer; transition:background 0.15s;}
+  .clear-modal-confirm:hover{background:rgba(239,68,68,0.1);}
+
   #pwa-banner{
     display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
     background:var(--zinc-800); border:1px solid var(--cyan-400); border-radius:12px;
@@ -182,7 +204,9 @@
   .led-amber{background:var(--amber-400);}
   .led-cyan{background:var(--cyan-400);}
   .led-blue{background:var(--blue-400);}
+  .led-purple{background:#a78bfa;}
   .led-emerald{background:var(--emerald-400);}
+  .text-purple{color:#a78bfa;}
   .led-red{background:var(--red-400);}
 
   .text-zinc{color:var(--zinc-500);}
@@ -195,6 +219,10 @@
   .view-header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px;}
   .view-title{font-size:20px; font-weight:700; letter-spacing:-0.02em; color:var(--text-strong);}
   .view-subtitle{font-size:14px; color:var(--zinc-500); margin-top:4px;}
+  @media (max-width:767px){
+    .view-header .view-title{display:none;}
+    .view-header{flex-wrap:wrap; gap:8px;}
+  }
   .muted-italic{font-size:14px; color:var(--zinc-600); font-style:italic;}
 
   .btn-primary{display:inline-flex; align-items:center; gap:8px; background:var(--cyan-400); color:var(--zinc-950);
@@ -218,8 +246,9 @@
   .stat-top{display:flex; align-items:center; justify-content:space-between;}
   .stat-label{font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--zinc-500); font-family:ui-monospace,monospace;}
   .stat-value{font-size:24px; font-weight:700; color:var(--text-strong); font-family:ui-monospace,monospace;}
-  .eq-bars{display:flex; align-items:flex-end; gap:3px; height:32px;}
-  .eq-bar{flex:1; border-radius:2px; background:var(--zinc-800);}
+  .stat-progress-track{height:4px; background:var(--zinc-800); border-radius:2px; margin-top:12px; overflow:hidden;}
+  .stat-progress-fill{height:100%; border-radius:2px; transition:width 0.4s ease;}
+  .stat-progress-label{font-size:11px; font-family:ui-monospace,monospace; color:var(--zinc-600); margin-top:4px;}
   .eq-amber{background:var(--amber-400) !important;}
   .eq-cyan{background:var(--cyan-400) !important;}
   .eq-emerald{background:var(--emerald-400) !important;}
@@ -296,7 +325,15 @@
   .job-card-meta{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-400);}
   .job-card-value{font-size:14px; font-family:ui-monospace,monospace; font-weight:700; color:var(--text-strong);}
   .job-card-footer{display:flex; align-items:center; justify-content:space-between; margin-top:4px;}
-  .job-card-actions{display:flex; align-items:center; gap:8px;}
+  .job-card-actions{display:flex; align-items:center; gap:2px;}
+  .job-type-badge{display:inline-block; font-size:10px; font-family:ui-monospace,monospace; letter-spacing:0.06em;
+    color:var(--accent-text); background:rgba(34,211,238,0.1); border:1px solid rgba(34,211,238,0.2);
+    border-radius:4px; padding:2px 7px; margin:3px 0 4px;}
+  .job-action-btn{display:inline-flex; flex-direction:column; align-items:center; gap:2px;
+    padding:5px 7px; border-radius:6px; border:none; background:none; cursor:pointer; color:var(--zinc-500);}
+  .job-action-btn:hover{background:var(--zinc-800); color:var(--text-strong);}
+  .job-action-btn.danger:hover{color:var(--red-400);}
+  .job-action-btn span{font-size:9px; font-family:ui-monospace,monospace; letter-spacing:0.05em; text-transform:uppercase;}
   .status-select{background:var(--input-bg); border:1px solid var(--zinc-700); border-radius:4px; font-size:12px; padding:4px 6px; color:var(--zinc-300);}
   .status-select:focus{outline:none; border-color:var(--cyan-400);}
 
@@ -322,14 +359,25 @@
   @media (min-width:640px){ .inv-grid{grid-template-columns:1fr 1fr;} }
   @media (min-width:1024px){ .inv-grid{grid-template-columns:1fr 1fr 1fr;} }
   .inv-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:10px; padding:16px;
-    display:flex; flex-direction:column; gap:8px;}
-  .inv-card-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+    display:flex; flex-direction:column; gap:6px;}
+  .inv-card-top{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
   .inv-cat-badge{display:inline-flex; align-items:center; gap:6px; font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
     font-family:ui-monospace,monospace; color:var(--zinc-500);}
-  .inv-card-name{font-size:14px; font-weight:600; color:var(--text-strong); line-height:1.3;}
-  .inv-card-ref{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
-  .inv-card-notes{font-size:12px; color:var(--zinc-400); line-height:1.5;}
-  .inv-card-footer{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; padding-top:8px; border-top:1px solid var(--zinc-800);}
+  .inv-gst-badge{font-size:10px; font-family:ui-monospace,monospace; color:var(--zinc-500); background:var(--zinc-800); border-radius:4px; padding:2px 6px;}
+  .inv-card-name{font-size:14px; font-weight:600; color:var(--text-strong); line-height:1.3; margin-top:2px;}
+  .inv-card-ref{font-size:12px; font-family:ui-monospace,monospace; color:var(--accent-text);}
+  .inv-card-specs{font-size:11px; color:var(--zinc-400); font-style:italic; line-height:1.4;}
+  .inv-card-supplier{font-size:11px; color:var(--zinc-500);}
+  .inv-card-notes{font-size:11px; color:var(--zinc-500); line-height:1.5;}
+  .inv-price{font-size:17px; font-weight:700; font-family:ui-monospace,monospace; color:var(--text-strong); margin-top:4px;}
+  .inv-unit{font-size:11px; font-weight:400; color:var(--zinc-500);}
+  .inv-margin{display:flex; align-items:center; gap:8px;}
+  .inv-cost{font-size:11px; color:var(--zinc-500); font-family:ui-monospace,monospace;}
+  .inv-margin-pct{font-size:11px; font-family:ui-monospace,monospace; font-weight:600; padding:2px 7px; border-radius:4px;}
+  .inv-margin-pct.good{color:var(--emerald-400); background:rgba(52,211,153,0.1);}
+  .inv-margin-pct.warn{color:var(--amber-400); background:rgba(251,191,36,0.1);}
+  .inv-margin-pct.bad{color:var(--red-400); background:rgba(248,113,113,0.1);}
+  .inv-card-footer{display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:auto; padding-top:8px; border-top:1px solid var(--zinc-800);}
   .inv-empty{display:flex; flex-direction:column; align-items:flex-start; gap:12px;}
 
   /* ---------- calendar ---------- */
@@ -374,6 +422,10 @@
   .field-input:focus, .field-select:focus, .field-textarea:focus{outline:none; border-color:var(--cyan-400);}
   .field-textarea{resize:vertical; min-height:64px;}
   .form-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:16px; border-top:1px solid var(--zinc-800); padding-top:16px;}
+  .form-section-label{font-family:ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin-bottom:8px;margin-top:4px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);}
+  .field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .field-row-3{display:grid;grid-template-columns:1fr 1fr 120px;gap:12px;}
+  @media(max-width:540px){.field-row-2,.field-row-3{grid-template-columns:1fr;}}
   .empty-msg{font-size:14px; color:var(--zinc-400); margin-bottom:12px;}
   .cinema-frame-wrap{border:1px solid var(--zinc-800); border-radius:8px; overflow:hidden; background:#0B0D10;}
   .cinema-frame{display:block; width:100%; height:75vh; min-height:520px; border:none; background:#0B0D10;}
@@ -460,23 +512,47 @@
 /* ================================ constants ================================ */
 
 const NAV = [
-  { id:'dashboard', label:'Dashboard', icon:'dashboard', num:'01' },
-  { id:'clients',   label:'Clients',   icon:'users',     num:'02' },
-  { id:'contacts',  label:'Contacts',  icon:'idcard',    num:'03' },
-  { id:'jobs',      label:'Jobs',      icon:'briefcase', num:'04' },
-  { id:'product',   label:'Product',   icon:'package',   num:'05' },
-  { id:'service',   label:'Services',  icon:'wrench',    num:'06' },
-  { id:'calendar',  label:'Calendar',  icon:'calendar',  num:'07' },
-  { id:'comms',     label:'Activity',  icon:'message',   num:'08' },
-  { id:'cinema',    label:'Cinema Design', icon:'monitor', num:'09' },
-  { id:'audioplan', label:'Pro Audio',  icon:'speaker',   num:'10' },
+  { id:'dashboard', label:'Dashboard',    icon:'dashboard',  num:'01' },
+  { id:'clients',   label:'Clients',      icon:'users',      num:'02' },
+  { id:'contacts',  label:'Contacts',     icon:'idcard',     num:'03' },
+  { id:'jobs',      label:'Jobs',         icon:'briefcase',  num:'04' },
+  { id:'catalog',   label:'Catalog',      icon:'package',    num:'05' },
+  { id:'calendar',  label:'Calendar',     icon:'calendar',   num:'06' },
+  { id:'comms',     label:'Activity',     icon:'message',    num:'07' },
+  { id:'design',    label:'Design Tools', icon:'monitor',    num:'08' },
 ];
 
-const JOB_STATUSES = ['Lead','Quoted','Booked','Completed','Paid'];
-const STATUS_LED  = { Lead:'led-zinc',  Quoted:'led-amber',  Booked:'led-cyan',  Completed:'led-blue',  Paid:'led-emerald' };
-const STATUS_TEXT = { Lead:'text-zinc', Quoted:'text-amber', Booked:'text-cyan', Completed:'text-blue', Paid:'text-emerald' };
+const JOB_STATUSES = ['Lead','Site Visit','Quoted','Booked','Work in Progress','Completed','Paid'];
+const STATUS_LED  = { Lead:'led-zinc', 'Site Visit':'led-purple', Quoted:'led-amber', Booked:'led-cyan', 'Work in Progress':'led-blue', Completed:'led-emerald', Paid:'led-emerald' };
+const STATUS_TEXT = { Lead:'text-zinc', 'Site Visit':'text-purple', Quoted:'text-amber', Booked:'text-cyan', 'Work in Progress':'text-blue', Completed:'text-emerald', Paid:'text-emerald' };
 
-const CLIENT_TYPES = ['Corporate','Event Planner','Venue','House of Worship','Education','Wedding / Private','Other'];
+const JOB_TYPES = [
+  'Home Cinema',
+  'Pro Audio — In-Ceiling',
+  'Pro Audio — On-Wall',
+  'Whole-Home Audio',
+  'Conference Room AV',
+  'Home Cinema + Pro Audio',
+  'Other',
+];
+
+const CLIENT_TYPES = [
+  'Residential — Villa / Bungalow',
+  'Residential — Apartment / Flat',
+  'Builder / Developer',
+  'Architect / Design Firm',
+  'Interior Designer',
+  'Corporate Office',
+  'Hotel / Hospitality',
+  'Restaurant / Café',
+  'Retail Showroom',
+  'House of Worship',
+  'Healthcare / Clinic',
+  'Gym / Fitness Studio',
+  'Educational Institute',
+  'Banquet Hall / Event Venue',
+  'Other',
+];
 
 const CONTACT_CATEGORIES = ['Electrician','Carpenter','POP / False Ceiling','Painter','Civil / Labour','Plumber','Architect','Interior Designer','Other'];
 const CONTACT_CATEGORY_ICONS = {
@@ -484,30 +560,92 @@ const CONTACT_CATEGORY_ICONS = {
   'Civil / Labour':'hardhat', Plumber:'droplet', Architect:'ruler', 'Interior Designer':'bulb', Other:'users'
 };
 
-const PRODUCT_CATEGORIES = ['Audio','Video','Lighting','Staging','Cabling & Power'];
-const SERVICE_CATEGORIES = ['Installation','AMC / Maintenance','On-site Support','Consultation & Design','Rental','Logistics & Transport'];
+const PRODUCT_CATEGORIES = [
+  'Projector & Display',
+  'Projection Screen',
+  'AV Receiver & Processor',
+  'Speaker — In-Ceiling',
+  'Speaker — On-Wall',
+  'Speaker — Floorstanding / Surround',
+  'Subwoofer',
+  'Amplifier',
+  'DSP & Signal Processing',
+  'Microphone',
+  'Media Player & Source',
+  'Control System & Automation',
+  'Video Matrix & Switching',
+  'Cabling & Connectors',
+  'Power & Protection',
+  'Rack & Enclosure',
+  'Acoustic Treatment',
+  'Mounting Hardware',
+  'Other',
+];
+
+const SERVICE_CATEGORIES = [
+  'Home Cinema — Design & Installation',
+  'Pro Audio — In-Ceiling Installation',
+  'Pro Audio — On-Wall Installation',
+  'Whole-Home Audio Installation',
+  'Control System Programming',
+  'Acoustic Treatment & Room Setup',
+  'AMC / Annual Maintenance',
+  'On-site Support & Repair',
+  'Consultation & Site Survey',
+  'Cable Laying & Infrastructure',
+  'Other',
+];
 const INV_LED  = { Available:'led-emerald', Booked:'led-cyan', Maintenance:'led-red' };
 const INV_TEXT = { Available:'text-emerald', Booked:'text-cyan', Maintenance:'text-red' };
 const INV_STATUSES = ['Available','Booked','Maintenance'];
 
 const CATEGORY_ICONS = {
-  Audio:'mic', Video:'monitor', Lighting:'bulb', Staging:'layers', 'Cabling & Power':'plug',
-  Installation:'wrench', 'AMC / Maintenance':'wrench', 'On-site Support':'headset',
-  'Consultation & Design':'edit', Rental:'package', 'Logistics & Transport':'truck'
+  'Projector & Display':'monitor',
+  'Projection Screen':'layers',
+  'AV Receiver & Processor':'layers',
+  'Speaker — In-Ceiling':'mic',
+  'Speaker — On-Wall':'mic',
+  'Speaker — Floorstanding / Surround':'mic',
+  'Subwoofer':'mic',
+  'Amplifier':'bolt',
+  'DSP & Signal Processing':'bolt',
+  'Microphone':'mic',
+  'Media Player & Source':'monitor',
+  'Control System & Automation':'edit',
+  'Video Matrix & Switching':'layers',
+  'Cabling & Connectors':'plug',
+  'Power & Protection':'plug',
+  'Rack & Enclosure':'layers',
+  'Acoustic Treatment':'headset',
+  'Mounting Hardware':'hammer',
+  'Other':'package',
+  'Home Cinema — Design & Installation':'monitor',
+  'Pro Audio — In-Ceiling Installation':'mic',
+  'Pro Audio — On-Wall Installation':'mic',
+  'Whole-Home Audio Installation':'headset',
+  'Control System Programming':'edit',
+  'Acoustic Treatment & Room Setup':'headset',
+  'AMC / Annual Maintenance':'wrench',
+  'On-site Support & Repair':'wrench',
+  'Consultation & Site Survey':'ruler',
+  'Cable Laying & Infrastructure':'plug',
+  'Other':'package',
 };
+
+const GST_RATES = ['5%','12%','18%','28%'];
+const PRODUCT_UNITS = ['Nos','Pair','Set','Lot','Metres','Box'];
+const SERVICE_UNITS = ['Lump Sum','Per Point','Per Zone','Per Sqft','Per Visit','Per Day'];
 
 const INVENTORY_META = {
   product: {
     stateKey:'products', label:'Products', addLabel:'Add Product', editLabel:'Edit Product',
-    categories: PRODUCT_CATEGORIES, sectionIcon:'wrench',
-    refLabel:'Serial / asset ID', refShort:'S/N', notesLabel:'Condition / notes', notesPlaceholder:'e.g. Good, Excellent, Needs service',
-    emptyMsg:'No products logged yet.', countNoun:'item'
+    categories: PRODUCT_CATEGORIES, sectionIcon:'package',
+    emptyMsg:'No products added yet. Add your first product to start building your catalog.', countNoun:'product'
   },
   service: {
     stateKey:'services', label:'Services', addLabel:'Add Service', editLabel:'Edit Service',
     categories: SERVICE_CATEGORIES, sectionIcon:'wrench',
-    refLabel:'Reference / contract ID', refShort:'Ref', notesLabel:'Notes', notesPlaceholder:'e.g. Quarterly visit, covers projector lamp',
-    emptyMsg:'No services logged yet.', countNoun:'service'
+    emptyMsg:'No services added yet.', countNoun:'service'
   }
 };
 
@@ -620,11 +758,11 @@ const SEED_CONTACTS = [
 
 
 const SEED_JOBS = [
-  { id:'j1', clientId:'c1', title:'Q3 Town Hall - Hinjawadi Campus', eventDate:'2026-06-28', venue:'Cognizant Hinjawadi Auditorium', status:'Booked', value:185000, notes:'Two line arrays, 6 wireless mics, confidence monitors, 12x7ft LED wall.' },
-  { id:'j2', clientId:'c2', title:'Kapoor-Iyer Wedding Reception', eventDate:'2026-07-12', venue:'Hotel Conrad, Pune', status:'Quoted', value:95000, notes:'Outdoor lawn setup. Needs weatherproof speakers and a DJ booth.' },
-  { id:'j3', clientId:'c3', title:'Sunday Service Sound Support', eventDate:'2026-06-21', venue:"St. Anne's Church, Pimpri", status:'Paid', value:3500, notes:'Recurring weekly booking, standard package.' },
-  { id:'j4', clientId:'c1', title:'New Hire Orientation AV', eventDate:'2026-06-18', venue:'Cognizant Hinjawadi Auditorium', status:'Lead', value:45000, notes:'Waiting on headcount and final date confirmation.' },
-  { id:'j5', clientId:'c2', title:'Sharma Engagement Ceremony', eventDate:'2026-06-05', venue:'Banquet Hall, Baner', status:'Completed', value:62000, notes:'Event delivered. Invoice still pending.' },
+  { id:'j1', clientId:'c1', title:'Q3 Town Hall AV — Hinjawadi', jobType:'Conference Room AV', projectDate:'2026-06-28', siteLocation:'Cognizant Hinjawadi Auditorium', status:'Booked', value:185000, notes:'Two line arrays, 6 wireless mics, confidence monitors, 12×7ft LED wall.' },
+  { id:'j2', clientId:'c2', title:'Kapoor-Iyer Villa — Home Cinema', jobType:'Home Cinema', projectDate:'2026-07-12', siteLocation:'Villa, Koregaon Park, Pune', status:'Quoted', value:95000, notes:'Dedicated 5.1 cinema room, 4K laser projector, motorised screen.' },
+  { id:'j3', clientId:'c3', title:'St. Anne\'s Church PA System', jobType:'Pro Audio — On-Wall', projectDate:'2026-06-21', siteLocation:"St. Anne's Church, Pimpri", status:'Paid', value:3500, notes:'Column speakers on side walls, digital mixer, wireless mic set.' },
+  { id:'j4', clientId:'c1', title:'Cognizant Boardroom — Ceiling Audio', jobType:'Pro Audio — In-Ceiling', projectDate:'2026-06-18', siteLocation:'Cognizant Hinjawadi, Floor 3', status:'Lead', value:45000, notes:'8-zone in-ceiling distributed audio, DSP programming, Bluetooth source.' },
+  { id:'j5', clientId:'c2', title:'Sharma Residence — Whole-Home Audio', jobType:'Home Cinema + Pro Audio', projectDate:'2026-06-05', siteLocation:'Baner, Pune', status:'Completed', value:62000, notes:'In-ceiling audio all 3 floors + cinema room basement. Invoice pending.' },
 ];
 
 const SEED_PRODUCTS = [
@@ -666,7 +804,9 @@ let state = {
   theme: 'dark',
   cinemaJobId: null,
   audioJobId: null,
-  proAudioTab: 'coverage',
+  catalogTab: 'product',
+  designTab: 'cinema',
+  designJobId: null,
   invFilter: {
     product: { category:'all', status:'all', search:'' },
     service: { category:'all', status:'all', search:'' }
@@ -757,6 +897,51 @@ function clearAllData(){
   render();
 }
 
+function showClearConfirmModal(){
+  // Step 1 — silently download a backup first, before even showing the modal
+  const payload = {
+    clients: state.clients,
+    contacts: state.contacts,
+    jobs: state.jobs,
+    products: state.products,
+    services: state.services,
+    comms: state.comms,
+    exportedAt: new Date().toISOString(),
+    note: 'Auto-backup created before Clear All'
+  };
+  const now = new Date();
+  const ts = now.getFullYear() + '-' +
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + '_' +
+    String(now.getHours()).padStart(2,'0') + '-' +
+    String(now.getMinutes()).padStart(2,'0');
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'AV-CRM_Backup_' + ts + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+
+  // Step 2 — populate and show the styled confirmation modal
+  var counts = document.getElementById('clear-modal-counts');
+  if(counts){
+    counts.innerHTML = [
+      ['Clients',   state.clients.length],
+      ['Contacts',  state.contacts.length],
+      ['Jobs',      state.jobs.length],
+      ['Products',  state.products.length],
+      ['Services',  state.services.length],
+      ['Activities',state.comms.length],
+    ].map(function(r){
+      return '<div class="clear-modal-count"><strong>' + r[1] + '</strong>' + r[0] + '</div>';
+    }).join('');
+  }
+  document.getElementById('clear-modal').style.display = 'flex';
+}
+
 function exportData(){
   const payload = {
     clients: state.clients,
@@ -767,11 +952,17 @@ function exportData(){
     comms: state.comms,
     exportedAt: new Date().toISOString()
   };
+  const exportNow = new Date();
+  const exportTs = exportNow.getFullYear() + '-' +
+    String(exportNow.getMonth()+1).padStart(2,'0') + '-' +
+    String(exportNow.getDate()).padStart(2,'0') + '_' +
+    String(exportNow.getHours()).padStart(2,'0') + '-' +
+    String(exportNow.getMinutes()).padStart(2,'0');
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'av-crm-data.json';
+  a.download = 'AV-CRM_Export_' + exportTs + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -854,20 +1045,22 @@ function saveComm(data){
 
 /* ================================ small renderers ================================ */
 
-function eqBarsHtml(pct, colorClass){
+function statProgressHtml(pct, colorClass){
   const clamped = Math.min(100, Math.max(0, pct || 0));
-  const activeCount = Math.round((clamped / 100) * EQ_HEIGHTS.length);
-  return '<div class="eq-bars">' + EQ_HEIGHTS.map(function(h, i){
-    return '<div class="eq-bar ' + (i < activeCount ? colorClass : '') + '" style="height:' + h + '%"></div>';
-  }).join('') + '</div>';
+  const colorMap = { 'eq-amber':'var(--amber-400)', 'eq-cyan':'var(--accent-text)', 'eq-red':'var(--red-400)', 'eq-emerald':'var(--emerald-400)' };
+  const color = colorMap[colorClass] || 'var(--accent-text)';
+  return '<div class="stat-progress-track">' +
+    '<div class="stat-progress-fill" style="width:' + clamped + '%;background:' + color + ';"></div>' +
+  '</div>' +
+  '<div class="stat-progress-label">' + Math.round(clamped) + '%' + (clamped < 100 ? ' of target' : ' — full') + '</div>';
 }
 
 function statCard(iconName, label, value, pct, colorClass){
   const iconHtml = iconName === 'rupee' ? rupeeIcon() : icon(iconName, 14);
   return '<div class="stat-card">' +
     '<div class="stat-top"><span class="stat-label">' + esc(label) + '</span><span class="text-zinc">' + iconHtml + '</span></div>' +
-    '<div class="stat-value">' + esc(value) + '</div>' +
-    eqBarsHtml(pct, colorClass) +
+    '<div class="stat-value">' + esc(String(value)) + '</div>' +
+    statProgressHtml(pct, colorClass) +
     '</div>';
 }
 
@@ -880,7 +1073,7 @@ function jobRowHtml(j){
       '<div class="job-row-sub">' + esc(client ? (client.company || client.name) : 'No client') + '</div>' +
     '</div>' +
     '<div class="job-row-meta">' +
-      '<div class="job-row-date">' + fmtDate(j.eventDate) + '</div>' +
+      '<div class="job-row-date">' + fmtDate(j.projectDate) + '</div>' +
       '<div class="job-row-value">' + fmtINR(j.value) + '</div>' +
     '</div>' +
   '</div>';
@@ -907,10 +1100,13 @@ function renderDashboard(){
   const pipelineValue = state.jobs.filter(function(j){ return j.status !== 'Paid'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
   const bookedValue = state.jobs.filter(function(j){ return j.status === 'Booked'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
   const outstandingValue = state.jobs.filter(function(j){ return j.status === 'Completed'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
-  const productBookedPct = state.products.length ? Math.round(state.products.filter(function(e){ return e.status === 'Booked'; }).length / state.products.length * 100) : 0;
+  const activeJobs = state.jobs.filter(function(j){ return j.status === 'Booked' || j.status === 'Completed'; });
+  const activeCount = activeJobs.length;
+  const totalJobs = state.jobs.length || 1;
+  const activePct = Math.round(activeCount / totalJobs * 100);
 
   const upcoming = state.jobs.filter(function(j){ return j.status !== 'Paid'; })
-    .slice().sort(function(a,b){ return (a.eventDate||'').localeCompare(b.eventDate||''); }).slice(0,5);
+    .slice().sort(function(a,b){ return (a.projectDate||'').localeCompare(b.projectDate||''); }).slice(0,5);
   const recent = state.comms.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).slice(0,5);
 
   return '' +
@@ -919,7 +1115,7 @@ function renderDashboard(){
     statCard('activity', 'Pipeline Value', fmtINR(pipelineValue), pipelineValue/totalJobsValue*100, 'eq-amber') +
     statCard('briefcase', 'Booked Revenue', fmtINR(bookedValue), bookedValue/totalJobsValue*100, 'eq-cyan') +
     statCard('rupee', 'Awaiting Invoice', fmtINR(outstandingValue), outstandingValue/totalJobsValue*100, 'eq-red') +
-    statCard('package', 'Products In Use', productBookedPct + '%', productBookedPct, 'eq-emerald') +
+    statCard('briefcase', 'Active Projects', activeCount + ' job' + (activeCount !== 1 ? 's' : ''), activePct, 'eq-emerald') +
   '</div>' +
   '<div class="dash-cols">' +
     '<div>' +
@@ -1081,19 +1277,20 @@ function jobCardHtml(job){
   return '<div class="job-card">' +
     '<div class="job-card-top"><div class="job-card-title">' + esc(job.title) + '</div><span class="led ' + STATUS_LED[job.status] + '" style="margin-top:4px;"></span></div>' +
     '<div class="job-card-client">' + esc(client ? (client.company || client.name) : 'No client') + '</div>' +
-    '<div class="job-card-meta">' + fmtDate(job.eventDate) + ' \u00B7 ' + esc(job.venue || '\u2014') + '</div>' +
+    (job.jobType ? '<div class="job-type-badge">' + esc(job.jobType) + '</div>' : '') +
+    '<div class="job-card-meta">' + fmtDate(job.projectDate) + ' \u00B7 ' + esc(job.siteLocation || '\u2014') + '</div>' +
     '<div class="job-card-value">' + fmtINR(job.value) + '</div>' +
     '<div class="job-card-footer">' +
       '<select class="status-select job-status-select" data-id="' + job.id + '">' +
         JOB_STATUSES.map(function(s){ return '<option value="' + s + '" ' + (s === job.status ? 'selected' : '') + '>' + s + '</option>'; }).join('') +
       '</select>' +
       '<div class="job-card-actions">' +
-        '<button class="icon-btn" data-action="open-cinema" data-id="' + job.id + '" title="Open in Cinema Design">' + icon('monitor',14) + '</button>' +
-        '<button class="icon-btn" data-action="open-audioplan" data-id="' + job.id + '" title="Open in Pro Audio">' + icon('speaker',14) + '</button>' +
-        '<button class="icon-btn" data-action="open-modal" data-type="job" data-id="' + job.id + '">' + icon('edit',14) + '</button>' +
+        '<button class="icon-btn job-action-btn" data-action="open-design" data-tab="cinema" data-id="' + job.id + '" title="Open in Cinema Design">' + icon('monitor',13) + '<span>Cinema</span></button>' +
+        '<button class="icon-btn job-action-btn" data-action="open-design" data-tab="audio" data-id="' + job.id + '" title="Open in Pro Audio">' + icon('speaker',13) + '<span>Audio</span></button>' +
+        '<button class="icon-btn job-action-btn" data-action="open-modal" data-type="job" data-id="' + job.id + '" title="Edit job">' + icon('edit',13) + '<span>Edit</span></button>' +
         (isConfirm
           ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="job" data-id="' + job.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
-          : '<button class="icon-btn danger" data-action="delete-request" data-type="job" data-id="' + job.id + '">' + icon('trash',14) + '</button>') +
+          : '<button class="icon-btn danger job-action-btn" data-action="delete-request" data-type="job" data-id="' + job.id + '" title="Delete job">' + icon('trash',13) + '<span>Delete</span></button>') +
       '</div>' +
     '</div>' +
   '</div>';
@@ -1117,7 +1314,7 @@ function renderJobs(){
 
   return '' +
   '<div class="view-header">' +
-    '<div><h2 class="view-title">Jobs</h2><p class="view-subtitle">Pipeline from first contact through to payment</p></div>' +
+    '<div><h2 class="view-title">Jobs</h2><p class="view-subtitle">Your project pipeline — from first enquiry to final payment</p></div>' +
     '<button class="btn-primary" data-action="open-modal" data-type="job" data-id="">' + icon('plus',16) + 'New Job</button>' +
   '</div>' +
   '<div class="kanban">' + cols + '</div>';
@@ -1127,16 +1324,35 @@ function invCardHtml(kind, item){
   const isConfirm = state.confirmDelete && state.confirmDelete.type === kind && state.confirmDelete.id === item.id;
   const meta = INVENTORY_META[kind];
   const catIcon = CATEGORY_ICONS[item.category] || meta.sectionIcon;
+
+  // Pricing display
+  const sell = parseFloat(item.sellingPrice);
+  const buy  = parseFloat(item.purchasePrice);
+  const margin = (sell && buy && sell > buy) ? Math.round((sell - buy) / sell * 100) : null;
+
+  let priceHtml = '';
+  if(sell) priceHtml += '<div class="inv-price">₹' + fmtINR(sell).replace('₹','') + '<span class="inv-unit"> / ' + esc(item.unit || 'Nos') + '</span></div>';
+  if(kind === 'product' && buy && sell){
+    priceHtml += '<div class="inv-margin">' +
+      '<span class="inv-cost">Cost ₹' + fmtINR(buy).replace('₹','') + '</span>' +
+      (margin !== null ? '<span class="inv-margin-pct ' + (margin >= 30 ? 'good' : margin >= 15 ? 'warn' : 'bad') + '">' + margin + '% margin</span>' : '') +
+    '</div>';
+  }
+
   return '<div class="inv-card">' +
     '<div class="inv-card-top">' +
-      '<span class="inv-cat-badge">' + icon(catIcon,13) + esc(item.category) + '</span>' +
-      '<span class="led ' + INV_LED[item.status] + '" title="' + esc(item.status) + '"></span>' +
+      '<span class="inv-cat-badge">' + icon(catIcon,12) + esc(item.category) + '</span>' +
+      (item.gst ? '<span class="inv-gst-badge">GST ' + esc(item.gst) + '</span>' : '') +
     '</div>' +
     '<div class="inv-card-name">' + esc(item.name) + '</div>' +
-    (item.serial ? '<div class="inv-card-ref">' + esc(meta.refShort) + ': ' + esc(item.serial) + '</div>' : '') +
-    (item.condition ? '<div class="inv-card-notes">' + esc(item.condition) + '</div>' : '') +
+    (kind === 'product' && (item.brand || item.modelNo)
+      ? '<div class="inv-card-ref">' + [item.brand, item.modelNo].filter(Boolean).map(esc).join(' · ') + '</div>'
+      : '') +
+    (item.keySpecs ? '<div class="inv-card-specs">' + esc(item.keySpecs) + '</div>' : '') +
+    priceHtml +
+    (item.supplier ? '<div class="inv-card-supplier">Supplier: ' + esc(item.supplier) + '</div>' : '') +
+    (item.notes ? '<div class="inv-card-notes">' + esc(item.notes) + '</div>' : '') +
     '<div class="inv-card-footer">' +
-      '<span class="equip-status ' + INV_TEXT[item.status] + '">' + item.status + '</span>' +
       '<div class="equip-actions">' +
         '<button class="icon-btn" data-action="open-modal" data-type="' + kind + '" data-id="' + item.id + '">' + icon('edit',14) + '</button>' +
         (isConfirm
@@ -1154,7 +1370,7 @@ function invFilteredItems(kind){
   return state[meta.stateKey].filter(function(item){
     if(f.category !== 'all' && item.category !== f.category) return false;
     if(f.status !== 'all' && item.status !== f.status) return false;
-    if(q && (item.name + ' ' + (item.serial||'') + ' ' + (item.condition||'') + ' ' + item.category).toLowerCase().indexOf(q) === -1) return false;
+    if(q && ([item.name, item.brand, item.modelNo, item.keySpecs, item.supplier, item.notes, item.category].filter(Boolean).join(' ')).toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
 }
@@ -1180,15 +1396,21 @@ function invStatsHtml(kind){
   const meta = INVENTORY_META[kind];
   const all = state[meta.stateKey];
   const f = state.invFilter[kind];
-  const counts = {};
-  INV_STATUSES.forEach(function(s){ counts[s] = all.filter(function(i){ return i.status === s; }).length; });
+
+  // Count items with and without pricing
+  const withPrice = all.filter(function(i){ return parseFloat(i.sellingPrice) > 0; }).length;
+  const withoutPrice = all.length - withPrice;
+
   const chips = [
     '<button class="inv-stat-chip ' + (f.status === 'all' ? 'active' : '') + '" data-action="inv-filter-status" data-kind="' + kind + '" data-value="all">' +
-      '<span class="inv-stat-num">' + all.length + '</span><span class="inv-stat-label">Total</span></button>'
-  ].concat(INV_STATUSES.map(function(s){
-    return '<button class="inv-stat-chip ' + (f.status === s ? 'active' : '') + '" data-action="inv-filter-status" data-kind="' + kind + '" data-value="' + s + '">' +
-      '<span class="led ' + INV_LED[s] + '"></span><span class="inv-stat-num">' + counts[s] + '</span><span class="inv-stat-label">' + s + '</span></button>';
-  }));
+      '<span class="inv-stat-num">' + all.length + '</span><span class="inv-stat-label">Total</span></button>',
+    '<div class="inv-stat-chip" style="cursor:default;">' +
+      '<span class="inv-stat-num" style="color:var(--emerald-400);">' + withPrice + '</span><span class="inv-stat-label">Priced</span></div>',
+    withoutPrice > 0
+      ? '<div class="inv-stat-chip" style="cursor:default;">' +
+          '<span class="inv-stat-num" style="color:var(--amber-400);">' + withoutPrice + '</span><span class="inv-stat-label">No price</span></div>'
+      : ''
+  ];
   return '<div class="inv-stats">' + chips.join('') + '</div>';
 }
 
@@ -1207,19 +1429,186 @@ function invToolbarHtml(kind){
   '<div class="inv-filters">' + pills.join('') + '</div>';
 }
 
+/* ================================ Excel import / export ================================ */
+
+var PRODUCT_EXCEL_COLS = ['Name','Category','Brand','Model No.','Unit','Purchase Price (₹)','Selling Price (₹)','GST %','Key Specs','Supplier','Notes'];
+var SERVICE_EXCEL_COLS = ['Name','Category','Unit','Selling Price (₹)','GST %','Scope / Included','Notes'];
+var EXCEL_STATUSES = ['Available','Booked','Maintenance'];
+
+function invToExcelRows(kind){
+  const meta = INVENTORY_META[kind];
+  const cols = kind === 'product' ? PRODUCT_EXCEL_COLS : SERVICE_EXCEL_COLS;
+  const rows = [cols];
+  state[meta.stateKey].forEach(function(item){
+    if(kind === 'product'){
+      rows.push([
+        item.name||'', item.category||'', item.brand||'', item.modelNo||'',
+        item.unit||'Nos', item.purchasePrice||'', item.sellingPrice||'',
+        item.gst||'18%', item.keySpecs||'', item.supplier||'', item.notes||''
+      ]);
+    } else {
+      rows.push([
+        item.name||'', item.category||'', item.unit||'Lump Sum',
+        item.sellingPrice||'', item.gst||'18%', item.keySpecs||'', item.notes||''
+      ]);
+    }
+  });
+  return rows;
+}
+
+function exportExcel(kind){
+  const meta = INVENTORY_META[kind];
+  const wb = XLSX.utils.book_new();
+
+  // Data sheet
+  const dataRows = invToExcelRows(kind);
+  const ws = XLSX.utils.aoa_to_sheet(dataRows);
+
+  // Column widths
+  ws['!cols'] = [
+    { wch:40 }, // Name
+    { wch:35 }, // Category
+    { wch:30 }, // Brand/Model or Scope
+    { wch:14 }, // Status
+    { wch:50 }, // Notes
+  ];
+
+  // Freeze top row
+  ws['!freeze'] = { xSplit:0, ySplit:1 };
+
+  XLSX.utils.book_append_sheet(wb, ws, meta.label);
+
+  // Template / reference sheet
+  const refRows = [
+    ['--- CATEGORIES (use exactly as shown) ---'],
+    ...meta.categories.map(function(c){ return [c]; }),
+    [''],
+    ['--- INSTRUCTIONS ---'],
+    ['1. Fill the \'' + meta.label + '\' sheet. Do not change column headers.'],
+    ['2. Category must match one from the list above exactly.'],
+    ['3. Prices in ₹ (numbers only, no commas or symbols).'],
+    ['4. Save as .xlsx and import using the Import Excel button in the app.'],
+  ];
+  const wsRef = XLSX.utils.aoa_to_sheet(refRows);
+  wsRef['!cols'] = [{ wch:55 }];
+  XLSX.utils.book_append_sheet(wb, wsRef, 'Reference & Instructions');
+
+  // Generate and download
+  const now = new Date();
+  const ts = now.getFullYear() + '-' +
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + '_' +
+    String(now.getHours()).padStart(2,'0') + '-' +
+    String(now.getMinutes()).padStart(2,'0');
+  XLSX.writeFile(wb, 'AV-CRM_' + meta.label + '_' + ts + '.xlsx');
+}
+
+function importExcel(kind, file){
+  const meta = INVENTORY_META[kind];
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type:'array' });
+      // Read first sheet (the data sheet)
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+
+      if(rows.length < 2){
+        alert('The Excel file appears empty. Make sure you have data rows below the header.');
+        return;
+      }
+
+      // Validate header
+      const header = rows[0].map(function(h){ return String(h).trim(); });
+      const expectedCols = kind === 'product' ? PRODUCT_EXCEL_COLS : SERVICE_EXCEL_COLS;
+      const missing = expectedCols.filter(function(col){ return header.indexOf(col) === -1; });
+      if(missing.length > 0){
+        alert('Column(s) not found: ' + missing.join(', ') + '\n\nMake sure you are importing the correct template and have not renamed any column headers.');
+        return;
+      }
+
+      const nameIdx = header.indexOf(expectedCols[0]);
+      const catIdx  = header.indexOf(expectedCols[1]);
+
+      var imported = 0, skipped = 0;
+      rows.slice(1).forEach(function(row){
+        const name = String(row[nameIdx] || '').trim();
+        if(!name){ skipped++; return; }
+        const cat = meta.categories.indexOf(String(row[catIdx]||'').trim()) !== -1
+                    ? String(row[catIdx]).trim() : meta.categories[0];
+
+        if(kind === 'product'){
+          const brandIdx  = header.indexOf('Brand');
+          const modelIdx  = header.indexOf('Model No.');
+          const unitIdx   = header.indexOf('Unit');
+          const buyIdx    = header.indexOf('Purchase Price (₹)');
+          const sellIdx   = header.indexOf('Selling Price (₹)');
+          const gstIdx    = header.indexOf('GST %');
+          const specIdx   = header.indexOf('Key Specs');
+          const suppIdx   = header.indexOf('Supplier');
+          const noteIdx   = header.indexOf('Notes');
+          state[meta.stateKey].push({
+            id: uid(), name, category: cat,
+            brand:    String(row[brandIdx]  || '').trim(),
+            modelNo:  String(row[modelIdx]  || '').trim(),
+            unit:     String(row[unitIdx]   || 'Nos').trim(),
+            purchasePrice: String(row[buyIdx]  || '').trim(),
+            sellingPrice:  String(row[sellIdx] || '').trim(),
+            gst:      String(row[gstIdx]    || '18%').trim(),
+            keySpecs: String(row[specIdx]   || '').trim(),
+            supplier: String(row[suppIdx]   || '').trim(),
+            notes:    String(row[noteIdx]   || '').trim(),
+          });
+        } else {
+          const unitIdx  = header.indexOf('Unit');
+          const sellIdx  = header.indexOf('Selling Price (₹)');
+          const gstIdx   = header.indexOf('GST %');
+          const specIdx  = header.indexOf('Scope / Included');
+          const noteIdx  = header.indexOf('Notes');
+          state[meta.stateKey].push({
+            id: uid(), name, category: cat,
+            unit:         String(row[unitIdx]  || 'Lump Sum').trim(),
+            sellingPrice: String(row[sellIdx]  || '').trim(),
+            gst:          String(row[gstIdx]   || '18%').trim(),
+            keySpecs:     String(row[specIdx]  || '').trim(),
+            notes:        String(row[noteIdx]  || '').trim(),
+          });
+        }
+        imported++;
+      });
+
+      persist();
+      render();
+      alert('Imported ' + imported + ' ' + meta.countNoun + (imported !== 1 ? 's' : '') +
+        (skipped ? ' (' + skipped + ' blank rows skipped).' : '.'));
+    }catch(err){
+      alert('Could not read the Excel file. Make sure it is a valid .xlsx file exported from this app.\n\nError: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function renderInventory(kind){
   const meta = INVENTORY_META[kind];
   const items = state[meta.stateKey];
 
   return '' +
   '<div class="view-header">' +
-    '<div><h2 class="view-title">' + esc(meta.label) + '</h2><p class="view-subtitle">' + items.length + ' ' + meta.countNoun + (items.length !== 1 ? 's' : '') + ' in inventory</p></div>' +
-    '<button class="btn-primary" data-action="open-modal" data-type="' + kind + '" data-id="">' + icon('plus',16) + esc(meta.addLabel) + '</button>' +
+    '<div><h2 class="view-title">' + esc(meta.label) + '</h2><p class="view-subtitle">' + items.length + ' ' + meta.countNoun + (items.length !== 1 ? 's' : '') + '</p></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+      '<button class="data-btn" data-action="export-excel" data-kind="' + kind + '" title="Export to Excel">' + icon('layers',14) + ' Excel ↓</button>' +
+      '<label class="data-btn" style="cursor:pointer;" title="Import from Excel">' + icon('layers',14) + ' Excel ↑' +
+        '<input type="file" accept=".xlsx,.xls" style="display:none;" data-action="import-excel" data-kind="' + kind + '"/>' +
+      '</label>' +
+      '<button class="btn-primary" data-action="open-modal" data-type="' + kind + '" data-id="">' + icon('plus',16) + esc(meta.addLabel) + '</button>' +
+    '</div>' +
   '</div>' +
   invStatsHtml(kind) +
   invToolbarHtml(kind) +
   '<div id="inv-grid-wrap-' + kind + '">' + invGridHtml(kind) + '</div>';
 }
+
 
 function renderCalendar(){
   const y = state.calMonth.y, m = state.calMonth.m;
@@ -1238,7 +1627,7 @@ function renderCalendar(){
   const cellsHtml = cells.map(function(d){
     if(d === null) return '<div class="cal-cell empty"></div>';
     const dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    const dayJobs = state.jobs.filter(function(j){ return j.eventDate === dateStr; });
+    const dayJobs = state.jobs.filter(function(j){ return j.projectDate === dateStr; });
     const isToday = dateStr === todayStr();
     const shown = dayJobs.slice(0, MAX_CHIPS);
     const extra = dayJobs.length - shown.length;
@@ -1300,97 +1689,97 @@ function buildCinemaPrefill(jobId){
     project: {
       client: client ? client.name : '',
       project: job ? job.title : '',
-      address: job ? (job.venue || (client ? client.address : '') || '') : '',
+      address: job ? (job.siteLocation || (client ? client.address : '') || '') : '',
       phone: client ? (client.phone || '') : '',
       email: client ? (client.email || '') : '',
-      date: job ? (job.eventDate || '') : ''
+      date: job ? (job.projectDate || '') : ''
     }
   };
 }
 
-function renderCinema(){
-  const job = state.cinemaJobId ? state.jobs.find(function(j){ return j.id === state.cinemaJobId; }) : null;
-  const subtitle = job
-    ? 'Opened from job \u201C' + esc(job.title) + '\u201D \u2014 project &amp; client details are sent across automatically'
-    : 'Room layout, Dolby Atmos speaker placement, THX screen sizing, 3D model, product catalog and client quotes';
+/* ---------- Catalog (Products + Services merged) ---------- */
+function renderCatalog(){
+  const tab = state.catalogTab || 'product';
   return '' +
   '<div class="view-header">' +
-    '<div><h2 class="view-title">Cinema Design</h2><p class="view-subtitle">' + subtitle + '</p></div>' +
-    '<a class="data-btn" href="cinemaplan.html" target="_blank" rel="noopener" style="text-decoration:none; padding:10px 16px;">Open in new tab \u2197</a>' +
+    '<div><h2 class="view-title">Catalog</h2><p class="view-subtitle">Your product and service catalog — used for quoting</p></div>' +
   '</div>' +
-  '<div class="cinema-frame-wrap">' +
-    '<iframe id="cinema-frame" class="cinema-frame" src="cinemaplan.html" title="CinemaPlan Design Suite"></iframe>' +
+  '<div class="proaudio-tabs" style="margin-bottom:20px;">' +
+    '<button class="proaudio-tab ' + (tab === 'product' ? 'active' : '') + '" data-action="catalog-tab" data-tab="product">' + icon('package',14) + 'Products</button>' +
+    '<button class="proaudio-tab ' + (tab === 'service' ? 'active' : '') + '" data-action="catalog-tab" data-tab="service">' + icon('wrench',14) + 'Services</button>' +
   '</div>' +
-  '<p class="helper-text">CinemaPlan opens from <code>cinemaplan.html</code> \u2014 keep that file in the same folder as this AV/CRM file. ' +
-    'The 3D model, fonts and PDF export need an internet connection to load their libraries; everything else in this CRM works offline.</p>';
+  '<div id="catalog-inner">' + renderInventory(tab) + '</div>';
+}
+
+/* ---------- Design Tools (Cinema Design + Pro Audio merged) ---------- */
+function buildCinemaPrefill(jobId){
+  const job = state.jobs.find(function(j){ return j.id === jobId; });
+  const client = job ? state.clients.find(function(c){ return c.id === job.clientId; }) : null;
+  return { project:{ client: client ? client.name : '', project: job ? job.title : '',
+    address: job ? (job.siteLocation || (client ? client.address : '') || '') : '',
+    phone: client ? (client.phone||'') : '', email: client ? (client.email||'') : '',
+    date: job ? (job.projectDate||'') : '' } };
 }
 
 function buildAudioPlanPrefill(jobId){
   const job = state.jobs.find(function(j){ return j.id === jobId; });
   const client = job ? state.clients.find(function(c){ return c.id === job.clientId; }) : null;
-  return {
-    project: {
-      client: client ? client.name : '',
-      project: job ? job.title : '',
-      address: job ? (job.venue || (client ? client.address : '') || '') : '',
-      phone: client ? (client.phone || '') : '',
-      email: client ? (client.email || '') : '',
-      date: job ? (job.eventDate || '') : ''
-    }
-  };
+  return { project:{ client: client ? client.name : '', project: job ? job.title : '',
+    address: job ? (job.siteLocation || (client ? client.address : '') || '') : '',
+    phone: client ? (client.phone||'') : '', email: client ? (client.email||'') : '',
+    date: job ? (job.projectDate||'') : '' } };
 }
 
-function renderAudioPlan(){
-  const job = state.audioJobId ? state.jobs.find(function(j){ return j.id === state.audioJobId; }) : null;
+function renderDesignTools(){
+  const tab = state.designTab || 'cinema';
+  const job = state.designJobId ? state.jobs.find(function(j){ return j.id === state.designJobId; }) : null;
   const subtitle = job
-    ? 'Opened from job \u201C' + esc(job.title) + '\u201D \u2014 project &amp; client details prefilled in AudioPlan'
-    : 'Coverage designer &amp; engineering calculator \u2014 two tools, one module';
-
-  const activeTab = state.proAudioTab || 'coverage';
+    ? 'Opened from \u201C' + esc(job.title) + '\u201D \u2014 client &amp; project details prefilled'
+    : 'Home cinema layout &amp; pro audio coverage design \u2014 two tools in one place';
 
   return '' +
   '<div class="view-header">' +
-    '<div><h2 class="view-title">Pro Audio</h2><p class="view-subtitle">' + subtitle + '</p></div>' +
-    '<div style="display:flex;gap:8px;">' +
-      '<a class="data-btn" href="audioplan.html" target="_blank" rel="noopener" style="text-decoration:none;padding:10px 14px;" title="Open AudioPlan in new tab">Coverage \u2197</a>' +
-      '<a class="data-btn" href="audiocalc.html" target="_blank" rel="noopener" style="text-decoration:none;padding:10px 14px;" title="Open AudioCalc in new tab">Calc \u2197</a>' +
+    '<div><h2 class="view-title">Design Tools</h2><p class="view-subtitle">' + subtitle + '</p></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<a class="data-btn" href="cinemaplan.html" target="_blank" rel="noopener" style="text-decoration:none;padding:9px 14px;">Cinema \u2197</a>' +
+      '<a class="data-btn" href="audioplan.html" target="_blank" rel="noopener" style="text-decoration:none;padding:9px 14px;">Coverage \u2197</a>' +
+      '<a class="data-btn" href="audiocalc.html" target="_blank" rel="noopener" style="text-decoration:none;padding:9px 14px;">Calc \u2197</a>' +
     '</div>' +
   '</div>' +
 
-  '<div class="proaudio-tabs">' +
-    '<button class="proaudio-tab ' + (activeTab === 'coverage' ? 'active' : '') + '" data-action="proaudio-tab" data-tab="coverage">' +
-      icon('speaker', 14) + 'Coverage Designer</button>' +
-    '<button class="proaudio-tab ' + (activeTab === 'calc' ? 'active' : '') + '" data-action="proaudio-tab" data-tab="calc">' +
-      icon('bolt', 14) + 'Engineering Calculator</button>' +
+  '<div class="proaudio-tabs" style="margin-bottom:14px;">' +
+    '<button class="proaudio-tab ' + (tab === 'cinema' ? 'active' : '') + '" data-action="design-tab" data-tab="cinema">' + icon('monitor',14) + 'Cinema Design</button>' +
+    '<button class="proaudio-tab ' + (tab === 'audio' ? 'active' : '') + '" data-action="design-tab" data-tab="audio">' + icon('speaker',14) + 'Pro Audio</button>' +
+    '<button class="proaudio-tab ' + (tab === 'calc' ? 'active' : '') + '" data-action="design-tab" data-tab="calc">' + icon('bolt',14) + 'Eng. Calculator</button>' +
   '</div>' +
 
-  '<div class="proaudio-panel ' + (activeTab === 'coverage' ? 'active' : '') + '" id="proaudio-panel-coverage">' +
-    '<div class="cinema-frame-wrap">' +
-      '<iframe id="audioplan-frame" class="cinema-frame" src="audioplan.html" title="AudioPlan Coverage Design Suite"></iframe>' +
-    '</div>' +
-    '<p class="helper-text">AudioPlan \u2014 in-ceiling &amp; on-wall coverage, hex/square grid layouts, zone planner, quote builder and PDF report. Loads from <code>audioplan.html</code> in the same folder.</p>' +
+  '<div class="proaudio-panel ' + (tab === 'cinema' ? 'active' : '') + '" id="design-panel-cinema">' +
+    '<div class="cinema-frame-wrap"><iframe id="cinema-frame" class="cinema-frame" src="cinemaplan.html" title="CinemaPlan"></iframe></div>' +
+    '<p class="helper-text">CinemaPlan \u2014 room layout, Dolby Atmos placement, THX screen sizing, 3D model. Loads from <code>cinemaplan.html</code>. 3D model &amp; fonts need internet.</p>' +
   '</div>' +
 
-  '<div class="proaudio-panel ' + (activeTab === 'calc' ? 'active' : '') + '" id="proaudio-panel-calc">' +
-    '<div class="cinema-frame-wrap">' +
-      '<iframe id="audiocalc-frame" class="cinema-frame" src="audiocalc.html" title="AudioCalc Engineering Calculator"></iframe>' +
-    '</div>' +
-    '<p class="helper-text">AudioCalc \u2014 SPL/distance, amp power, 100V line loading, RT60, coverage, delay alignment &amp; impedance. Loads from <code>audiocalc.html</code>. Runs fully offline.</p>' +
+  '<div class="proaudio-panel ' + (tab === 'audio' ? 'active' : '') + '" id="design-panel-audio">' +
+    '<div class="cinema-frame-wrap"><iframe id="audioplan-frame" class="cinema-frame" src="audioplan.html" title="AudioPlan"></iframe></div>' +
+    '<p class="helper-text">AudioPlan \u2014 in-ceiling &amp; on-wall coverage, hex/square grids, zone planner, PDF report. Loads from <code>audioplan.html</code>.</p>' +
+  '</div>' +
+
+  '<div class="proaudio-panel ' + (tab === 'calc' ? 'active' : '') + '" id="design-panel-calc">' +
+    '<div class="cinema-frame-wrap"><iframe id="audiocalc-frame" class="cinema-frame" src="audiocalc.html" title="AudioCalc"></iframe></div>' +
+    '<p class="helper-text">AudioCalc \u2014 SPL, amp power, 100V line, RT60, delay, impedance. Fully offline. Loads from <code>audiocalc.html</code>.</p>' +
   '</div>';
 }
 
 const VIEW_RENDERERS = {
   dashboard: renderDashboard,
-  clients: renderClients,
-  contacts: renderContacts,
-  jobs: renderJobs,
-  product: function(){ return renderInventory('product'); },
-  service: function(){ return renderInventory('service'); },
-  calendar: renderCalendar,
-  comms: renderComms,
-  cinema: renderCinema,
-  audioplan: renderAudioPlan,
+  clients:   renderClients,
+  contacts:  renderContacts,
+  jobs:      renderJobs,
+  catalog:   renderCatalog,
+  calendar:  renderCalendar,
+  comms:     renderComms,
+  design:    renderDesignTools,
 };
+
 
 /* ================================ forms ================================ */
 
@@ -1398,9 +1787,12 @@ function fieldInput(label, field, value, type, extra){
   return '<label class="field"><span class="field-label">' + esc(label) + '</span>' +
     '<input class="field-input" type="' + (type || 'text') + '" data-field="' + field + '" value="' + esc(value === undefined ? '' : value) + '" ' + (extra || '') + '/></label>';
 }
-function fieldTextarea(label, field, value, rows){
+function fieldTextarea(label, field, value, extra){
+  const isNum = typeof extra === 'number';
+  const rows = isNum ? extra : 3;
+  const ph = (!isNum && extra) ? extra : '';
   return '<label class="field"><span class="field-label">' + esc(label) + '</span>' +
-    '<textarea class="field-textarea" data-field="' + field + '" rows="' + (rows || 3) + '">' + esc(value || '') + '</textarea></label>';
+    '<textarea class="field-textarea" data-field="' + field + '" rows="' + rows + '" ' + ph + '>' + esc(value || '') + '</textarea></label>';
 }
 function fieldSelect(label, field, options, value){
   const opts = options.map(function(o){
@@ -1445,12 +1837,13 @@ function jobFormHtml(d){
   if(state.clients.length === 0){
     return '<p class="empty-msg">Add a client first before creating a job.</p><div class="form-actions"><button type="button" class="btn-secondary" data-action="close-modal">Close</button></div>';
   }
-  const clientOptions = state.clients.map(function(c){ return { value: c.id, label: c.name + ' \u2014 ' + c.company }; });
+  const clientOptions = state.clients.map(function(c){ return { value: c.id, label: c.name + ' \u2014 ' + (c.company || c.name) }; });
   return '' +
     fieldInput('Job title','title',d.title) +
     fieldSelect('Client','clientId',clientOptions,d.clientId) +
-    fieldInput('Event date','eventDate',d.eventDate,'date') +
-    fieldInput('Venue','venue',d.venue) +
+    fieldSelect('Job type','jobType',JOB_TYPES,d.jobType) +
+    fieldInput('Project date','projectDate',d.projectDate,'date') +
+    fieldInput('Site / location','siteLocation',d.siteLocation) +
     fieldSelect('Status','status',JOB_STATUSES,d.status) +
     fieldInput('Value (\u20B9)','value',d.value,'number','min="0"') +
     fieldTextarea('Notes','notes',d.notes);
@@ -1458,12 +1851,45 @@ function jobFormHtml(d){
 
 function invFormHtml(kind, d){
   const meta = INVENTORY_META[kind];
-  return '' +
-    fieldInput('Item name','name',d.name) +
-    fieldSelect('Category','category',meta.categories,d.category) +
-    fieldInput(meta.refLabel,'serial',d.serial) +
-    fieldSelect('Status','status',Object.keys(INV_LED),d.status) +
-    fieldInput(meta.notesLabel,'condition',d.condition,'text','placeholder="' + meta.notesPlaceholder + '"');
+  if(kind === 'product'){
+    return '' +
+      '<div class="form-section-label">Product Identity</div>' +
+      fieldInput('Product name / description','name',d.name,'text','placeholder="e.g. 4K Laser Projector UST"') +
+      fieldSelect('Category','category',meta.categories,d.category) +
+      '<div class="field-row-2">' +
+        fieldInput('Brand','brand',d.brand,'text','placeholder="e.g. Epson"') +
+        fieldInput('Model number','modelNo',d.modelNo,'text','placeholder="e.g. EH-LS300W"') +
+      '</div>' +
+      '<div class="form-section-label" style="margin-top:14px;">Pricing</div>' +
+      '<div class="field-row-3">' +
+        fieldInput('Purchase price (₹)','purchasePrice',d.purchasePrice,'number','min="0" step="1" placeholder="Your cost"') +
+        fieldInput('Selling price (₹)','sellingPrice',d.sellingPrice,'number','min="0" step="1" placeholder="Client price"') +
+        fieldSelect('GST rate','gst',GST_RATES,d.gst||'18%') +
+      '</div>' +
+      '<div class="form-section-label" style="margin-top:14px;">Details</div>' +
+      '<div class="field-row-2">' +
+        fieldSelect('Unit','unit',PRODUCT_UNITS,d.unit||'Nos') +
+        fieldInput('Supplier / vendor','supplier',d.supplier,'text','placeholder="e.g. Epson India / local distributor"') +
+      '</div>' +
+      fieldInput('Key specs (for quote line)','keySpecs',d.keySpecs,'text','placeholder="e.g. 4K, 3600 lm, laser, UST, HDMI 2.0"') +
+      fieldTextarea('Internal notes','notes',d.notes,'placeholder="Warranty, lead time, substitutes, your own notes"');
+  }
+  if(kind === 'service'){
+    return '' +
+      '<div class="form-section-label">Service Identity</div>' +
+      fieldInput('Service name / description','name',d.name,'text','placeholder="e.g. Pro Audio In-Ceiling Installation"') +
+      fieldSelect('Category','category',meta.categories,d.category) +
+      '<div class="form-section-label" style="margin-top:14px;">Pricing</div>' +
+      '<div class="field-row-3">' +
+        fieldInput('Selling price (₹)','sellingPrice',d.sellingPrice,'number','min="0" step="1" placeholder="Per unit price"') +
+        fieldSelect('Unit','unit',SERVICE_UNITS,d.unit||'Lump Sum') +
+        fieldSelect('GST rate','gst',GST_RATES,d.gst||'18%') +
+      '</div>' +
+      '<div class="form-section-label" style="margin-top:14px;">Details</div>' +
+      fieldTextarea('Scope / what is included','keySpecs',d.keySpecs,'placeholder="e.g. Includes cable laying, speaker mounting, DSP programming, handover and testing"') +
+      fieldTextarea('Internal notes','notes',d.notes,'placeholder="Sub-contractor, estimated man-days, exclusions, etc."');
+  }
+  return '';
 }
 
 function commFormHtml(d){
@@ -1490,11 +1916,13 @@ function buildDraft(type, data){
   }
   if(type === 'job'){
     return data ? Object.assign({}, data)
-      : { title:'', clientId: (state.clients[0] && state.clients[0].id) || '', eventDate:todayStr(), venue:'', status:'Lead', value:'', notes:'', id:null };
+      : { title:'', clientId: (state.clients[0] && state.clients[0].id) || '', jobType:JOB_TYPES[0], projectDate:todayStr(), siteLocation:'', status:'Lead', value:'', notes:'', id:null };
   }
   if(type === 'product' || type === 'service'){
-    return data ? Object.assign({}, data)
-      : { name:'', category:INVENTORY_META[type].categories[0], serial:'', status:'Available', condition:'', id:null };
+    const defaults = type === 'product'
+      ? { name:'', category:INVENTORY_META.product.categories[0], brand:'', modelNo:'', purchasePrice:'', sellingPrice:'', gst:'18%', unit:'Nos', supplier:'', keySpecs:'', notes:'', id:null }
+      : { name:'', category:INVENTORY_META.service.categories[0], sellingPrice:'', unit:'Lump Sum', gst:'18%', keySpecs:'', notes:'', id:null };
+    return data ? Object.assign({}, defaults, data) : defaults;
   }
   if(type === 'contact'){
     return data ? Object.assign({}, data, { leadSource: !!data.leadSource })
@@ -1620,6 +2048,13 @@ function onBodyClick(e){
       else if(t === 'product' || t === 'service') deleteInvItem(t, id);
       break;
     }
+    case 'export-excel':
+      if(typeof XLSX === 'undefined'){
+        alert('Excel library not loaded yet. Please check your internet connection and try again.');
+      } else {
+        exportExcel(el.dataset.kind);
+      }
+      break;
     case 'export-data':
       exportData();
       closeMobileMenu();
@@ -1641,29 +2076,29 @@ function onBodyClick(e){
       break;
     case 'clear-all-data':
       closeMobileMenu();
-      if(window.confirm('This will permanently delete all clients, contacts, jobs, products, services and activity on this device. Export a backup first if you want to keep it.\n\nClear everything and start fresh?')){
-        clearAllData();
-      }
+      showClearConfirmModal();
       break;
-    case 'open-cinema':
-      state.cinemaJobId = el.dataset.id || null;
-      state.view = 'cinema';
+    case 'open-design':
+      state.designJobId = el.dataset.id || null;
+      state.designTab = el.dataset.tab === 'audio' ? 'audio' : 'cinema';
+      state.view = 'design';
       render();
       break;
-    case 'open-audioplan':
-      state.audioJobId = el.dataset.id || null;
-      state.proAudioTab = 'coverage';
-      state.view = 'audioplan';
-      render();
-      break;
-    case 'proaudio-tab':
-      state.proAudioTab = el.dataset.tab;
-      // toggle panels and tabs in-place without full re-render (avoids iframe reload)
+    case 'design-tab':
+      state.designTab = el.dataset.tab;
+      // toggle in-place to avoid reloading iframes
       document.querySelectorAll('.proaudio-tab').forEach(function(t){
         t.classList.toggle('active', t.dataset.tab === el.dataset.tab);
       });
       document.querySelectorAll('.proaudio-panel').forEach(function(p){
-        p.classList.toggle('active', p.id === 'proaudio-panel-' + el.dataset.tab);
+        p.classList.toggle('active', p.id === 'design-panel-' + el.dataset.tab);
+      });
+      break;
+    case 'catalog-tab':
+      state.catalogTab = el.dataset.tab;
+      document.getElementById('catalog-inner').innerHTML = renderInventory(el.dataset.tab);
+      document.querySelectorAll('[data-action="catalog-tab"]').forEach(function(t){
+        t.classList.toggle('active', t.dataset.tab === el.dataset.tab);
       });
       break;
     case 'inv-filter-category':
@@ -1697,6 +2132,18 @@ function onBodyChange(e){
   const t = e.target;
   if(t.id === 'import-file-input'){
     if(t.files && t.files[0]) importDataFromFile(t.files[0]);
+    t.value = '';
+    return;
+  }
+  // Excel import file input (label wrapping input with data-action)
+  if(t.dataset && t.dataset.action === 'import-excel'){
+    if(t.files && t.files[0]){
+      if(typeof XLSX === 'undefined'){
+        alert('Excel library not loaded yet. Please check your internet connection and try again.');
+      } else {
+        importExcel(t.dataset.kind, t.files[0]);
+      }
+    }
     t.value = '';
     return;
   }
@@ -1851,14 +2298,14 @@ function init(){
     const msg = e.data;
     if(!msg) return;
     if(msg.type === 'cinemaplan:ready'){
-      if(state.cinemaJobId && e.source){
-        e.source.postMessage({ type:'cinemaplan:prefill', data: buildCinemaPrefill(state.cinemaJobId) }, '*');
+      if(state.designJobId && e.source){
+        e.source.postMessage({ type:'cinemaplan:prefill', data: buildCinemaPrefill(state.designJobId) }, '*');
       }
       return;
     }
     if(msg.type === 'audioplan:ready'){
-      if(state.audioJobId && e.source){
-        e.source.postMessage({ type:'audioplan:prefill', data: buildAudioPlanPrefill(state.audioJobId) }, '*');
+      if(state.designJobId && e.source){
+        e.source.postMessage({ type:'audioplan:prefill', data: buildAudioPlanPrefill(state.designJobId) }, '*');
       }
       return;
     }
@@ -1868,6 +2315,29 @@ function init(){
 
 init();
 </script>
+
+<!-- Clear-data confirmation modal -->
+<div class="clear-modal-overlay" id="clear-modal" style="display:none;">
+  <div class="clear-modal">
+    <div class="clear-modal-icon">🗑</div>
+    <div class="clear-modal-head">
+      <div class="clear-modal-title">Clear all data?</div>
+      <div class="clear-modal-sub">This will permanently erase everything on this device. This cannot be undone.</div>
+    </div>
+    <div class="clear-modal-backup">
+      <div class="clear-modal-backup-icon">✅</div>
+      <div class="clear-modal-backup-text">
+        <strong>Backup downloaded</strong>
+        A backup file was saved to your device before this dialog opened. If you change your mind, use Import data to restore it.
+      </div>
+    </div>
+    <div class="clear-modal-counts" id="clear-modal-counts"></div>
+    <div class="clear-modal-footer">
+      <button class="clear-modal-cancel" id="clear-modal-cancel">Cancel</button>
+      <button class="clear-modal-confirm" id="clear-modal-confirm">Yes, clear everything</button>
+    </div>
+  </div>
+</div>
 
 <!-- PWA Install Banner -->
 <div id="pwa-banner">
@@ -1885,6 +2355,23 @@ init();
 </div>
 
 <script>
+/* ============================================================
+   Clear-data confirmation modal buttons
+============================================================ */
+document.getElementById('clear-modal-cancel').addEventListener('click', function(){
+  document.getElementById('clear-modal').style.display = 'none';
+});
+
+document.getElementById('clear-modal-confirm').addEventListener('click', function(){
+  document.getElementById('clear-modal').style.display = 'none';
+  clearAllData();
+});
+
+// also close if user taps the dark overlay behind the modal
+document.getElementById('clear-modal').addEventListener('click', function(e){
+  if(e.target === this) this.style.display = 'none';
+});
+
 /* ============================================================
    PWA — Service Worker + Install Prompt
 ============================================================ */

@@ -347,63 +347,20 @@ input:focus, select:focus, textarea:focus{
 <nav class="sidebar">
   <div class="brand">Audio<span>Plan</span></div>
   <div class="brand-sub">Coverage Design Suite v1.0</div>
-  <div class="nav-item active" data-page="project"><span class="nav-num">01</span>Project</div>
-  <div class="nav-item" data-page="setup"><span class="nav-num">02</span>Speaker &amp; Coverage</div>
-  <div class="nav-item" data-page="zones"><span class="nav-num">03</span>Zones / Rooms</div>
-  <div class="nav-item" data-page="plan"><span class="nav-num">04</span>Layout Plan</div>
-  <div class="nav-item" data-page="reference"><span class="nav-num">05</span>Pattern Reference</div>
-  <div class="nav-item" data-page="quote"><span class="nav-num">06</span>Quote Builder</div>
-  <div class="nav-item" data-page="report"><span class="nav-num">07</span>Generate Report</div>
+    <div class="nav-item active" data-page="setup"><span class="nav-num">01</span>Speaker &amp; Coverage</div>
+  <div class="nav-item" data-page="zones"><span class="nav-num">02</span>Zones / Rooms</div>
+  <div class="nav-item" data-page="plan"><span class="nav-num">03</span>Layout Plan</div>
+  <div class="nav-item" data-page="reference"><span class="nav-num">04</span>Pattern Reference</div>
+  <div class="nav-item" data-page="report"><span class="nav-num">05</span>Generate Report</div>
   <div class="sidebar-footer">All data stored locally<br>in this browser only.</div>
 </nav>
 
 <main class="main">
 
-  <!-- ===================== PAGE 1: PROJECT ===================== -->
-  <section class="page active" id="page-project">
+  <!-- ===================== PAGE 1: SPEAKER & COVERAGE: SPEAKER & COVERAGE SETUP ===================== -->
+  <section class="page active" id="page-setup">
     <div class="page-header">
       <div class="page-eyebrow">Step 01</div>
-      <div class="page-title">Project &amp; Client Details</div>
-      <div class="page-desc">Enter the client and project information that will appear on the cover of your coverage report and quotation.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Client Information</div>
-      <div class="grid grid-2">
-        <div class="field"><label>Client Name</label><input id="p_client" placeholder="e.g. Mr. Sharma"></div>
-        <div class="field"><label>Project / Site Name</label><input id="p_project" placeholder="e.g. Villa Residence — Ceiling Audio"></div>
-        <div class="field"><label>Site Address</label><input id="p_address" placeholder="City, Area"></div>
-        <div class="field"><label>Contact Number</label><input id="p_phone" placeholder="+91 ..."></div>
-        <div class="field"><label>Email</label><input id="p_email" placeholder="client@email.com"></div>
-        <div class="field"><label>Date</label><input id="p_date" type="date"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Your Company Details</div>
-      <div class="grid grid-2">
-        <div class="field"><label>Company / Trade Name</label><input id="c_company" placeholder="Your enterprise name"></div>
-        <div class="field"><label>GSTIN / Tax ID (optional)</label><input id="c_gst" placeholder="e.g. 27ABCDE1234F1Z5"></div>
-        <div class="field"><label>Phone</label><input id="c_phone" placeholder="Your contact number"></div>
-        <div class="field"><label>Email</label><input id="c_email" placeholder="Your email"></div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
-      <button class="btn" onclick="newProject()">Start New Project</button>
-    </div>
-
-    <div class="security-note">
-      <span>🔒</span>
-      <div><strong>Your data stays on this device.</strong> AudioPlan runs entirely in your browser — no client data, product prices, or reports are uploaded to any server. Use "Export Project File" on the Report page to back up or move a project to another computer.</div>
-    </div>
-  </section>
-
-  <!-- ===================== PAGE 2: SPEAKER & COVERAGE SETUP ===================== -->
-  <section class="page" id="page-setup">
-    <div class="page-header">
-      <div class="page-eyebrow">Step 02</div>
       <div class="page-title">Speaker &amp; Coverage Defaults</div>
       <div class="page-desc">These defaults are used for new zones. Each zone can override them. Coverage is calculated from the speaker's conical dispersion angle (the "-6dB" beamwidth most manufacturers publish) and the mounting height above the listening plane.</div>
     </div>
@@ -478,7 +435,7 @@ input:focus, select:focus, textarea:focus{
   <!-- ===================== PAGE 3: ZONES ===================== -->
   <section class="page" id="page-zones">
     <div class="page-header">
-      <div class="page-eyebrow">Step 03</div>
+      <div class="page-eyebrow">Step 02</div>
       <div class="page-title">Zones / Rooms</div>
       <div class="page-desc">Break the project into zones (rooms or open-plan areas). Each zone gets its own coverage calculation, speaker count, and layout plan — useful when pitching a multi-room ceiling audio system to an architect or interior designer.</div>
     </div>
@@ -509,7 +466,7 @@ input:focus, select:focus, textarea:focus{
   <!-- ===================== PAGE 4: LAYOUT PLAN ===================== -->
   <section class="page" id="page-plan">
     <div class="page-header">
-      <div class="page-eyebrow">Step 04</div>
+      <div class="page-eyebrow">Step 03</div>
       <div class="page-title">Layout Plan</div>
       <div class="page-desc">A scaled top-down plan of the selected zone showing speaker positions and their dispersion coverage footprint. This is the visual you'll walk an architect or interior designer through.</div>
     </div>
@@ -548,78 +505,25 @@ input:focus, select:focus, textarea:focus{
   <!-- ===================== PAGE 5: PATTERN REFERENCE ===================== -->
   <section class="page" id="page-reference">
     <div class="page-header">
-      <div class="page-eyebrow">Step 05</div>
+      <div class="page-eyebrow">Step 04</div>
       <div class="page-title">In-Ceiling &amp; On-Wall Pattern Reference</div>
       <div class="page-desc">A quick reference you can talk an architect or interior designer through — how dispersion coverage, mounting height and grid pattern relate, and why hexagonal layouts are usually the more efficient choice.</div>
     </div>
     <div id="referenceContent"></div>
   </section>
 
-  <!-- ===================== PAGE 6: QUOTE ===================== -->
-  <section class="page" id="page-quote">
-    <div class="page-header">
-      <div class="page-eyebrow">Step 06</div>
-      <div class="page-title">Quote Builder</div>
-      <div class="page-desc">Speaker quantities are pre-filled from your zone calculations. Maintain your price list once and reuse it across projects.</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Suggested Quantities (from zones)</div>
-      <div class="readout" id="quoteSuggestion"></div>
-      <div class="btn-row">
-        <button class="btn btn-sm" onclick="applySuggestedQuantities()">Apply suggested quantities to price list</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Product / Price List</div>
-      <div style="overflow-x:auto;">
-        <table class="product-table" id="productTable">
-          <thead>
-            <tr><th style="width:30%;">Product Name</th><th style="width:18%;">Category</th><th style="width:12%;">Price (₹)</th><th style="width:10%;">Qty</th><th style="width:14%;">Line Total</th><th style="width:8%;">Include</th><th style="width:8%;"></th></tr>
-          </thead>
-          <tbody id="productRows"></tbody>
-        </table>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-sm" onclick="addProductRow()">+ Add Product</button>
-        <button class="btn btn-sm" onclick="saveProductDB()">Save Price List</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Budget</div>
-      <div class="grid grid-2">
-        <div class="field"><label>Client Budget (₹, optional)</label><input id="q_budget" type="number" placeholder="e.g. 350000" oninput="renderBudgetBar()"></div>
-      </div>
-      <div class="budget-bar"><div class="budget-fill" id="budgetFill" style="width:0%;"></div></div>
-      <div class="readout">
-        <div><span class="label">Items Included</span><span class="val" id="qSummaryItems">0</span></div>
-        <div><span class="label">Subtotal</span><span class="val" id="qSummarySubtotal">₹0</span></div>
-        <div><span class="label">Client Budget</span><span class="val" id="qSummaryBudget">—</span></div>
-        <div><span class="label">Remaining / Over Budget</span><span class="val" id="qSummaryDiff">—</span></div>
-      </div>
-      <div class="total-row"><span>Grand Total</span><span class="amt" id="qGrandTotal">₹0</span></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="saveAndGo('report')">Continue to Report →</button>
-    </div>
-  </section>
-
-  <!-- ===================== PAGE 7: REPORT ===================== -->
+  <!-- ===================== PAGE 5: REPORT: REPORT ===================== -->
   <section class="page" id="page-report">
     <div class="page-header">
-      <div class="page-eyebrow">Step 07</div>
+      <div class="page-eyebrow">Step 05</div>
       <div class="page-title">Generate Client Report</div>
-      <div class="page-desc">Produce a polished PDF combining project details, per-zone coverage calculations, layout diagrams, the pattern reference, and (optionally) the quotation — ready to share with an architect or interior designer.</div>
+      <div class="page-desc">Produce a polished PDF combining project details, per-zone coverage calculations, zone layout diagrams and the pattern reference — ready to share with an architect or interior designer.</div>
     </div>
 
     <div class="card">
       <div class="card-title">Report Options</div>
       <div class="grid grid-2">
         <div class="field">
-          <label><input type="checkbox" id="rep_quote" checked style="width:auto; margin-right:8px;">Include Quotation</label>
         </div>
         <div class="field">
           <label><input type="checkbox" id="rep_plans" checked style="width:auto; margin-right:8px;">Include Layout Plan Diagrams</label>
@@ -699,13 +603,8 @@ function loadState(){
 }
 
 function persistState(){
-  state.project = {
-    client: val('p_client'), project: val('p_project'), address: val('p_address'),
-    phone: val('p_phone'), email: val('p_email'), date: val('p_date')
-  };
-  state.company = {
-    company: val('c_company'), gst: val('c_gst'), phone: val('c_phone'), email: val('c_email')
-  };
+  // state.project is populated from the CRM prefill bridge — do not overwrite from removed form fields
+  // just save current state (zones, setup, screen, audio config) to localStorage
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }catch(e){ console.warn('Could not save state', e); }
@@ -713,9 +612,6 @@ function persistState(){
 
 function hydrateForm(){
   const p = state.project||{}, c = state.company||{};
-  setVal('p_client', p.client); setVal('p_project', p.project); setVal('p_address', p.address);
-  setVal('p_phone', p.phone); setVal('p_email', p.email); setVal('p_date', p.date);
-  setVal('c_company', c.company); setVal('c_gst', c.gst); setVal('c_phone', c.phone); setVal('c_email', c.email);
 
   // defaults
   const d = state.defaults;
@@ -772,7 +668,6 @@ function navTo(page){
   if(page==='zones'){ renderZoneList(); renderZoneEditor(); }
   if(page==='plan'){ renderPlanZoneSelect(); renderPlan(); }
   if(page==='reference'){ renderReference(); }
-  if(page==='quote'){ renderQuoteSuggestion(); renderProductTable(); }
 }
 
 /* ============================================================
@@ -940,7 +835,7 @@ function recalcAll(){
   renderZoneEditor();
   renderZoneSummary();
   if(document.getElementById('page-plan').classList.contains('active')) renderPlan();
-  if(document.getElementById('page-quote').classList.contains('active')) renderQuoteSuggestion();
+  
 }
 
 function renderCoverageReadout(){
@@ -1427,39 +1322,20 @@ function loadProductDB(){
   }
 }
 function saveProductDB(){
-  try{ localStorage.setItem(PRODUCT_DB_KEY, JSON.stringify(products)); showToast('Price list saved.'); }
+  try{ localStorage.setItem(PRODUCT_DB_KEY, JSON.stringify(products)); }
   catch(e){ console.warn(e); }
 }
 
-function renderProductTable(){
-  const tbody = document.getElementById('productRows');
-  tbody.innerHTML = products.map(function(p,i){
-    const catOptions = CATEGORIES.map(function(c){ return '<option value="'+c+'" '+(p.category===c?'selected':'')+'>'+c+'</option>'; }).join('');
-    const lineTotal = (p.price * p.qty)||0;
-    return '<tr>' +
-      '<td><input value="'+escapeHtml(p.name)+'" oninput="updateProduct('+i+',\'name\',this.value)"></td>' +
-      '<td><select onchange="updateProduct('+i+',\'category\',this.value)">'+catOptions+'</select></td>' +
-      '<td><input type="number" value="'+p.price+'" oninput="updateProduct('+i+',\'price\',this.value)"></td>' +
-      '<td><input type="number" value="'+p.qty+'" min="0" oninput="updateProduct('+i+',\'qty\',this.value)"></td>' +
-      '<td style="font-family:\'JetBrains Mono\',monospace;">\u20B9'+lineTotal.toLocaleString('en-IN')+'</td>' +
-      '<td style="text-align:center;"><input type="checkbox" '+(p.include?'checked':'')+' style="width:auto;" onchange="updateProduct('+i+',\'include\',this.checked)"></td>' +
-      '<td><button class="btn btn-sm btn-danger" onclick="removeProduct('+i+')">\u2715</button></td>' +
-    '</tr>';
-  }).join('');
-  renderBudgetBar();
-}
+function renderProductTable(){}
 function updateProduct(i, field, value){
   if(field==='price' || field==='qty') value = parseFloat(value)||0;
   products[i][field] = value;
-  if(field!=='include') renderProductTable(); else renderBudgetBar();
 }
 function addProductRow(){
   products.push({name:'New Product', category:'Other', price:0, qty:1, include:true});
-  renderProductTable();
 }
 function removeProduct(i){
   products.splice(i,1);
-  renderProductTable();
 }
 
 function totalSpeakerCounts(){
@@ -1472,22 +1348,7 @@ function totalSpeakerCounts(){
   return { ceilingCount, wallCount };
 }
 
-function renderQuoteSuggestion(){
-  const el = document.getElementById('quoteSuggestion');
-  if(state.zones.length===0){
-    el.innerHTML = '<div class="helper">Add zones in Step 03 to get suggested speaker quantities here.</div>';
-    return;
-  }
-  let rows = '';
-  state.zones.forEach(function(z){
-    const calc = calcZone(z);
-    rows += kvRow(z.name + ' (' + (z.mount==='wall'?'On-Wall':'In-Ceiling '+(z.pattern==='hex'?'Hex':'Square')) + ')', calc.count + ' speaker' + (calc.count!==1?'s':''));
-  });
-  const totals = totalSpeakerCounts();
-  rows += kvRow('Total in-ceiling speakers', totals.ceilingCount + '', true);
-  rows += kvRow('Total on-wall speakers', totals.wallCount + '', true);
-  el.innerHTML = rows;
-}
+function renderQuoteSuggestion(){}
 
 function applySuggestedQuantities(){
   const totals = totalSpeakerCounts();
@@ -1506,34 +1367,10 @@ function applySuggestedQuantities(){
       p.qty = totals.wallCount; p.include = true; wallSet = true;
     }
   });
-  renderProductTable();
   showToast('Suggested quantities applied to the first matching product line in each category.');
 }
 
-function renderBudgetBar(){
-  const included = products.filter(function(p){ return p.include; });
-  const subtotal = included.reduce(function(sum,p){ return sum+(p.price*p.qty); },0);
-  const budget = parseFloat(val('q_budget'))||0;
-
-  document.getElementById('qSummaryItems').textContent = included.length;
-  document.getElementById('qSummarySubtotal').textContent = '\u20B9'+subtotal.toLocaleString('en-IN');
-  document.getElementById('qSummaryBudget').textContent = budget ? '\u20B9'+budget.toLocaleString('en-IN') : '\u2014';
-  document.getElementById('qGrandTotal').textContent = '\u20B9'+subtotal.toLocaleString('en-IN');
-
-  const diffEl = document.getElementById('qSummaryDiff');
-  const fill = document.getElementById('budgetFill');
-  if(budget){
-    const diff = budget - subtotal;
-    diffEl.textContent = (diff>=0? '\u20B9'+diff.toLocaleString('en-IN')+' remaining' : '\u20B9'+Math.abs(diff).toLocaleString('en-IN')+' over budget');
-    diffEl.className = diff>=0 ? 'val' : 'val warn';
-    const pct = Math.min(100, (subtotal/budget)*100);
-    fill.style.width = pct+'%';
-    fill.classList.toggle('over', subtotal>budget);
-  } else {
-    diffEl.textContent = '\u2014';
-    fill.style.width = '0%';
-  }
-}
+function renderBudgetBar(){}
 
 /* ============================================================
    PDF REPORT GENERATION
@@ -1682,39 +1519,6 @@ async function generatePDF(){
     paragraph('On-wall speakers are arranged in a single row along the longer wall; if the room depth exceeds the coverage diameter, a second row (or in-ceiling units) is recommended for full-depth coverage.');
   }
 
-  // ---- Quote ----
-  if(document.getElementById('rep_quote').checked){
-    checkPage(20);
-    h1('Quotation');
-    const included = products.filter(function(p){ return p.include; });
-    doc.setFontSize(9); doc.setFont('helvetica','bold');
-    const qcol = [margin, margin+85, margin+118, margin+138, margin+165];
-    ['Product','Category','Price','Qty','Total'].forEach(function(t,i){ doc.text(t, qcol[i], y); });
-    y+=2; doc.setDrawColor(200,200,200); doc.line(margin,y,pageW-margin,y); y+=5;
-    doc.setFont('helvetica','normal');
-    let total=0;
-    included.forEach(function(p){
-      checkPage(7);
-      const lineTotal = p.price*p.qty;
-      total += lineTotal;
-      doc.text(doc.splitTextToSize(p.name, 80)[0], qcol[0], y);
-      doc.text(p.category, qcol[1], y);
-      doc.text('Rs.'+p.price.toLocaleString('en-IN'), qcol[2], y);
-      doc.text(String(p.qty), qcol[3], y);
-      doc.text('Rs.'+lineTotal.toLocaleString('en-IN'), qcol[4], y);
-      y+=6;
-    });
-    checkPage(10);
-    y+=2; doc.setDrawColor(61,198,232); doc.setLineWidth(0.6); doc.line(margin,y,pageW-margin,y); y+=7;
-    doc.setFont('helvetica','bold'); doc.setFontSize(12);
-    doc.text('Grand Total: Rs. '+total.toLocaleString('en-IN'), margin, y);
-    y+=10;
-    const budget = parseFloat(val('q_budget'));
-    if(budget){
-      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(100,100,100);
-      doc.text('Client Budget: Rs. '+budget.toLocaleString('en-IN'), margin, y); y+=6;
-    }
-  }
 
   // ---- Footer ----
   const pageCount = doc.internal.getNumberOfPages();
@@ -1780,7 +1584,6 @@ function handleImport(e){
 ============================================================ */
 loadState();
 loadProductDB();
-renderProductTable();
 renderReference();
 </script>
 
