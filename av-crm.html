@@ -239,10 +239,35 @@
   .cancel-btn{background:none; border:none; font-size:12px; color:var(--zinc-500); cursor:pointer; padding:0;}
 
   /* ---------- dashboard ---------- */
-  .stats-grid{display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:32px;}
+  .stats-grid{display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:24px;}
   @media (min-width:640px){ .stats-grid{grid-template-columns:1fr 1fr;} }
   @media (min-width:1024px){ .stats-grid{grid-template-columns:1fr 1fr 1fr 1fr;} }
-  .stat-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px;}
+  .stat-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px; cursor:pointer; transition:border-color 0.15s;}
+  .stat-card:hover{border-color:var(--accent-text);}
+  .stat-card.urgent{border-left:3px solid var(--red-400);}
+  .stat-card.active{border-left:3px solid var(--emerald-400);}
+  .stat-card.money{border-left:3px solid var(--amber-400);}
+  .stat-card.visits{border-left:3px solid var(--cyan-400);}
+  .task-board{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+  .task-row{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color 0.15s;}
+  .task-row:hover{border-color:var(--accent-text);}
+  .task-stage{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;padding:3px 8px;border-radius:4px;flex-shrink:0;min-width:110px;text-align:center;}
+  .task-stage.ts-lead{background:rgba(161,161,170,0.15);color:var(--zinc-400);}
+  .task-stage.ts-site{background:rgba(167,139,250,0.15);color:#a78bfa;}
+  .task-stage.ts-quoted{background:rgba(251,191,36,0.12);color:var(--amber-400);}
+  .task-stage.ts-booked{background:rgba(34,211,238,0.12);color:var(--accent-text);}
+  .task-stage.ts-wip{background:rgba(96,165,250,0.12);color:#60a5fa;}
+  .task-stage.ts-completed{background:rgba(52,211,153,0.12);color:var(--emerald-400);}
+  .task-info{flex:1;min-width:0;}
+  .task-title{font-size:14px;font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .task-client{font-size:12px;color:var(--zinc-500);margin-top:1px;}
+  .task-meta{text-align:right;flex-shrink:0;}
+  .task-value{font-size:13px;font-family:ui-monospace,monospace;color:var(--zinc-400);}
+  .task-date{font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-600);margin-top:2px;}
+  .task-action{font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-500);font-style:italic;flex-shrink:0;max-width:160px;text-align:right;}
+  .dash-section-head{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--zinc-500);font-family:ui-monospace,monospace;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--zinc-800);display:flex;align-items:center;justify-content:space-between;}
+  .dash-empty{text-align:center;padding:28px 16px;color:var(--zinc-600);font-size:13px;background:var(--zinc-900);border:1px dashed var(--zinc-800);border-radius:10px;}
+  .network-overdue-strip{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--red-400);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .stat-top{display:flex; align-items:center; justify-content:space-between;}
   .stat-label{font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--zinc-500); font-family:ui-monospace,monospace;}
   .stat-value{font-size:24px; font-weight:700; color:var(--text-strong); font-family:ui-monospace,monospace;}
@@ -268,6 +293,7 @@
   .job-row-value{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
 
   .comm-row{display:flex; align-items:flex-start; gap:12px; background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:8px; padding:12px 16px;}
+  .comm-actions{display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:auto;}
   .comm-icon{color:var(--zinc-500); margin-top:2px; display:flex;}
   .comm-body{flex:1; min-width:0;}
   .comm-top{display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;}
@@ -306,6 +332,9 @@
   .tag{font-size:12px; background:var(--zinc-800); color:var(--zinc-400); border-radius:4px; padding:2px 8px;}
   .client-notes{font-size:12px; color:var(--zinc-500); margin-top:4px; line-height:1.5;}
   .client-footer{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-600); margin-top:4px;}
+  .client-card{cursor:pointer;}
+  .client-footer-link{color:var(--accent-text); font-weight:600;}
+  .client-referred-by{font-size:11px; font-family:ui-monospace,monospace; color:var(--accent-text); display:flex; align-items:center; gap:5px; margin:4px 0;}
 
   /* ---------- jobs / kanban ---------- */
   .kanban{display:grid; grid-template-columns:1fr; gap:16px;}
@@ -380,6 +409,94 @@
   .inv-card-footer{display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:auto; padding-top:8px; border-top:1px solid var(--zinc-800);}
   .inv-empty{display:flex; flex-direction:column; align-items:flex-start; gap:12px;}
 
+  /* ---------- prospects ---------- */
+  .prospects-dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+  .prospects-kpi{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:14px 16px;}
+  .prospects-kpi-val{font-size:26px;font-weight:700;font-family:ui-monospace,monospace;color:var(--text-strong);}
+  .prospects-kpi-label{font-size:11px;color:var(--zinc-500);text-transform:uppercase;letter-spacing:0.1em;font-family:ui-monospace,monospace;margin-top:2px;}
+  .prospects-kpi-sub{font-size:12px;color:var(--zinc-400);margin-top:4px;}
+  .prospect-cards{display:flex;flex-direction:column;gap:10px;}
+  .prospect-card{background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--zinc-700);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color 0.15s;}
+  .prospect-card:hover{border-color:var(--cyan-400);}
+  .prospect-card.heat-hot{border-left-color:var(--amber-400);}
+  .prospect-card.heat-warm{border-left-color:var(--cyan-400);}
+  .prospect-card.overdue{border-left-color:var(--red-400)!important;}
+  .pc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;}
+  .pc-name{font-size:15px;font-weight:600;color:var(--text-strong);}
+  .pc-firm{font-size:12px;color:var(--zinc-500);margin-top:1px;}
+  .pc-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .pc-stage{font-size:10px;font-family:ui-monospace,monospace;letter-spacing:0.06em;padding:2px 7px;border-radius:4px;background:var(--zinc-800);color:var(--zinc-400);}
+  .pc-stage.active-prospect{background:rgba(251,191,36,0.12);color:var(--amber-400);}
+  .pc-stage.on-project,.pc-stage.repeat{background:rgba(52,211,153,0.12);color:var(--emerald-400);}
+  .pc-heat{font-size:13px;}
+  .pc-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--zinc-500);margin-top:6px;}
+  .pc-followup{font-size:11px;font-family:ui-monospace,monospace;color:var(--cyan-400);margin-top:6px;}
+  .pc-followup.overdue{color:var(--red-400);}
+  .pc-followup.today{color:var(--amber-400);}
+  .pc-last-note{font-size:12px;color:var(--zinc-500);margin-top:6px;line-height:1.5;font-style:italic;border-top:1px solid var(--zinc-800);padding-top:7px;}
+  .prospect-detail-avatar{width:52px;height:52px;border-radius:50%;background:rgba(34,211,238,0.1);border:2px solid var(--cyan-400);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--cyan-400);flex-shrink:0;font-family:ui-monospace,monospace;}
+  .prospect-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:14px;}
+  .prospect-info-item{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:9px 12px;}
+  .prospect-info-label{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--zinc-600);margin-bottom:3px;}
+  .prospect-info-val{font-size:13px;color:var(--text-strong);}
+  .meeting-timeline{display:flex;flex-direction:column;gap:10px;}
+  .meeting-entry{background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--zinc-700);border-radius:10px;padding:13px 15px;}
+  .meeting-entry.followup-pending{border-left-color:var(--amber-400);}
+  .meeting-entry.followup-done{border-left-color:var(--zinc-700);}
+  .me-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+  .me-date{font-family:ui-monospace,monospace;font-size:12px;color:var(--cyan-400);}
+  .me-type{font-size:10px;background:var(--zinc-800);color:var(--zinc-400);padding:2px 7px;border-radius:4px;font-family:ui-monospace,monospace;letter-spacing:0.06em;}
+  .me-reaction{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;font-family:ui-monospace,monospace;}
+  .me-reaction.rv{background:rgba(52,211,153,0.12);color:var(--emerald-400);}
+  .me-reaction.ri{background:rgba(34,211,238,0.1);color:var(--cyan-400);}
+  .me-reaction.rn{background:var(--zinc-800);color:var(--zinc-500);}
+  .me-reaction.rnn{background:rgba(251,191,36,0.1);color:var(--amber-400);}
+  .me-reaction.rno{background:rgba(248,113,113,0.1);color:var(--red-400);}
+  .me-label{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--zinc-600);margin-top:7px;margin-bottom:2px;}
+  .me-val{font-size:13px;color:var(--text-strong);line-height:1.5;}
+  .me-commit{font-size:12px;color:var(--zinc-400);line-height:1.5;}
+  .me-followup-strip{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;font-family:ui-monospace,monospace;padding:6px 10px;border-radius:6px;background:rgba(251,191,36,0.07);color:var(--amber-400);border:1px solid rgba(251,191,36,0.18);}
+  .me-followup-strip.done{background:var(--zinc-800);color:var(--zinc-600);border-color:var(--zinc-800);}
+  .prospects-alert{background:rgba(248,113,113,0.07);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--red-400);}
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--zinc-800);}
+  .section-head-title{font-size:15px;font-weight:600;color:var(--text-strong);}
+
+  /* ---------- supply chain ---------- */
+  .supply-tabs{display:flex;gap:4px;background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:4px;width:fit-content;margin-bottom:20px;}
+  .supply-tab{padding:8px 18px;border-radius:7px;border:none;font-size:13px;font-weight:500;cursor:pointer;color:var(--zinc-400);background:transparent;transition:all 0.15s;}
+  .supply-tab.active{background:var(--zinc-800);color:var(--text-strong);}
+  .supply-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+  .supply-card{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:16px;cursor:pointer;transition:border-color 0.15s;}
+  .supply-card:hover{border-color:var(--accent-text);}
+  .supply-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .supply-card-name{font-size:15px;font-weight:600;color:var(--text-strong);}
+  .supply-card-sub{font-size:12px;color:var(--zinc-500);margin-top:1px;}
+  .supply-card-brands{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;}
+  .brand-pill{font-size:10px;font-family:ui-monospace,monospace;letter-spacing:0.06em;padding:2px 8px;border-radius:4px;background:rgba(34,211,238,0.08);color:var(--accent-text);border:1px solid rgba(34,211,238,0.15);}
+  .supply-meta{font-size:12px;color:var(--zinc-500);display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+  .supply-card-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--zinc-800);}
+  .supply-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:16px;}
+  .supply-info-item{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:9px 12px;}
+  .supply-info-label{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--zinc-600);margin-bottom:3px;}
+  .supply-info-val{font-size:13px;color:var(--text-strong);}
+  .pricelist-entry{background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--cyan-400);border-radius:8px;padding:11px 14px;margin-bottom:8px;}
+  .pricelist-date{font-family:ui-monospace,monospace;font-size:11px;color:var(--accent-text);}
+  .pricelist-summary{font-size:13px;color:var(--text-strong);margin-top:3px;line-height:1.5;}
+  .reliability-excellent{color:var(--emerald-400);}
+  .reliability-good{color:var(--cyan-400);}
+  .reliability-average{color:var(--amber-400);}
+  .reliability-inconsistent{color:var(--red-400);}
+  .import-zone{border:2px dashed var(--zinc-700);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:border-color 0.15s;margin-top:12px;}
+  .import-zone:hover,.import-zone.drag{border-color:var(--accent-text);}
+  .import-zone-icon{font-size:32px;margin-bottom:8px;}
+  .import-zone-text{font-size:14px;color:var(--zinc-400);}
+  .import-zone-sub{font-size:12px;color:var(--zinc-600);margin-top:4px;}
+  .import-result{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:14px 16px;margin-top:14px;}
+  .import-result-row{display:flex;align-items:center;gap:10px;font-size:13px;padding:4px 0;}
+  .import-dot-new{width:8px;height:8px;border-radius:50%;background:var(--emerald-400);flex-shrink:0;}
+  .import-dot-updated{width:8px;height:8px;border-radius:50%;background:var(--cyan-400);flex-shrink:0;}
+  .import-dot-skip{width:8px;height:8px;border-radius:50%;background:var(--zinc-600);flex-shrink:0;}
+
   /* ---------- calendar ---------- */
   .cal-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:8px;}
   .cal-month-group{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center;}
@@ -420,6 +537,9 @@
   .field-input, .field-select, .field-textarea{width:100%; background:var(--input-bg); border:1px solid var(--zinc-700);
     border-radius:6px; padding:8px 12px; font-size:14px; color:var(--text-strong); font-family:inherit;}
   .field-input:focus, .field-select:focus, .field-textarea:focus{outline:none; border-color:var(--cyan-400);}
+  .field-input.field-error, .field-select.field-error, .field-textarea.field-error{border-color:var(--red-400); background:rgba(248,113,113,0.05);}
+  .form-error-msg{background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.25); color:var(--red-400);
+    border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:14px;}
   .field-textarea{resize:vertical; min-height:64px;}
   .form-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:16px; border-top:1px solid var(--zinc-800); padding-top:16px;}
   .form-section-label{font-family:ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin-bottom:8px;margin-top:4px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);}
@@ -512,14 +632,16 @@
 /* ================================ constants ================================ */
 
 const NAV = [
-  { id:'dashboard', label:'Dashboard',    icon:'dashboard',  num:'01' },
-  { id:'clients',   label:'Clients',      icon:'users',      num:'02' },
-  { id:'contacts',  label:'Contacts',     icon:'idcard',     num:'03' },
-  { id:'jobs',      label:'Jobs',         icon:'briefcase',  num:'04' },
-  { id:'catalog',   label:'Catalog',      icon:'package',    num:'05' },
-  { id:'calendar',  label:'Calendar',     icon:'calendar',   num:'06' },
-  { id:'comms',     label:'Activity',     icon:'message',    num:'07' },
-  { id:'design',    label:'Design Tools', icon:'monitor',    num:'08' },
+  { id:'dashboard',    label:'Dashboard',     icon:'dashboard',  num:'01' },
+  { id:'contacts',     label:'Contacts',      icon:'idcard',     num:'02' },
+  { id:'network',      label:'Network',       icon:'star',       num:'03' },
+  { id:'clients',      label:'Clients',       icon:'users',      num:'04' },
+  { id:'jobs',         label:'Jobs',          icon:'briefcase',  num:'05' },
+  { id:'design',       label:'Design Tools',  icon:'monitor',    num:'06' },
+  { id:'catalog',      label:'Catalog',       icon:'package',    num:'07' },
+  { id:'supply',       label:'Supply Chain',  icon:'truck',      num:'08' },
+  { id:'calendar',     label:'Calendar',      icon:'calendar',   num:'09' },
+  { id:'comms',        label:'Activity',      icon:'message',    num:'10' },
 ];
 
 const JOB_STATUSES = ['Lead','Site Visit','Quoted','Booked','Work in Progress','Completed','Paid'];
@@ -535,6 +657,90 @@ const JOB_TYPES = [
   'Home Cinema + Pro Audio',
   'Other',
 ];
+
+/* ── Prospects ── */
+const PROSPECT_TYPES      = ['Architect', 'Interior Designer', 'Builder / Developer', 'PMC / Project Manager', 'Other'];
+const PROSPECT_STAGES     = ['Awareness', 'First Contact', 'Relationship', 'Active Prospect', 'On a Project', 'Repeat Partner', 'Cold / Dormant'];
+const PROSPECT_HEAT       = ['🔥 Hot', '🌤 Warm', '❄️ Cold'];
+const PROSPECT_BUDGET     = ['Entry (< ₹5L)', 'Mid (₹5L–20L)', 'Premium (₹20L–50L)', 'Luxury (> ₹50L)', 'Unknown'];
+const PROSPECT_SPECIALITY = ['Residential — Villas', 'Residential — Apartments', 'Commercial — Office', 'Hospitality', 'Retail', 'Mixed / All', 'Other'];
+const PROSPECT_HOW_MET    = ['Cold Visit', 'Referral', 'Exhibition / Event', 'LinkedIn / Social', 'Google Search', 'Common Contact', 'Walk-in / Inquiry', 'Other'];
+const MEETING_TYPES       = ['Office Visit', 'Site Visit', 'Phone Call', 'WhatsApp', 'Email', 'Video Call', 'Lunch / Coffee', 'Exhibition', 'Chance Meeting'];
+const OFFERING_CATS       = ['Home Cinema', 'Pro Audio — In-Ceiling', 'Pro Audio — On-Wall', 'Whole-Home Audio', 'Conference Room AV', 'AudioPlan Coverage Design', 'CinemaPlan Report', 'General Introduction'];
+const MEETING_REACTIONS   = ['Very Interested', 'Interested', 'Neutral', 'Not Now', 'Not Interested'];
+
+const STAGE_COLORS = {
+  'Awareness':       { led:'led-zinc',    text:'text-zinc' },
+  'First Contact':   { led:'led-blue',    text:'text-blue' },
+  'Relationship':    { led:'led-cyan',    text:'text-cyan' },
+  'Active Prospect': { led:'led-amber',   text:'text-amber' },
+  'On a Project':    { led:'led-emerald', text:'text-emerald' },
+  'Repeat Partner':  { led:'led-emerald', text:'text-emerald' },
+  'Cold / Dormant':  { led:'led-zinc',    text:'text-zinc' },
+};
+
+const SEED_NETWORK = [
+  {
+    id:'n1', contactId:'ct7',
+    stage:'Relationship', heat:'🌤 Warm',
+    budgetRange:'Premium (₹20L–50L)', speciality:'Residential — Villas',
+    typicalProjects:'Villa bungalows, 3–4 per year, Koregaon Park / Baner',
+    howMet:'Referral', referredBy:'Rohan Mehta',
+    notes:'Very particular about aesthetics — tech must be invisible. Hates exposed cables and big boxes. Responds well to design-language conversation, not specs. Best time to reach: Tuesday/Thursday morning on WhatsApp.',
+    nextFollowUp: new Date(Date.now() + 5*24*60*60*1000).toISOString().slice(0,10),
+    meetings:[
+      { id:'m1', date:'2026-06-02', type:'Office Visit',
+        discussed:'Introduced AudioPlan and CinemaPlan. Showed hex grid dispersion concept for a villa project she has in Baner.',
+        offered:['AudioPlan Coverage Design','Home Cinema'], reaction:'Interested',
+        projectsMentioned:'Baner villa — 4BHK, client wants invisible ceiling audio and maybe a dedicated cinema room.',
+        myCommitments:'Send AudioPlan coverage report sample for a 20×14 ft room.',
+        theirCommitments:'Will introduce to villa client if project moves to interior fit-out stage.',
+        followUpAction:'Send sample PDF coverage report', followUpDate:'2026-06-09', done:true },
+      { id:'m2', date:'2026-06-14', type:'WhatsApp',
+        discussed:'Sent sample AudioPlan PDF. She replied positively — forwarded to the Baner villa client.',
+        offered:[], reaction:'Very Interested', projectsMentioned:'',
+        myCommitments:'Call her next week for introduction to client.',
+        theirCommitments:'', followUpAction:'Call to confirm client intro', followUpDate:'2026-06-21', done:false }
+    ]
+  },
+  {
+    id:'n2', contactId:'ct8',
+    stage:'First Contact', heat:'🌤 Warm',
+    budgetRange:'Mid (₹5L–20L)', speciality:'Residential — Apartments',
+    typicalProjects:'Apartment fit-outs, 6–8 per year',
+    howMet:'LinkedIn / Social', referredBy:'',
+    notes:'Very active on Instagram. Likes clean modern aesthetic. Has mentioned interest in in-ceiling audio but not sure about budgets. Young practice — growing quickly. Responds fast on Instagram DM.',
+    nextFollowUp: new Date(Date.now() + 3*24*60*60*1000).toISOString().slice(0,10),
+    meetings:[
+      { id:'m3', date:'2026-06-10', type:'Coffee',
+        discussed:'First meeting. Showed company profile and the AudioPlan coverage visualisation tool. She was impressed by the coverage diagram.',
+        offered:['General Introduction','Pro Audio — In-Ceiling'], reaction:'Interested',
+        projectsMentioned:'Two 3BHK apartments in Baner coming up in August.',
+        myCommitments:'WhatsApp her a short video of the AudioPlan coverage diagram.',
+        theirCommitments:'Will try to include ceiling audio spec in her next project proposal.',
+        followUpAction:'Follow up before her August projects begin', followUpDate:'2026-07-15', done:false }
+    ]
+  },
+  {
+    id:'n3', contactId:'ct9',
+    stage:'Awareness', heat:'❄️ Cold',
+    budgetRange:'Mid (₹5L–20L)', speciality:'Commercial — Office',
+    typicalProjects:'IT parks, corporate interiors, Hinjawadi belt',
+    howMet:'Cold Visit', referredBy:'',
+    notes:'Met briefly at his office reception — left brochure. Receptionist said he handles AV specs for IT clients. Need a proper sit-down meeting.',
+    nextFollowUp: new Date(Date.now() + 1*24*60*60*1000).toISOString().slice(0,10),
+    meetings:[
+      { id:'m4', date:'2026-06-01', type:'Cold Visit',
+        discussed:'Left company profile at reception. No meeting yet.',
+        offered:['General Introduction'], reaction:'Neutral',
+        projectsMentioned:'', myCommitments:'Call to request a 20-min intro meeting.',
+        theirCommitments:'', followUpAction:'Call to book intro meeting', followUpDate:'2026-06-18', done:false }
+    ]
+  }
+];
+
+
+const SALUTATION = ['Mr.', 'Mrs.', 'Ms.', 'Miss', 'Dr.', 'Ar.', 'Er.', 'Prof.', ''];
 
 const CLIENT_TYPES = [
   'Residential — Villa / Bungalow',
@@ -704,6 +910,23 @@ function rupeeIcon(){ return '<span style="font-family:ui-monospace,monospace;fo
 
 function uid(){ return Math.random().toString(36).slice(2, 10); }
 function fmtINR(n){ return '\u20B9' + Math.round(Number(n) || 0).toLocaleString('en-IN'); }
+
+// Returns days until next birthday (0=today, 1=tomorrow, etc.), or null if no DOB
+function daysUntilBirthday(dob){
+  if(!dob) return null;
+  const parts = dob.split('-');
+  if(parts.length < 3) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const month = parseInt(parts[1],10) - 1; // 0-indexed
+  const day   = parseInt(parts[2],10);
+  // This year's birthday
+  const bday = new Date(now.getFullYear(), month, day);
+  if(bday < now){
+    // Already passed this year — use next year
+    bday.setFullYear(now.getFullYear() + 1);
+  }
+  return Math.round((bday - now) / 86400000);
+}
 function fmtDate(d){
   if(!d) return '\u2014';
   const dt = new Date(d + 'T00:00:00');
@@ -719,6 +942,74 @@ function esc(str){
     return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
   });
 }
+
+/* ================================ supply chain constants ================================ */
+
+const PAYMENT_TERMS    = ['Advance 100%','50% Advance','30 days credit','45 days credit','60 days credit','Against delivery','Account basis'];
+const REP_RELIABILITY  = ['Excellent','Good','Average','Inconsistent'];
+const SC_TURNAROUND    = ['Same day','1–3 days','3–7 days','1–2 weeks','2–4 weeks','Depends on part'];
+const DEALER_STATES    = ['Maharashtra','Gujarat','Karnataka','Delhi','Tamil Nadu','Telangana','West Bengal','Rajasthan','Other'];
+
+const SEED_SUPPLY = {
+  dealers: [
+    { id:'d1', company:'Harman Professional India', city:'Mumbai', state:'Maharashtra',
+      brands:'JBL, Crown, AMX, BSS', accountCode:'HPL-MH-2891', paymentTerms:'30 days credit',
+      creditLimit:'200000', tradeDiscount:'28', leadTimeDays:'5', gst:'27AABCH1234F1Z5',
+      phone:'+91 22 6789 0011', email:'trade@harmanindia.example', website:'harmanpro.com',
+      notes:'Primary source for JBL in-ceiling and Crown amps. Rep: Sunil. Very reliable on delivery.',
+      priceLists:[
+        { id:'pl1', date:'2026-05-10', format:'Excel', summary:'JBL CBT series prices revised +4%. Crown DCi range unchanged.' }
+      ]
+    },
+    { id:'d2', company:'Epson India Pvt Ltd', city:'Bangalore', state:'Karnataka',
+      brands:'Epson', accountCode:'EPSON-B2B-7723', paymentTerms:'Advance 100%',
+      creditLimit:'0', tradeDiscount:'22', leadTimeDays:'7', gst:'29AABCE5678G1Z3',
+      phone:'+91 80 4567 8901', email:'b2b@epsonindia.example', website:'epson.co.in',
+      notes:'Laser projectors — EH-LS series. 3-year on-site warranty. Direct brand.',
+      priceLists:[
+        { id:'pl2', date:'2026-04-01', format:'PDF', summary:'Annual price revision. LS300W up by ₹8,000.' }
+      ]
+    },
+    { id:'d3', company:'Rashi Peripherals', city:'Mumbai', state:'Maharashtra',
+      brands:'Sonos, Bose, Klipsch, Sennheiser', accountCode:'RASHI-5540', paymentTerms:'45 days credit',
+      creditLimit:'500000', tradeDiscount:'25', leadTimeDays:'3', gst:'27AABCR9012H1Z1',
+      phone:'+91 22 4001 2233', email:'av@rashiperipherals.example', website:'rashiperipherals.com',
+      notes:'Good stock levels. Sonos distributor for West India. Quick responses.',
+      priceLists:[]
+    },
+  ],
+  reps: [
+    { id:'r1', name:'Sunil Patkar', phone:'+91 98200 44556', email:'sunil.patkar@example.com',
+      dealerId:'d1', brands:'JBL, Crown', reliability:'Excellent',
+      lastContacted:'2026-06-10',
+      notes:'Very responsive on WhatsApp. Sends proforma within 2 hours. Good on giving advance notice of price changes.' },
+    { id:'r2', name:'Kavita Menon', phone:'+91 98450 77889', email:'kavita.menon@example.com',
+      dealerId:'d2', brands:'Epson', reliability:'Good',
+      lastContacted:'2026-05-28',
+      notes:'Handles all Epson B2B accounts in Pune. Slow to respond on email — always use WhatsApp.' },
+    { id:'r3', name:'Rohan Dsouza', phone:'+91 99300 11223', email:'rohan.dsouza@example.com',
+      dealerId:'d3', brands:'Sonos, Bose', reliability:'Good',
+      lastContacted:'2026-06-02',
+      notes:'Recently moved from another distributor. Still building the relationship. Good product knowledge.' },
+  ],
+  serviceCentres: [
+    { id:'sc1', name:'Harman Authorized Service — Pune', city:'Pune', address:'Viman Nagar, Pune 411014',
+      phone:'+91 20 4567 1234', email:'service.pune@harman.example',
+      dealerId:'d1', brands:'JBL, Crown, AMX',
+      warrantyProcess:'Carry-in or doorstep pickup for products under warranty. Online job card at harmanservice.in. Photo proof of damage required for claims.',
+      turnaround:'3–7 days', notes:'For in-ceiling speakers, they visit site. For amps/processors, carry-in only.' },
+    { id:'sc2', name:'Epson Express Service', city:'Pune', address:'Shivajinagar, Pune 411005',
+      phone:'+91 20 2567 8800', email:'service@epsonpune.example',
+      dealerId:'d2', brands:'Epson',
+      warrantyProcess:'Call helpline 1800-XXX-XXXX to register complaint. Engineer visits within 48 hours for on-site warranty units.',
+      turnaround:'1–3 days', notes:'On-site warranty for all LS series laser projectors. Bulb lamps not covered.' },
+    { id:'sc3', name:'Digital AV Care', city:'Pimpri', address:'Bhosari MIDC, Pimpri 411026',
+      phone:'+91 98761 00234', email:'service@digitalavcare.example',
+      dealerId:'', brands:'Sonos, Denon, Marantz, Yamaha',
+      warrantyProcess:'Carry-in only. Job card issued. Customer notified by SMS on completion.',
+      turnaround:'1–2 weeks', notes:'Independent local centre. Not brand-authorised but reliable for out-of-warranty repairs.' },
+  ]
+};
 
 /* ================================ seed data ================================ */
 
@@ -754,6 +1045,8 @@ const SEED_CONTACTS = [
     notes:'Refers home theatre and conference room AV scopes on her residential & commercial projects.' },
   { id:'ct8', name:'Neha Kulkarni', category:'Interior Designer', company:'Kulkarni Interiors', phone:'+91 99750 12398', email:'neha@kulkarniinteriors.example', area:'Aundh, Pune', leadSource:true,
     notes:'Coordinates closely on false ceiling + lighting layout, often the first call on new villa projects.' },
+  { id:'ct9', name:'Ar. Vikram Joshi', category:'Architect', company:'Joshi & Associates', phone:'+91 98101 44321', email:'vjoshi@joshiarch.example', area:'Hinjawadi, Pune', leadSource:false,
+    notes:'Handles AV specs for IT corporate clients in Hinjawadi. Cold visit only so far — needs a proper intro meeting.' },
 ];
 
 
@@ -796,9 +1089,16 @@ const SEED_COMMS = [
 let state = {
   view: 'dashboard',
   clients: [], contacts: [], jobs: [], products: [], services: [], comms: [],
+  supply: { dealers:[], reps:[], serviceCentres:[] },
+  supplyTab: 'dealers',
+  supplyView: 'list',   // 'list' | 'detail' | 'add' | 'edit' | 'pricelist'
+  selectedSupplyId: null,
+  selectedSupplyType: null, // 'dealer' | 'rep' | 'sc'
   modal: null,        // { type, data }
   formDraft: {},
   clientSearch: '',
+  clientView: 'list',  // 'list' | 'detail'
+  selectedClientId: null,
   commFilter: 'all',
   confirmDelete: null, // { type, id }
   theme: 'dark',
@@ -807,6 +1107,9 @@ let state = {
   catalogTab: 'product',
   designTab: 'cinema',
   designJobId: null,
+  prospectsView: 'dashboard',  // 'dashboard' | 'list' | 'detail' | 'add' | 'edit'
+  selectedProspectId: null,
+  prospectMeetingDraft: null,
   invFilter: {
     product: { category:'all', status:'all', search:'' },
     service: { category:'all', status:'all', search:'' }
@@ -841,6 +1144,8 @@ function persist(){
       products: state.products,
       services: state.services,
       comms: state.comms,
+      network: state.network,
+      supply: state.supply,
       theme: state.theme,
       savedAt: new Date().toISOString()
     };
@@ -866,6 +1171,8 @@ function loadData(){
     state.products = saved.products || [];
     state.services = saved.services || [];
     state.comms    = saved.comms    || [];
+    state.network= saved.network || saved.prospects || [];
+    state.supply = saved.supply  || { dealers:[], reps:[], serviceCentres:[] };
     if(saved.theme) state.theme = saved.theme;
   } else {
     // First run ever — load demo seed data so the app isn't empty
@@ -875,6 +1182,8 @@ function loadData(){
     state.products  = JSON.parse(JSON.stringify(SEED_PRODUCTS));
     state.services  = JSON.parse(JSON.stringify(SEED_SERVICES));
     state.comms     = JSON.parse(JSON.stringify(SEED_COMMS));
+    state.network = JSON.parse(JSON.stringify(SEED_NETWORK));
+    state.supply  = JSON.parse(JSON.stringify(SEED_SUPPLY));
     persist(); // save the seed so next load is treated as returning user
   }
 }
@@ -893,6 +1202,8 @@ function resetToSeedData(){
 function clearAllData(){
   state.clients = []; state.contacts = []; state.jobs = [];
   state.products = []; state.services = []; state.comms = [];
+  state.network = [];
+  state.supply = { dealers:[], reps:[], serviceCentres:[] };
   persist();
   render();
 }
@@ -906,6 +1217,8 @@ function showClearConfirmModal(){
     products: state.products,
     services: state.services,
     comms: state.comms,
+    network: state.network,
+    supply: state.supply,
     exportedAt: new Date().toISOString(),
     note: 'Auto-backup created before Clear All'
   };
@@ -928,6 +1241,7 @@ function showClearConfirmModal(){
   // Step 2 — populate and show the styled confirmation modal
   var counts = document.getElementById('clear-modal-counts');
   if(counts){
+    var supplyTotal = state.supply.dealers.length + state.supply.reps.length + state.supply.serviceCentres.length;
     counts.innerHTML = [
       ['Clients',   state.clients.length],
       ['Contacts',  state.contacts.length],
@@ -935,6 +1249,8 @@ function showClearConfirmModal(){
       ['Products',  state.products.length],
       ['Services',  state.services.length],
       ['Activities',state.comms.length],
+      ['Network',   state.network.length],
+      ['Supply Chain', supplyTotal],
     ].map(function(r){
       return '<div class="clear-modal-count"><strong>' + r[1] + '</strong>' + r[0] + '</div>';
     }).join('');
@@ -950,6 +1266,8 @@ function exportData(){
     products: state.products,
     services: state.services,
     comms: state.comms,
+    network: state.network,
+    supply: state.supply,
     exportedAt: new Date().toISOString()
   };
   const exportNow = new Date();
@@ -974,6 +1292,19 @@ function importDataFromFile(file){
   reader.onload = function(){
     try{
       const data = JSON.parse(reader.result);
+      // Validate shape — each field must be an array if present, to avoid corrupting state
+      const arrayFields = ['clients','contacts','jobs','products','services','comms','equipment','network'];
+      for(var i=0;i<arrayFields.length;i++){
+        var f = arrayFields[i];
+        if(data[f] !== undefined && !Array.isArray(data[f])){
+          window.alert('That file looks corrupted — "' + f + '" should be a list but isn\'t. Import cancelled, nothing was changed.');
+          return;
+        }
+      }
+      if(data.supply !== undefined && (typeof data.supply !== 'object' || Array.isArray(data.supply))){
+        window.alert('That file looks corrupted — Supply Chain data is in the wrong format. Import cancelled, nothing was changed.');
+        return;
+      }
       if(data.clients) state.clients = data.clients;
       if(data.contacts) state.contacts = data.contacts;
       if(data.jobs) state.jobs = data.jobs;
@@ -981,6 +1312,8 @@ function importDataFromFile(file){
       else if(data.equipment) state.products = data.equipment; // legacy export compatibility
       if(data.services) state.services = data.services;
       if(data.comms) state.comms = data.comms;
+      if(data.network) state.network = data.network;
+      if(data.supply) state.supply = Object.assign({ dealers:[], reps:[], serviceCentres:[] }, data.supply);
       state.modal = null;
       state.confirmDelete = null;
       persist();
@@ -1037,6 +1370,43 @@ function deleteInvItem(kind, id){
   state.confirmDelete = null; render();
 }
 
+function deleteNetworkEntry(id){
+  state.network = state.network.filter(function(x){ return x.id !== id; });
+  state.confirmDelete = null;
+  // If we were viewing this entry's detail, go back to the list
+  if(state.selectedNetworkId === id){
+    state.selectedNetworkId = null;
+    state.networkView = 'list';
+  }
+  persist(); render();
+}
+
+function deleteSupplyEntry(type, id){
+  const collection = type === 'dealer' ? 'dealers' : type === 'rep' ? 'reps' : 'serviceCentres';
+  state.supply[collection] = state.supply[collection].filter(function(x){ return x.id !== id; });
+  state.confirmDelete = null;
+  if(state.selectedSupplyId === id){
+    state.selectedSupplyId = null;
+    state.supplyView = 'list';
+  }
+  persist(); render();
+}
+
+function deleteCommEntry(id){
+  state.comms = state.comms.filter(function(x){ return x.id !== id; });
+  state.confirmDelete = null;
+  persist(); render();
+}
+
+function deleteMeeting(networkId, meetingId){
+  const n = state.network.find(function(x){ return x.id === networkId; });
+  if(n && n.meetings){
+    n.meetings = n.meetings.filter(function(m){ return m.id !== meetingId; });
+  }
+  state.confirmDelete = null;
+  persist(); render();
+}
+
 function saveComm(data){
   if(data.id){ state.comms = state.comms.map(m => m.id === data.id ? Object.assign({}, data) : m); }
   else { state.comms.push(Object.assign({}, data, { id: uid() })); }
@@ -1066,11 +1436,13 @@ function statCard(iconName, label, value, pct, colorClass){
 
 function jobRowHtml(j){
   const client = state.clients.find(function(c){ return c.id === j.clientId; });
+  const clientName = client ? client.name : 'No client';
+  const clientCompany = client && client.company && client.company !== client.name ? client.company : '';
   return '<div class="job-row">' +
     '<span class="led ' + STATUS_LED[j.status] + '"></span>' +
     '<div class="job-row-info">' +
       '<div class="job-row-title">' + esc(j.title) + '</div>' +
-      '<div class="job-row-sub">' + esc(client ? (client.company || client.name) : 'No client') + '</div>' +
+      '<div class="job-row-sub">' + esc(clientName) + (clientCompany ? ' · ' + esc(clientCompany) : '') + '</div>' +
     '</div>' +
     '<div class="job-row-meta">' +
       '<div class="job-row-date">' + fmtDate(j.projectDate) + '</div>' +
@@ -1083,6 +1455,7 @@ function commRowHtml(m){
   const client = state.clients.find(function(c){ return c.id === m.clientId; });
   const job = state.jobs.find(function(j){ return j.id === m.jobId; });
   const iconName = COMM_ICONS[m.type] || 'message';
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'comm' && state.confirmDelete.id === m.id;
   return '<div class="comm-row">' +
     '<span class="comm-icon">' + icon(iconName, 16) + '</span>' +
     '<div class="comm-body">' +
@@ -1090,53 +1463,238 @@ function commRowHtml(m){
       (job ? '<div class="comm-job">' + esc(job.title) + '</div>' : '') +
       '<p class="comm-note">' + esc(m.note) + '</p>' +
     '</div>' +
+    '<div class="comm-actions">' +
+      (isConfirm
+        ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="comm" data-id="' + m.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+        : '<button class="icon-btn" data-action="open-modal" data-type="comm" data-id="' + m.id + '" title="Edit entry">' + icon('edit',13) + '</button>' +
+          '<button class="icon-btn danger" data-action="delete-request" data-type="comm" data-id="' + m.id + '" title="Delete entry">' + icon('trash',13) + '</button>') +
+    '</div>' +
   '</div>';
 }
 
 /* ================================ views ================================ */
 
 function renderDashboard(){
-  const totalJobsValue = state.jobs.reduce(function(s,j){ return s + Number(j.value || 0); }, 0) || 1;
-  const pipelineValue = state.jobs.filter(function(j){ return j.status !== 'Paid'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
-  const bookedValue = state.jobs.filter(function(j){ return j.status === 'Booked'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
-  const outstandingValue = state.jobs.filter(function(j){ return j.status === 'Completed'; }).reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
-  const activeJobs = state.jobs.filter(function(j){ return j.status === 'Booked' || j.status === 'Completed'; });
-  const activeCount = activeJobs.length;
-  const totalJobs = state.jobs.length || 1;
-  const activePct = Math.round(activeCount / totalJobs * 100);
+  const today = todayStr();
+  const allOpen = state.jobs.filter(function(j){ return j.status !== 'Paid'; });
 
-  const upcoming = state.jobs.filter(function(j){ return j.status !== 'Paid'; })
-    .slice().sort(function(a,b){ return (a.projectDate||'').localeCompare(b.projectDate||''); }).slice(0,5);
-  const recent = state.comms.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).slice(0,5);
+  // Stage groups
+  const leads      = allOpen.filter(function(j){ return j.status === 'Lead'; });
+  const siteVisits = allOpen.filter(function(j){ return j.status === 'Site Visit'; });
+  const quoted     = allOpen.filter(function(j){ return j.status === 'Quoted'; });
+  const booked     = allOpen.filter(function(j){ return j.status === 'Booked'; });
+  const wip        = allOpen.filter(function(j){ return j.status === 'Work in Progress'; });
+  const completed  = allOpen.filter(function(j){ return j.status === 'Completed'; });
+
+  // Revenue
+  const totalValue    = state.jobs.reduce(function(s,j){ return s+Number(j.value||0); },0) || 1;
+  const pipelineValue = allOpen.reduce(function(s,j){ return s+Number(j.value||0); },0);
+  const bookedValue   = booked.concat(wip).reduce(function(s,j){ return s+Number(j.value||0); },0);
+  const invoicePending= completed.reduce(function(s,j){ return s+Number(j.value||0); },0);
+
+  // Network overdue follow-ups
+  const overdueNetwork = state.network.filter(function(n){
+    if(!n.nextFollowUp) return false;
+    return n.nextFollowUp < today;
+  });
+
+  // Task board — priority order: WIP, Booked, Completed (invoice), Site Visit, Quoted, Lead
+  const STAGE_ORDER = ['Work in Progress','Booked','Completed','Site Visit','Quoted','Lead'];
+  const STAGE_CLASS = {
+    'Lead':'ts-lead','Site Visit':'ts-site','Quoted':'ts-quoted',
+    'Booked':'ts-booked','Work in Progress':'ts-wip','Completed':'ts-completed'
+  };
+  const STAGE_ACTION = {
+    'Lead':           'Follow up with client',
+    'Site Visit':     'Visit scheduled',
+    'Quoted':         'Awaiting client decision',
+    'Booked':         'Prepare & procure',
+    'Work in Progress':'Installation in progress',
+    'Completed':      'Raise invoice'
+  };
+
+  const taskJobs = allOpen.slice().sort(function(a,b){
+    return STAGE_ORDER.indexOf(a.status) - STAGE_ORDER.indexOf(b.status)
+        || (a.projectDate||'').localeCompare(b.projectDate||'');
+  });
+
+  function taskRowHtml(j){
+    const client = state.clients.find(function(c){ return c.id===j.clientId; });
+    const clientName = client ? client.name : '';
+    const clientCo = client && client.company && client.company !== client.name ? client.company : '';
+    return '<div class="task-row" data-action="set-view" data-view="jobs">' +
+      '<span class="led ' + STATUS_LED[j.status] + '"></span>' +
+      '<span class="task-stage ' + (STAGE_CLASS[j.status]||'ts-lead') + '">' + esc(j.status) + '</span>' +
+      '<div class="task-info">' +
+        '<div class="task-title">' + esc(j.title) + '</div>' +
+        '<div class="task-client">' + esc(clientName) + (clientCo?' · '+esc(clientCo):'') + '</div>' +
+      '</div>' +
+      '<div class="task-action">' + esc(STAGE_ACTION[j.status]||'') + '</div>' +
+      '<div class="task-meta">' +
+        '<div class="task-value">' + fmtINR(j.value) + '</div>' +
+        (j.projectDate ? '<div class="task-date">' + fmtDate(j.projectDate) + '</div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  // KPI stat cards — action-oriented
+  function actionStatCard(label, count, sub, colorClass, view){
+    const isEmpty = count === 0;
+    return '<div class="stat-card ' + colorClass + '" data-action="set-view" data-view="' + view + '">' +
+      '<div class="stat-top"><span class="stat-label">' + esc(label) + '</span></div>' +
+      '<div class="stat-value" style="' + (isEmpty?'color:var(--zinc-700)':'') + '">' + count + '</div>' +
+      '<div style="font-size:11px;font-family:ui-monospace,monospace;color:' + (isEmpty?'var(--zinc-700)':'var(--zinc-500)') + ';">' + esc(sub) + '</div>' +
+    '</div>';
+  }
+
+  // Upcoming birthdays — contacts with DOB set, within 30 days
+  const birthdayContacts = state.contacts
+    .filter(function(c){ return !!c.dob; })
+    .map(function(c){ return { c:c, days: daysUntilBirthday(c.dob) }; })
+    .filter(function(x){ return x.days !== null && x.days <= 30; })
+    .sort(function(a,b){ return a.days - b.days; });
+
+  const birthdaySection = birthdayContacts.length === 0 ? '' :
+    '<div class="dash-section-head" style="margin-top:8px;">' +
+      '<span>🎂 Upcoming Birthdays</span>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">' +
+    birthdayContacts.map(function(x){
+      const c = x.c, days = x.days;
+      const isToday    = days === 0;
+      const isTomorrow = days === 1;
+      const isUrgent   = days <= 7;
+      const label = isToday ? '🎂 Today!' : isTomorrow ? 'Tomorrow' : 'In ' + days + ' days';
+      const color = isToday ? 'var(--amber-400)' : isUrgent ? 'var(--cyan-400)' : 'var(--zinc-500)';
+      const displayName = (c.salutation?c.salutation+' ':'') + c.name;
+      const whatsapp = c.phone ? c.phone.replace(/[^+\d]/g,'') : '';
+      return '<div class="task-row" style="padding:10px 14px;">' +
+        '<span style="font-size:20px;">' + (isToday?'🎂':'🎁') + '</span>' +
+        '<div class="task-info">' +
+          '<div class="task-title">' + esc(displayName) + '</div>' +
+          '<div class="task-client">' + esc(c.category) + (c.company?' · '+esc(c.company):'') + '</div>' +
+        '</div>' +
+        '<div style="font-family:ui-monospace,monospace;font-size:13px;font-weight:600;color:' + color + ';flex-shrink:0;">' + label + '</div>' +
+        (whatsapp
+          ? '<a href="https://wa.me/' + esc(whatsapp) + '?text=' + encodeURIComponent('Happy Birthday ' + displayName + '! 🎉') + '" target="_blank" class="data-btn" style="font-size:11px;text-decoration:none;flex-shrink:0;">WhatsApp 🎉</a>'
+          : '') +
+      '</div>';
+    }).join('') +
+    '</div>';
+  const commItems = state.comms.map(function(m){
+    return { _type:'comm', _date: m.date||'', _data: m };
+  });
+
+  const networkItems = [];
+  state.network.forEach(function(n){
+    const c = contactOf(n);
+    (n.meetings||[]).forEach(function(m){
+      networkItems.push({
+        _type: 'network-meeting',
+        _date: m.date||'',
+        _data: m,
+        _networkId: n.id,
+        _contactName: (c.salutation?c.salutation+' ':'') + (c.name||'Unknown'),
+        _firm: c.company||''
+      });
+    });
+  });
+
+  const allRecentItems = commItems.concat(networkItems)
+    .sort(function(a,b){ return b._date.localeCompare(a._date); })
+    .slice(0, 8);
+
+  function recentItemHtml(item){
+    if(item._type === 'comm'){
+      return commRowHtml(item._data);
+    }
+    // Network meeting log entry
+    const m = item._data;
+    const reactionColors = {
+      'Very Interested':'var(--emerald-400)',
+      'Interested':'var(--accent-text)',
+      'Neutral':'var(--zinc-500)',
+      'Not Now':'var(--amber-400)',
+      'Not Interested':'var(--red-400)'
+    };
+    const reactionColor = reactionColors[m.reaction] || 'var(--zinc-500)';
+    return '<div class="comm-row" style="cursor:pointer;" data-action="open-network" data-id="' + esc(item._networkId) + '">' +
+      '<span class="comm-icon">' + icon('users',16) + '</span>' +
+      '<div class="comm-body">' +
+        '<div class="comm-top">' +
+          '<span class="comm-client">' + esc(item._contactName) + (item._firm?' · <span style="font-weight:400;color:var(--zinc-500);">'+esc(item._firm)+'</span>':'') + '</span>' +
+          '<span class="comm-date">' + fmtDate(m.date) + '</span>' +
+        '</div>' +
+        '<div class="comm-job" style="color:var(--zinc-500);">' + esc(m.type||'Meeting') +
+          (m.reaction ? ' · <span style="color:'+reactionColor+';">'+esc(m.reaction)+'</span>' : '') +
+        '</div>' +
+        (m.discussed ? '<p class="comm-note">' + esc(m.discussed.slice(0,100)) + (m.discussed.length>100?'…':'') + '</p>' : '') +
+      '</div>' +
+      '<div class="comm-actions">' +
+        '<button class="icon-btn" data-action="open-network" data-id="' + esc(item._networkId) + '" title="View in Network">' + icon('star',13) + '</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  const recent = allRecentItems;
 
   return '' +
-  '<div class="view-header"><div><h2 class="view-title">Dashboard</h2><p class="view-subtitle">Signal overview of your AV business</p></div></div>' +
+  '<div class="view-header"><div>' +
+    '<h2 class="view-title">Dashboard</h2>' +
+    '<p class="view-subtitle">You have <strong>' + allOpen.length + '</strong> open job' + (allOpen.length!==1?'s':'') + ' across the pipeline</p>' +
+  '</div></div>' +
+
+  // Network overdue alert
+  (overdueNetwork.length > 0
+    ? '<div class="network-overdue-strip">' +
+        icon('star',14) + ' <strong>' + overdueNetwork.length + ' Network follow-up' + (overdueNetwork.length!==1?'s':'')+' overdue</strong> — ' +
+        overdueNetwork.slice(0,3).map(function(n){ return esc(contactOf(n).name||'Unknown'); }).join(', ') +
+        (overdueNetwork.length>3?' and '+(overdueNetwork.length-3)+' more':'') +
+        '<button class="data-btn" data-action="set-view" data-view="network" style="margin-left:auto;font-size:11px;">View Network →</button>' +
+      '</div>'
+    : '') +
+
+  // 4 KPI cards — action oriented
   '<div class="stats-grid">' +
-    statCard('activity', 'Pipeline Value', fmtINR(pipelineValue), pipelineValue/totalJobsValue*100, 'eq-amber') +
-    statCard('briefcase', 'Booked Revenue', fmtINR(bookedValue), bookedValue/totalJobsValue*100, 'eq-cyan') +
-    statCard('rupee', 'Awaiting Invoice', fmtINR(outstandingValue), outstandingValue/totalJobsValue*100, 'eq-red') +
-    statCard('briefcase', 'Active Projects', activeCount + ' job' + (activeCount !== 1 ? 's' : ''), activePct, 'eq-emerald') +
+    actionStatCard('Needs Follow-up',    leads.length + quoted.length,
+      leads.length + ' lead' + (leads.length!==1?'s':'') + ' · ' + quoted.length + ' quoted', 'urgent', 'jobs') +
+    actionStatCard('Site Visits',        siteVisits.length,
+      siteVisits.length === 0 ? 'None pending' : 'Visit' + (siteVisits.length!==1?'s':'')+' to conduct', 'visits', 'jobs') +
+    actionStatCard('Active Work',        booked.length + wip.length,
+      booked.length + ' booked · ' + wip.length + ' in progress', 'active', 'jobs') +
+    actionStatCard('Invoice Pending',    completed.length,
+      completed.length === 0 ? 'All invoiced' : fmtINR(invoicePending) + ' to collect', 'money', 'jobs') +
   '</div>' +
-  '<div class="dash-cols">' +
-    '<div>' +
-      '<div class="col-title">Upcoming Jobs</div>' +
-      '<div class="list-col">' + (upcoming.length === 0
-        ? '<p class="muted-italic">Nothing scheduled. Add a job to fill the calendar.</p>'
-        : upcoming.map(jobRowHtml).join('')) + '</div>' +
-    '</div>' +
-    '<div>' +
-      '<div class="col-title">Recent Activity</div>' +
-      '<div class="list-col">' + (recent.length === 0
-        ? '<p class="muted-italic">No activity logged yet.</p>'
-        : recent.map(commRowHtml).join('')) + '</div>' +
-    '</div>' +
-  '</div>';
+
+  // Task board — all open jobs
+  '<div class="dash-section-head">' +
+    '<span>My Task Board — All Open Jobs</span>' +
+    '<button class="data-btn" data-action="set-view" data-view="jobs" style="font-size:11px;">View All →</button>' +
+  '</div>' +
+  (taskJobs.length === 0
+    ? '<div class="dash-empty">No open jobs right now.<br>Add a job when you get an enquiry.</div>'
+    : '<div class="task-board">' + taskJobs.map(taskRowHtml).join('') + '</div>'
+  ) +
+
+  birthdaySection +
+
+  // Recent unified feed
+  '<div class="dash-section-head" style="margin-top:8px;">' +
+    '<span>Recent Activity &amp; Meetings</span>' +
+    '<button class="data-btn" data-action="set-view" data-view="comms" style="font-size:11px;">View Activity →</button>' +
+  '</div>' +
+  (recent.length === 0
+    ? '<div class="dash-empty">Nothing logged yet. Log an activity or a network meeting to see it here.</div>'
+    : '<div class="list-col">' + recent.map(recentItemHtml).join('') + '</div>'
+  );
 }
 
 function clientCardHtml(c){
   const jobCount = state.jobs.filter(function(j){ return j.clientId === c.id; }).length;
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'client' && state.confirmDelete.id === c.id;
-  return '<div class="client-card">' +
+  const referredBy = c.referredByNetworkId ? state.network.find(function(n){ return n.id === c.referredByNetworkId; }) : null;
+  const referredByName = referredBy ? contactOf(referredBy).name : '';
+  return '<div class="client-card" data-action="open-client" data-id="' + c.id + '">' +
     '<div class="client-top">' +
       '<div><div class="client-name">' + esc(c.name) + '</div><div class="client-company">' + esc(c.company) + '</div></div>' +
       '<div class="client-actions">' +
@@ -1147,6 +1705,7 @@ function clientCardHtml(c){
       '</div>' +
     '</div>' +
     '<span class="badge-type">' + esc(c.type) + '</span>' +
+    (referredByName ? '<div class="client-referred-by">' + icon('star',11) + ' Referred by ' + esc(referredByName) + '</div>' : '') +
     '<div class="contact-list">' +
       (c.phone ? '<div class="contact-row">' + icon('phone',12) + ' ' + esc(c.phone) + '</div>' : '') +
       (c.email ? '<div class="contact-row">' + icon('mail',12) + ' ' + esc(c.email) + '</div>' : '') +
@@ -1154,7 +1713,7 @@ function clientCardHtml(c){
     '</div>' +
     (c.tags && c.tags.length ? '<div class="tag-list">' + c.tags.map(function(t){ return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
     (c.notes ? '<p class="client-notes">' + esc(c.notes) + '</p>' : '') +
-    '<div class="client-footer">' + jobCount + ' job' + (jobCount !== 1 ? 's' : '') + '</div>' +
+    '<div class="client-footer client-footer-link">' + jobCount + ' job' + (jobCount !== 1 ? 's' : '') + ' →</div>' +
   '</div>';
 }
 
@@ -1173,6 +1732,11 @@ function renderClientsListOnly(){
 }
 
 function renderClients(){
+  if(state.clientView === 'detail' && state.selectedClientId){
+    const c = state.clients.find(function(x){ return x.id === state.selectedClientId; });
+    if(c) return renderClientDetail(c);
+    state.clientView = 'list';
+  }
   return '' +
   '<div class="view-header">' +
     '<div><h2 class="view-title">Clients</h2><p class="view-subtitle">' + state.clients.length + ' client' + (state.clients.length !== 1 ? 's' : '') + ' on file</p></div>' +
@@ -1185,17 +1749,83 @@ function renderClients(){
   '<div id="client-grid-wrap">' + clientGridHtml() + '</div>';
 }
 
+function renderClientDetail(c){
+  const jobs = state.jobs.filter(function(j){ return j.clientId === c.id; })
+    .slice().sort(function(a,b){ return (b.projectDate||'').localeCompare(a.projectDate||''); });
+  const activity = state.comms.filter(function(m){ return m.clientId === c.id; })
+    .slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  const referredBy = c.referredByNetworkId ? state.network.find(function(n){ return n.id === c.referredByNetworkId; }) : null;
+  const referredByContact = referredBy ? contactOf(referredBy) : null;
+  const totalValue = jobs.reduce(function(s,j){ return s + Number(j.value||0); }, 0);
+  const initials = c.name.split(' ').slice(0,2).map(function(w){ return w[0]; }).join('').toUpperCase();
+
+  return '' +
+  '<div class="view-header">' +
+    '<div style="display:flex;align-items:center;gap:14px;">' +
+      '<div class="prospect-detail-avatar">' + initials + '</div>' +
+      '<div>' +
+        '<h2 class="view-title">' + esc(c.name) + '</h2>' +
+        '<p class="view-subtitle">' + esc(c.company||'') + (c.type?' · '+esc(c.type):'') + '</p>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-primary" data-action="new-job-for-client" data-id="' + c.id + '">+ New Job</button>' +
+      '<button class="btn-secondary" data-action="log-activity-for-client" data-id="' + c.id + '">+ Log Activity</button>' +
+      '<button class="btn-secondary" data-action="open-modal" data-type="client" data-id="' + c.id + '">Edit</button>' +
+      '<button class="data-btn" data-action="clients-back">← Clients</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="supply-detail-grid">' +
+    supplyInfoItem('Phone', c.phone) +
+    supplyInfoItem('Email', c.email) +
+    supplyInfoItem('Address', c.address) +
+    supplyInfoItem('Client Type', c.type) +
+    supplyInfoItem('Total Job Value', totalValue ? fmtINR(totalValue) : '—') +
+    supplyInfoItem('Total Jobs', jobs.length) +
+  '</div>' +
+
+  (referredByContact ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--accent-text);border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+    '<div><div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);margin-bottom:4px;">Referred By</div>' +
+    '<div style="font-size:14px;color:var(--text-strong);font-weight:600;">' + esc(referredByContact.name) + (referredByContact.company?' — '+esc(referredByContact.company):'') + '</div></div>' +
+    '<button class="data-btn" data-action="open-network" data-id="' + referredBy.id + '" style="font-size:12px;">View in Network →</button>' +
+  '</div>' : '') +
+
+  (c.tags && c.tags.length ? '<div class="tag-list" style="margin-bottom:14px;">' + c.tags.map(function(t){ return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : '') +
+
+  (c.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(c.notes) + '</div>' : '') +
+
+  '<div class="section-head"><div class="section-head-title">Job History (' + jobs.length + ')</div></div>' +
+  (jobs.length === 0 ? '<div class="empty-msg">No jobs yet for this client.</div>' :
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">' +
+    jobs.map(function(j){
+      return '<div class="job-row" data-action="open-job-detail" data-id="' + j.id + '" style="cursor:pointer;">' +
+        '<span class="led ' + STATUS_LED[j.status] + '"></span>' +
+        '<div class="job-row-info"><div class="job-row-title">' + esc(j.title) + '</div>' +
+        '<div class="job-row-sub">' + esc(j.jobType||'') + ' · ' + esc(j.status) + '</div></div>' +
+        '<div class="job-row-date">' + fmtDate(j.projectDate) + '<br><strong>' + fmtINR(j.value) + '</strong></div>' +
+      '</div>';
+    }).join('') + '</div>'
+  ) +
+
+  (activity.length > 0 ? '<div class="section-head"><div class="section-head-title">Recent Activity (' + activity.length + ')</div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+    activity.slice(0,5).map(commRowHtml).join('') +
+    '</div>' : '');
+}
+
 /* ---------- contacts (trades, vendors, lead sources) ---------- */
 
 function contactCardHtml(c){
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'contact' && state.confirmDelete.id === c.id;
   const catIcon = CONTACT_CATEGORY_ICONS[c.category] || 'users';
+  const displayName = (c.salutation ? c.salutation + ' ' : '') + c.name;
   return '<div class="inv-card">' +
     '<div class="inv-card-top">' +
       '<span class="inv-cat-badge">' + icon(catIcon,13) + esc(c.category) + '</span>' +
-      (c.leadSource ? '<span class="lead-badge" title="Lead source">' + icon('star',13) + 'Lead source</span>' : '') +
+      (inNetwork(c.id) ? '<span class="lead-badge" style="background:rgba(34,211,238,0.1);color:var(--accent-text);" title="In Network">' + icon('star',13) + 'In Network</span>' : (c.leadSource ? '<span class="lead-badge" title="Lead source">' + icon('star',13) + 'Lead source</span>' : '')) +
     '</div>' +
-    '<div class="inv-card-name">' + esc(c.name) + '</div>' +
+    '<div class="inv-card-name">' + esc(displayName) + '</div>' +
     (c.company ? '<div class="inv-card-ref">' + esc(c.company) + '</div>' : '') +
     '<div class="contact-list">' +
       (c.phone ? '<div class="contact-row"><a class="contact-link" href="tel:' + esc(c.phone.replace(/[^+\d]/g,'')) + '">' + icon('phone',12) + ' ' + esc(c.phone) + '</a></div>' : '') +
@@ -1203,12 +1833,20 @@ function contactCardHtml(c){
       (c.area ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.area) + '</div>' : '') +
     '</div>' +
     (c.notes ? '<div class="inv-card-notes">' + esc(c.notes) + '</div>' : '') +
-    '<div class="inv-card-footer" style="border-top:none; padding-top:0; justify-content:flex-end;">' +
+    '<div class="inv-card-footer" style="border-top:1px solid var(--zinc-800); padding-top:8px; justify-content:space-between; align-items:center;">' +
+      '<div style="display:flex;gap:6px;align-items:center;">' +
+        // Star = Network (filled cyan if already in, outline if not)
+        (!inNetwork(c.id)
+          ? '<button class="icon-btn" data-action="add-contact-to-network" data-id="' + c.id + '" title="Add to Network" style="color:var(--accent-text);">' + icon('star',16) + '</button>'
+          : '<span class="icon-btn" style="color:var(--accent-text);cursor:default;opacity:0.5;" title="Already in Network">' + icon('star',16) + '</span>') +
+        // Users = Add to Client
+        '<button class="icon-btn" data-action="add-contact-to-client" data-id="' + c.id + '" title="Add as Client" style="color:var(--zinc-400);">' + icon('users',16) + '</button>' +
+      '</div>' +
       '<div class="equip-actions">' +
-        '<button class="icon-btn" data-action="open-modal" data-type="contact" data-id="' + c.id + '">' + icon('edit',14) + '</button>' +
+        '<button class="icon-btn" data-action="open-modal" data-type="contact" data-id="' + c.id + '" title="Edit contact">' + icon('edit',14) + '</button>' +
         (isConfirm
           ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="contact" data-id="' + c.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
-          : '<button class="icon-btn danger" data-action="delete-request" data-type="contact" data-id="' + c.id + '">' + icon('trash',14) + '</button>') +
+          : '<button class="icon-btn danger" data-action="delete-request" data-type="contact" data-id="' + c.id + '" title="Delete contact">' + icon('trash',14) + '</button>') +
       '</div>' +
     '</div>' +
   '</div>';
@@ -1769,15 +2407,942 @@ function renderDesignTools(){
   '</div>';
 }
 
+/* ================================ PROSPECTS ================================ */
+
+function prospectDaysUntil(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr); const now = new Date();
+  d.setHours(0,0,0,0); now.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+
+// Resolve contact data from a network entry's contactId
+function contactOf(n){
+  return state.contacts.find(function(c){ return c.id === n.contactId; }) || {};
+}
+
+// Check if a contact is already in the network
+function inNetwork(contactId){
+  return state.network.some(function(n){ return n.contactId === contactId; });
+}
+
+function prospectLastMeetingDate(p){
+  if(!p.meetings || !p.meetings.length) return null;
+  return p.meetings.slice().sort((a,b)=>b.date.localeCompare(a.date))[0].date;
+}
+
+function prospectLastMeetingNote(p){
+  if(!p.meetings || !p.meetings.length) return null;
+  const m = p.meetings.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+  return m.discussed || m.followUpAction || '';
+}
+
+function reactionClass(r){
+  if(r==='Very Interested') return 'rv';
+  if(r==='Interested')      return 'ri';
+  if(r==='Neutral')         return 'rn';
+  if(r==='Not Now')         return 'rnn';
+  return 'rno';
+}
+
+function prospectCardHtml(p){
+  const c = contactOf(p);  // resolved contact
+  const name = c.name || '(unknown contact)';
+  const firm = c.company || '';
+  const area = c.area || '';
+  const type = c.category || '';
+
+  const days = prospectDaysUntil(p.nextFollowUp);
+  const overdue = days !== null && days < 0;
+  const today = days === 0;
+  const heatClass = p.heat==='🔥 Hot'?'heat-hot':p.heat==='🌤 Warm'?'heat-warm':'';
+  const stageClass = p.stage==='Active Prospect'?'active-prospect':p.stage==='On a Project'?'on-project':p.stage==='Repeat Partner'?'repeat':'';
+  const lastNote = prospectLastMeetingNote(p);
+  const meetCount = (p.meetings||[]).length;
+  const linkedJobs = state.jobs.filter(j => j.networkId === p.id).length;
+
+  let fuText = '';
+  if(p.nextFollowUp){
+    if(overdue) fuText = '⚠ Follow-up overdue by ' + Math.abs(days) + ' day' + (Math.abs(days)!==1?'s':'');
+    else if(today) fuText = '📅 Follow up TODAY';
+    else fuText = '📅 Follow up in ' + days + ' day' + (days!==1?'s':'') + ' — ' + fmtDate(p.nextFollowUp);
+  }
+
+  return '<div class="prospect-card ' + heatClass + (overdue?' overdue':'') + '" data-action="open-network" data-id="' + p.id + '">' +
+    '<div class="pc-top">' +
+      '<div>' +
+        '<div class="pc-name">' + esc(name) + '</div>' +
+        '<div class="pc-firm">' + esc(firm) + (area?' · '+esc(area):'') + '</div>' +
+      '</div>' +
+      '<div class="pc-badges">' +
+        '<span class="pc-heat">' + (p.heat||'') + '</span>' +
+        '<span class="pc-stage ' + stageClass + '">' + esc(p.stage) + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="pc-meta">' +
+      (type ? '<span>' + icon('idcard',11) + ' ' + esc(type) + '</span>' : '') +
+      '<span>' + icon('briefcase',11) + ' ' + meetCount + ' meeting' + (meetCount!==1?'s':'') + '</span>' +
+      (linkedJobs ? '<span style="color:var(--emerald-400);">' + icon('check',11) + ' ' + linkedJobs + ' job' + (linkedJobs!==1?'s':'') + ' linked</span>' : '') +
+      (p.speciality ? '<span>' + esc(p.speciality) + '</span>' : '') +
+    '</div>' +
+    (fuText ? '<div class="pc-followup' + (overdue?' overdue':today?' today':'') + '">' + fuText + '</div>' : '') +
+    (lastNote ? '<div class="pc-last-note">' + esc(lastNote.slice(0,120)) + (lastNote.length>120?'…':'') + '</div>' : '') +
+  '</div>';
+}
+
+function renderNetworkDetail(p){
+  const c = contactOf(p);  // resolved contact
+  const name = c.name || '(unknown)';
+  const firm = c.company || '';
+  const area = c.area || '';
+  const phone = c.phone || '';
+  const email = c.email || '';
+  const type = c.category || '';
+
+  const days = prospectDaysUntil(p.nextFollowUp);
+  const overdue = days !== null && days < 0;
+  const initials = name.split(' ').slice(0,2).map(function(w){ return w[0]; }).join('').toUpperCase();
+  const linkedJobs = state.jobs.filter(function(j){ return j.networkId === p.id; });
+  const meetings = (p.meetings||[]).slice().sort(function(a,b){ return b.date.localeCompare(a.date); });
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'network' && state.confirmDelete.id === p.id;
+
+  return '' +
+  '<div class="view-header">' +
+    '<div style="display:flex;align-items:center;gap:14px;">' +
+      '<div class="prospect-detail-avatar">' + initials + '</div>' +
+      '<div>' +
+        '<h2 class="view-title">' + esc(name) + '</h2>' +
+        '<p class="view-subtitle">' + esc(firm) + (area?' · '+esc(area):'') +
+          ' · <span style="color:var(--accent-text);cursor:pointer;text-decoration:underline;" data-action="goto-contact" data-id="' + (p.contactId||'') + '">View in Contacts</span>' +
+        '</p>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+      '<button class="btn-primary" data-action="add-network-meeting" data-id="' + p.id + '">+ Log Meeting</button>' +
+      '<button class="btn-secondary" data-action="edit-network" data-id="' + p.id + '">Edit</button>' +
+      (isConfirm
+        ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="network" data-id="' + p.id + '">Confirm Delete</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+        : '<button class="icon-btn danger" data-action="delete-request" data-type="network" data-id="' + p.id + '" title="Delete this network entry">' + icon('trash',14) + '</button>') +
+      '<button class="data-btn" data-action="network-back">← Network</button>' +
+    '</div>' +
+  '</div>' +
+  (overdue ? '<div class="prospects-alert">⚠ <strong>Follow-up overdue by ' + Math.abs(days) + ' day' + (Math.abs(days)!==1?'s':'') + '</strong> — scheduled for ' + fmtDate(p.nextFollowUp) + '</div>' : '') +
+
+  '<div class="prospect-info-grid">' +
+    kv2('Type', type) + kv2('Stage', p.stage) + kv2('Heat', p.heat||'—') +
+    kv2('Speciality', p.speciality||'—') + kv2('Budget Range', p.budgetRange||'—') +
+    kv2('How Met', p.howMet||'—') + (p.referredBy?kv2('Referred By', p.referredBy):'') +
+    kv2('Phone', phone) + kv2('Email', email) +
+    kv2('Next Follow-up', p.nextFollowUp ? (overdue?'⚠ ':'')+fmtDate(p.nextFollowUp) : '—') +
+  '</div>' +
+
+  (p.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;">' +
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--amber-400);margin-bottom:6px;">Notes on this person</div>' +
+    '<div style="font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(p.notes) + '</div>' +
+  '</div>' : '') +
+
+  (linkedJobs.length ? '<div style="margin-bottom:16px;">' +
+    '<div class="section-head"><div class="section-head-title">Linked Jobs</div></div>' +
+    linkedJobs.map(function(j){
+      const client = state.clients.find(function(cl){ return cl.id===j.clientId; });
+      return '<div class="job-row" data-action="open-job-from-prospect" data-id="' + j.id + '" style="cursor:pointer;"><span class="led '+STATUS_LED[j.status]+'"></span>' +
+        '<div class="job-row-info"><div class="job-row-title">'+esc(j.title)+'</div>' +
+        '<div class="job-row-sub">'+(client?esc(client.company||client.name):'')+'</div></div>' +
+        '<div class="job-row-date">'+fmtDate(j.projectDate)+'</div></div>';
+    }).join('') + '</div>' : '') +
+
+  '<div class="section-head">' +
+    '<div class="section-head-title">Meeting History (' + meetings.length + ')</div>' +
+    '<button class="btn-primary" data-action="add-network-meeting" data-id="' + p.id + '" style="font-size:12px;padding:7px 14px;">+ Log Meeting</button>' +
+  '</div>' +
+  (meetings.length === 0 ? '<div class="empty-msg">No meetings logged yet.</div>' :
+  '<div class="meeting-timeline">' + meetings.map(function(m){
+    const fuClass = m.done ? 'followup-done' : 'followup-pending';
+    const isConfirm = state.confirmDelete && state.confirmDelete.type === 'meeting' && state.confirmDelete.id === m.id;
+    return '<div class="meeting-entry ' + fuClass + '">' +
+      '<div class="me-top">' +
+        '<span class="me-date">' + fmtDate(m.date) + '</span>' +
+        '<span class="me-type">' + esc(m.type) + '</span>' +
+        (m.reaction ? '<span class="me-reaction ' + reactionClass(m.reaction) + '">' + esc(m.reaction) + '</span>' : '') +
+        '<span style="margin-left:auto;display:flex;gap:4px;align-items:center;">' +
+          (isConfirm
+            ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="meeting" data-network-id="' + p.id + '" data-id="' + m.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+            : '<button class="icon-btn" data-action="edit-meeting" data-pid="' + p.id + '" data-mid="' + m.id + '" title="Edit this meeting entry">' + icon('edit',12) + '</button>' +
+              '<button class="icon-btn danger" data-action="delete-request" data-type="meeting" data-id="' + m.id + '" title="Delete this meeting log entry">' + icon('trash',12) + '</button>') +
+        '</span>' +
+      '</div>' +
+      (m.discussed ? '<div class="me-label">Discussed</div><div class="me-val">' + esc(m.discussed) + '</div>' : '') +
+      (m.offered && m.offered.length ? '<div class="me-label">Showed / Offered</div><div class="me-val">' + m.offered.map(esc).join(' · ') + '</div>' : '') +
+      (m.projectsMentioned ? '<div class="me-label">Projects Mentioned</div><div class="me-val">' + esc(m.projectsMentioned) + '</div>' : '') +
+      ((m.myCommitments||m.theirCommitments) ?
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">' +
+          (m.myCommitments ? '<div><div class="me-label">You promised to</div><div class="me-commit">' + esc(m.myCommitments) + '</div></div>' : '<div></div>') +
+          (m.theirCommitments ? '<div><div class="me-label">They said they\'d</div><div class="me-commit">' + esc(m.theirCommitments) + '</div></div>' : '<div></div>') +
+        '</div>' : '') +
+      (m.followUpAction ? '<div class="me-followup-strip ' + (m.done?'done':'') + '">' +
+        (m.done ? '✓ Done — ' : '📅 Follow up: ') + esc(m.followUpAction) +
+        (m.followUpDate && !m.done ? ' by ' + fmtDate(m.followUpDate) : '') +
+        (!m.done ? '&nbsp;&nbsp;<button style="font-size:10px;background:none;border:1px solid var(--amber-400);color:var(--amber-400);border-radius:4px;padding:1px 6px;cursor:pointer;" data-action="mark-followup-done" data-pid="' + p.id + '" data-mid="' + m.id + '">Mark done</button>' : '') +
+      '</div>' : '') +
+    '</div>';
+  }).join('') + '</div>');
+}
+
+function kv2(label, val){
+  return '<div class="prospect-info-item"><div class="prospect-info-label">' + esc(label) + '</div><div class="prospect-info-val">' + esc(String(val||'—')) + '</div></div>';
+}
+
+function renderNetwork(){
+  const view = state.networkView || 'list';
+
+  // Detail view
+  if(view === 'detail' && state.selectedNetworkId){
+    const p = state.network.find(x=>x.id===state.selectedNetworkId);
+    if(p) return renderNetworkDetail(p);
+    state.networkView = 'list';
+  }
+
+  // Add/Edit form
+  if(view === 'add' || view === 'edit'){
+    return renderNetworkForm();
+  }
+  if(view === 'meeting' || view === 'edit-meeting'){
+    return renderNetworkMeetingForm();
+  }
+
+  // Main list view
+  const prospects = state.network;
+
+  // Alerts — overdue follow-ups
+  const overduePeople = prospects.filter(p=>{
+    const d = prospectDaysUntil(p.nextFollowUp);
+    return d !== null && d < 0;
+  });
+  const dueToday = prospects.filter(p => prospectDaysUntil(p.nextFollowUp) === 0);
+  const dueThisWeek = prospects.filter(p=>{ const d=prospectDaysUntil(p.nextFollowUp); return d!==null&&d>0&&d<=7; });
+  const hot = prospects.filter(p=>p.heat==='🔥 Hot');
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Network</h2>' +
+    '<p class="view-subtitle">Architects &amp; interior designers — relationship tracker for your referral relationship tracker</p></div>' +
+    '<button class="btn-primary" data-action="new-network">+ Add to Network</button>' +
+  '</div>' +
+
+  // KPI dashboard
+  '<div class="prospects-dash">' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val">' + prospects.length + '</div><div class="prospects-kpi-label">Total</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val" style="color:var(--amber-400);">' + hot.length + '</div><div class="prospects-kpi-label">🔥 Hot</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val" style="color:var(--red-400);">' + overduePeople.length + '</div><div class="prospects-kpi-label">Overdue Follow-ups</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val" style="color:var(--cyan-400);">' + dueToday.length + '</div><div class="prospects-kpi-label">Due Today</div><div class="prospects-kpi-sub">+' + dueThisWeek.length + ' this week</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val" style="color:var(--emerald-400);">' +
+      prospects.filter(p=>p.stage==='On a Project'||p.stage==='Repeat Partner').length +
+    '</div><div class="prospects-kpi-label">Active Partners</div></div>' +
+  '</div>' +
+
+  // Overdue alert
+  (overduePeople.length ? '<div class="prospects-alert">⚠ <strong>' + overduePeople.length + ' follow-up' + (overduePeople.length!==1?'s':'') + ' overdue:</strong> ' +
+    overduePeople.map(p=>'<span style="cursor:pointer;text-decoration:underline;" data-action="open-network" data-id="'+p.id+'">'+esc(p.name)+'</span>').join(', ') +
+  '</div>' : '') +
+
+  // Due today strip
+  (dueToday.length ? '<div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--amber-400);">📅 <strong>Follow up today:</strong> ' +
+    dueToday.map(p=>'<span style="cursor:pointer;text-decoration:underline;" data-action="open-network" data-id="'+p.id+'">'+esc(p.name)+'</span>').join(', ') +
+  '</div>' : '') +
+
+  // Sorted list — overdue first, then by follow-up date
+  '<div class="prospect-cards">' +
+    (prospects.length === 0
+      ? '<div class="empty-msg">No prospects yet. Add your first architect or interior designer contact to start tracking relationships.</div>'
+      : prospects
+          .slice()
+          .sort(function(a,b){
+            const da = prospectDaysUntil(a.nextFollowUp) ?? 999;
+            const db = prospectDaysUntil(b.nextFollowUp) ?? 999;
+            return da - db;
+          })
+          .map(prospectCardHtml).join('')
+    ) +
+  '</div>';
+}
+
+function renderNetworkForm(){
+  const editing = state.networkView === 'edit' && state.selectedNetworkId;
+  const n = editing ? state.network.find(function(x){ return x.id===state.selectedNetworkId; }) : {};
+  const d = n || {};
+  const preselect = state._preselectedContactId || d.contactId || '';
+  state._preselectedContactId = null; // consume it
+
+  const title = editing ? 'Edit Network Entry' : 'Add to Network';
+
+  const networkContactIds = state.network.map(function(x){ return x.contactId; });
+  const availableContacts = state.contacts.filter(function(c){
+    if((editing && c.id === d.contactId) || c.id === preselect) return true;
+    return !networkContactIds.includes(c.id);
+  });
+  const priorityCats = ['Architect','Interior Designer','Builder / Developer','PMC / Project Manager'];
+  const priorityContacts = availableContacts.filter(function(c){ return priorityCats.includes(c.category); });
+  const otherContacts = availableContacts.filter(function(c){ return !priorityCats.includes(c.category); });
+
+  const contactOptions = [{ value:'', label:'— Pick a contact —' }]
+    .concat(priorityContacts.map(function(c){ return { value:c.id, label:c.name+(c.company?' — '+c.company:'')+' ('+c.category+')' }; }))
+    .concat(otherContacts.length ? [{ value:'__sep__', label:'────── Other contacts ──────' }] : [])
+    .concat(otherContacts.map(function(c){ return { value:c.id, label:c.name+(c.company?' — '+c.company:'')+' ('+c.category+')' }; }));
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + title + '</h2>' +
+    '<p class="view-subtitle">Contact details come from their Contact record — no re-entering data</p></div>' +
+    '<button class="data-btn" data-action="network-back">← Cancel</button>' +
+  '</div>' +
+  '<form data-form="network" style="max-width:720px;">' +
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Link to Contact</div>' +
+    fieldSelect('Contact', 'contactId', contactOptions, preselect) +
+    (state.contacts.length === 0
+      ? '<div style="font-size:12px;color:var(--amber-400);margin-top:6px;">No contacts yet. <span style="text-decoration:underline;cursor:pointer;" data-action="goto-contacts-from-network">Add contacts first →</span></div>'
+      : '<div style="font-size:12px;color:var(--zinc-500);margin-top:4px;">Not in the list? <span style="color:var(--accent-text);text-decoration:underline;cursor:pointer;" data-action="goto-contacts-from-network">Add them to Contacts first →</span></div>'
+    ) +
+
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Relationship</div>' +
+    '<div class="field-row-3">' + fieldSelect('Stage','stage',PROSPECT_STAGES,d.stage||'First Contact') + fieldSelect('Heat','heat',PROSPECT_HEAT,d.heat||'🌤 Warm') + fieldInput('Next follow-up date','nextFollowUp',d.nextFollowUp||'','date','min="' + todayStr() + '"') + '</div>' +
+    '<div class="field-row-2">' + fieldSelect('How you met','howMet',PROSPECT_HOW_MET,d.howMet||PROSPECT_HOW_MET[0]) + fieldInput('Referred by (if any)','referredBy',d.referredBy,'text','placeholder="Name of who introduced you"') + '</div>' +
+
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Their Work</div>' +
+    '<div class="field-row-2">' + fieldSelect('Speciality','speciality',PROSPECT_SPECIALITY,d.speciality||PROSPECT_SPECIALITY[0]) + fieldSelect('Typical budget range','budgetRange',PROSPECT_BUDGET,d.budgetRange||'Unknown') + '</div>' +
+    fieldInput('Typical projects','typicalProjects',d.typicalProjects,'text','placeholder="e.g. Residential villas, 3–4 per year, Baner / Koregaon Park"') +
+
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Notes on this person</div>' +
+    fieldTextarea('What to remember — personality, approach, best time to reach','notes',d.notes,'placeholder="e.g. Very particular about aesthetics. Hates jargon. Responds best on WhatsApp after 6pm. Bring printed diagrams."') +
+
+    '<div class="form-actions">' +
+      '<button type="button" class="btn-secondary" data-action="network-back">Cancel</button>' +
+      '<button type="submit" class="btn-primary">' + (editing?'Save Changes':'Add to Network') + '</button>' +
+    '</div>' +
+  '</form>';
+}
+
+function renderNetworkMeetingForm(){
+  const p = state.network.find(x=>x.id===state.selectedNetworkId);
+  if(!p) return '<div class="empty-msg">Network entry not found.</div>';
+  const d = state.networkMeetingDraft || {};
+  const isEditing = state.networkView === 'edit-meeting' && !!state._editMeetingId;
+  const c = contactOf(p);
+  const contactName = (c.salutation?c.salutation+' ':'') + (c.name||'');
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + (isEditing ? 'Edit Meeting Log' : 'Log Meeting') + '</h2>' +
+    '<p class="view-subtitle">' + esc(contactName) + (c.company?' · '+esc(c.company):'') + '</p></div>' +
+    '<button class="data-btn" data-action="back-to-network" data-id="' + p.id + '">← Cancel</button>' +
+  '</div>' +
+  '<form data-form="meeting" style="max-width:720px;">' +
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Meeting Details</div>' +
+    '<div class="field-row-2">' + fieldInput('Date','date',d.date||todayStr(),'date') + fieldSelect('Meeting type','meetingType',MEETING_TYPES,d.meetingType||d.type||'Office Visit') + '</div>' +
+
+    fieldTextarea('What was discussed','discussed',d.discussed,'placeholder="Summary of the conversation — what came up, what they said, any concerns or questions they raised"') +
+
+    '<div class="field-row-2">' +
+      fieldSelect('Their reaction / interest level','reaction',MEETING_REACTIONS,d.reaction||'Neutral') +
+      '<label class="field"><span class="field-label">What you showed / offered</span>' +
+        '<select class="field-select" data-field="offered" multiple style="height:100px;">' +
+          OFFERING_CATS.map(c=>'<option value="'+esc(c)+'" '+(d.offered&&d.offered.includes(c)?'selected':'')+'>'+esc(c)+'</option>').join('') +
+        '</select>' +
+      '</label>' +
+    '</div>' +
+
+    fieldTextarea('Projects they mentioned','projectsMentioned',d.projectsMentioned,'placeholder="Any upcoming projects — location, size, type, timeline if known"') +
+
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Commitments &amp; Follow-up</div>' +
+    '<div class="field-row-2">' +
+      fieldTextarea('What YOU promised to do or send','myCommitments',d.myCommitments,'placeholder="e.g. Send AudioPlan PDF sample for 20×14ft room"') +
+      fieldTextarea('What THEY said they\'d do','theirCommitments',d.theirCommitments,'placeholder="e.g. Will introduce to villa client if project moves forward"') +
+    '</div>' +
+    fieldInput('Follow-up action required','followUpAction',d.followUpAction,'text','placeholder="e.g. Call to confirm client introduction"') +
+    '<div class="field-row-2">' +
+      fieldInput('Follow-up by date','followUpDate',d.followUpDate||'','date','min="' + todayStr() + '"') +
+      (!isEditing ? fieldSelect('Update prospect stage to','newStage',['(no change)'].concat(PROSPECT_STAGES), d.newStage||'(no change)') : '') +
+    '</div>' +
+    (!isEditing ? fieldSelect('Update heat to','newHeat',['(no change)'].concat(PROSPECT_HEAT), d.newHeat||'(no change)') : '') +
+
+    '<div class="form-actions">' +
+      '<button type="button" class="data-btn" data-action="back-to-network" data-id="' + p.id + '">Cancel</button>' +
+      '<button type="submit" class="btn-primary">' + (isEditing ? 'Save Changes' : 'Save Meeting Log') + '</button>' +
+    '</div>' +
+  '</form>';
+}
+
+/* ================================ SUPPLY CHAIN ================================ */
+
+function brandPills(brandsStr){
+  if(!brandsStr) return '';
+  return brandsStr.split(',').map(function(b){
+    return '<span class="brand-pill">' + esc(b.trim()) + '</span>';
+  }).join('');
+}
+
+function supplyInfoItem(label, val){
+  return '<div class="supply-info-item"><div class="supply-info-label">' + esc(label) + '</div><div class="supply-info-val">' + esc(String(val||'—')) + '</div></div>';
+}
+
+function reliabilityClass(r){
+  if(r==='Excellent') return 'reliability-excellent';
+  if(r==='Good') return 'reliability-good';
+  if(r==='Average') return 'reliability-average';
+  return 'reliability-inconsistent';
+}
+
+/* ── Dealer card ── */
+function dealerCardHtml(d){
+  const repCount = state.supply.reps.filter(function(r){ return r.dealerId===d.id; }).length;
+  const scCount  = state.supply.serviceCentres.filter(function(s){ return s.dealerId===d.id; }).length;
+  const plCount  = (d.priceLists||[]).length;
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'dealer' && state.confirmDelete.id === d.id;
+  return '<div class="supply-card" data-action="open-supply" data-type="dealer" data-id="' + d.id + '">' +
+    '<div class="supply-card-top">' +
+      '<div>' +
+        '<div class="supply-card-name">' + esc(d.company) + '</div>' +
+        '<div class="supply-card-sub">' + esc(d.city) + ', ' + esc(d.state) + '</div>' +
+      '</div>' +
+      (d.tradeDiscount ? '<span style="font-family:ui-monospace,monospace;font-size:12px;color:var(--emerald-400);">' + esc(d.tradeDiscount) + '% disc</span>' : '') +
+    '</div>' +
+    '<div class="supply-card-brands">' + brandPills(d.brands) + '</div>' +
+    '<div class="supply-meta">' +
+      (d.paymentTerms ? '<span>' + icon('briefcase',11) + ' ' + esc(d.paymentTerms) + '</span>' : '') +
+      (d.leadTimeDays ? '<span>' + icon('truck',11) + ' ' + esc(d.leadTimeDays) + ' day lead</span>' : '') +
+      (repCount ? '<span>' + icon('users',11) + ' ' + repCount + ' rep' + (repCount!==1?'s':'') + '</span>' : '') +
+      (plCount ? '<span>' + icon('package',11) + ' ' + plCount + ' price list' + (plCount!==1?'s':'') + '</span>' : '') +
+    '</div>' +
+    '<div class="supply-card-footer">' +
+      (isConfirm
+        ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="dealer" data-id="' + d.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+        : '<button class="icon-btn" data-action="edit-supply" data-type="dealer" data-id="' + d.id + '">' + icon('edit',14) + '</button>' +
+          '<button class="icon-btn danger" data-action="delete-supply-request" data-type="dealer" data-id="' + d.id + '">' + icon('trash',14) + '</button>') +
+    '</div>' +
+  '</div>';
+}
+
+/* ── Rep card ── */
+function repCardHtml(r){
+  const dealer = state.supply.dealers.find(function(d){ return d.id===r.dealerId; });
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'rep' && state.confirmDelete.id === r.id;
+  return '<div class="supply-card" data-action="open-supply" data-type="rep" data-id="' + r.id + '">' +
+    '<div class="supply-card-top">' +
+      '<div>' +
+        '<div class="supply-card-name">' + esc(r.name) + '</div>' +
+        '<div class="supply-card-sub">' + esc(dealer ? dealer.company : 'No dealer linked') + '</div>' +
+      '</div>' +
+      '<span class="' + reliabilityClass(r.reliability) + '" style="font-size:11px;font-family:ui-monospace,monospace;">' + esc(r.reliability||'') + '</span>' +
+    '</div>' +
+    '<div class="supply-card-brands">' + brandPills(r.brands) + '</div>' +
+    '<div class="supply-meta">' +
+      (r.phone ? '<span>' + icon('phone',11) + ' ' + esc(r.phone) + '</span>' : '') +
+      (r.lastContacted ? '<span>Last: ' + fmtDate(r.lastContacted) + '</span>' : '') +
+    '</div>' +
+    '<div class="supply-card-footer">' +
+      (isConfirm
+        ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="rep" data-id="' + r.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+        : '<button class="icon-btn" data-action="edit-supply" data-type="rep" data-id="' + r.id + '">' + icon('edit',14) + '</button>' +
+          '<button class="icon-btn danger" data-action="delete-supply-request" data-type="rep" data-id="' + r.id + '">' + icon('trash',14) + '</button>') +
+    '</div>' +
+  '</div>';
+}
+
+/* ── Service Centre card ── */
+function scCardHtml(s){
+  const dealer = state.supply.dealers.find(function(d){ return d.id===s.dealerId; });
+  const isConfirm = state.confirmDelete && state.confirmDelete.type === 'sc' && state.confirmDelete.id === s.id;
+  return '<div class="supply-card" data-action="open-supply" data-type="sc" data-id="' + s.id + '">' +
+    '<div class="supply-card-top">' +
+      '<div>' +
+        '<div class="supply-card-name">' + esc(s.name) + '</div>' +
+        '<div class="supply-card-sub">' + esc(s.city) + (dealer ? ' · ' + esc(dealer.company) : ' · Independent') + '</div>' +
+      '</div>' +
+      (s.turnaround ? '<span style="font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-500);">' + esc(s.turnaround) + '</span>' : '') +
+    '</div>' +
+    '<div class="supply-card-brands">' + brandPills(s.brands) + '</div>' +
+    '<div class="supply-meta">' +
+      (s.phone ? '<span>' + icon('phone',11) + ' ' + esc(s.phone) + '</span>' : '') +
+      (s.address ? '<span>' + icon('mappin',11) + ' ' + esc(s.address) + '</span>' : '') +
+    '</div>' +
+    '<div class="supply-card-footer">' +
+      (isConfirm
+        ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="sc" data-id="' + s.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+        : '<button class="icon-btn" data-action="edit-supply" data-type="sc" data-id="' + s.id + '">' + icon('edit',14) + '</button>' +
+          '<button class="icon-btn danger" data-action="delete-supply-request" data-type="sc" data-id="' + s.id + '">' + icon('trash',14) + '</button>') +
+    '</div>' +
+  '</div>';
+}
+
+/* ── Detail views ── */
+function dealerDetailHtml(d){
+  const reps = state.supply.reps.filter(function(r){ return r.dealerId===d.id; });
+  const scs  = state.supply.serviceCentres.filter(function(s){ return s.dealerId===d.id; });
+  const pls  = d.priceLists || [];
+  return '' +
+  '<div class="view-header">' +
+    '<div>' +
+      '<h2 class="view-title">' + esc(d.company) + '</h2>' +
+      '<p class="view-subtitle">' + esc(d.city) + ', ' + esc(d.state) + (d.website?' · '+esc(d.website):'') + '</p>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-primary" data-action="import-pricelist" data-id="' + d.id + '">↑ Import Price List</button>' +
+      '<button class="btn-secondary" data-action="download-template">↓ Template</button>' +
+      '<button class="btn-secondary" data-action="edit-supply" data-type="dealer" data-id="' + d.id + '">Edit</button>' +
+      '<button class="data-btn" data-action="supply-back">← Dealers</button>' +
+    '</div>' +
+  '</div>' +
+  '<div class="supply-card-brands" style="margin-bottom:16px;">' + brandPills(d.brands) + '</div>' +
+  '<div class="supply-detail-grid">' +
+    supplyInfoItem('Account / Customer Code', d.accountCode) +
+    supplyInfoItem('Payment Terms', d.paymentTerms) +
+    supplyInfoItem('Credit Limit', d.creditLimit ? fmtINR(d.creditLimit) : '—') +
+    supplyInfoItem('Trade Discount', d.tradeDiscount ? d.tradeDiscount + '%' : '—') +
+    supplyInfoItem('Lead Time', d.leadTimeDays ? d.leadTimeDays + ' days' : '—') +
+    supplyInfoItem('GST Number', d.gst) +
+    supplyInfoItem('Phone', d.phone) +
+    supplyInfoItem('Email', d.email) +
+  '</div>' +
+  (d.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(d.notes) + '</div>' : '') +
+
+  // Reps at this dealer
+  (reps.length ? '<div class="section-head" style="margin-top:8px;"><div class="section-head-title">Sales Reps (' + reps.length + ')</div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">' +
+    reps.map(function(r){
+      return '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+        '<div>' +
+          '<div style="font-weight:600;color:var(--text-strong);">' + esc(r.name) + '</div>' +
+          '<div style="font-size:12px;color:var(--zinc-500);">' + esc(r.brands||'') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+          (r.phone ? '<a href="tel:' + esc(r.phone) + '" style="font-family:ui-monospace,monospace;font-size:12px;color:var(--accent-text);">' + esc(r.phone) + '</a>' : '') +
+          '<span class="' + reliabilityClass(r.reliability) + '" style="font-size:11px;font-family:ui-monospace,monospace;">' + esc(r.reliability||'') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>' : '') +
+
+  // Service centres
+  (scs.length ? '<div class="section-head"><div class="section-head-title">Service Centres (' + scs.length + ')</div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">' +
+    scs.map(function(s){
+      return '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:12px 14px;">' +
+        '<div style="font-weight:600;color:var(--text-strong);">' + esc(s.name) + ' <span style="font-size:11px;color:var(--zinc-500);">— ' + esc(s.city) + '</span></div>' +
+        '<div style="font-size:12px;color:var(--zinc-500);margin-top:2px;">' + esc(s.phone||'') + ' · Turnaround: ' + esc(s.turnaround||'—') + '</div>' +
+      '</div>';
+    }).join('') + '</div>' : '') +
+
+  // Price list history
+  '<div class="section-head">' +
+    '<div class="section-head-title">Price List History (' + pls.length + ')</div>' +
+    '<button class="btn-primary" data-action="import-pricelist" data-id="' + d.id + '" style="font-size:12px;padding:7px 14px;">↑ Import Price List</button>' +
+  '</div>' +
+  (pls.length === 0
+    ? '<div class="empty-msg">No price lists imported yet. Use "Import Price List" to bulk-update your Catalog from this dealer\'s Excel.</div>'
+    : pls.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }).map(function(pl){
+        return '<div class="pricelist-entry">' +
+          '<div class="pricelist-date">' + fmtDate(pl.date) + ' · ' + esc(pl.format||'Excel') + '</div>' +
+          '<div class="pricelist-summary">' + esc(pl.summary||'') + '</div>' +
+        '</div>';
+      }).join('')
+  );
+}
+
+/* ── Price list import UI ── */
+function importPriceListHtml(dealerId){
+  const d = state.supply.dealers.find(function(x){ return x.id===dealerId; });
+  if(!d) return '<div class="empty-msg">Dealer not found.</div>';
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Import Price List</h2>' +
+    '<p class="view-subtitle">From: <strong>' + esc(d.company) + '</strong> · Updates your Catalog</p></div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn-secondary" data-action="download-template">↓ Download Template</button>' +
+      '<button class="data-btn" data-action="back-to-dealer" data-id="' + dealerId + '">← Cancel</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:18px;margin-bottom:16px;">' +
+    '<div style="font-family:ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);margin-bottom:10px;">How it works</div>' +
+    '<ol style="font-size:13px;color:var(--zinc-400);line-height:2;padding-left:18px;">' +
+      '<li>Download the template using the button above</li>' +
+      '<li>Paste the dealer\'s products into the template columns</li>' +
+      '<li>Upload the filled template here</li>' +
+      '<li>Products matched by <strong style="color:var(--text-strong);">Model No.</strong> — existing products updated, new ones added</li>' +
+      '<li>Dealer is auto-stamped as <strong style="color:var(--text-strong);">Supplier</strong> on all imported rows</li>' +
+    '</ol>' +
+  '</div>' +
+
+  '<form data-form="pricelist-import" data-dealer-id="' + dealerId + '">' +
+    '<div class="field" style="margin-bottom:14px;">' +
+      '<span class="field-label">What changed in this price list (optional note)</span>' +
+      '<input class="field-input" data-field="summary" placeholder="e.g. JBL CBT series revised +5%. New Epson LS500W added." type="text">' +
+    '</div>' +
+    '<div class="import-zone" id="import-drop-zone">' +
+      '<div class="import-zone-icon">📊</div>' +
+      '<div class="import-zone-text">Drop your Excel file here or click to browse</div>' +
+      '<div class="import-zone-sub">Must match the template format — .xlsx or .xls</div>' +
+      '<input type="file" id="import-file-input" accept=".xlsx,.xls" style="display:none;" onchange="handlePriceListFile(this)">' +
+    '</div>' +
+    '<div id="import-preview"></div>' +
+    '<div class="form-actions">' +
+      '<button type="button" class="btn-secondary" data-action="back-to-dealer" data-id="' + dealerId + '">Cancel</button>' +
+      '<button type="submit" class="btn-primary" id="import-confirm-btn" style="display:none;">Confirm Import</button>' +
+    '</div>' +
+  '</form>';
+}
+
+/* ── Rep / SC detail (simple — just full info card) ── */
+function repDetailHtml(r){
+  const dealer = state.supply.dealers.find(function(d){ return d.id===r.dealerId; });
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + esc(r.name) + '</h2>' +
+    '<p class="view-subtitle">' + esc(dealer?dealer.company:'No dealer') + '</p></div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn-secondary" data-action="edit-supply" data-type="rep" data-id="' + r.id + '">Edit</button>' +
+      '<button class="data-btn" data-action="supply-back">← Reps</button>' +
+    '</div>' +
+  '</div>' +
+  '<div class="supply-detail-grid">' +
+    supplyInfoItem('Dealer / Employer', dealer?dealer.company:'—') +
+    supplyInfoItem('Brands', r.brands||'—') +
+    supplyInfoItem('Phone (WhatsApp)', r.phone||'—') +
+    supplyInfoItem('Email', r.email||'—') +
+    supplyInfoItem('Reliability', r.reliability||'—') +
+    supplyInfoItem('Last Contacted', r.lastContacted?fmtDate(r.lastContacted):'—') +
+  '</div>' +
+  (r.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(r.notes) + '</div>' : '');
+}
+
+function scDetailHtml(s){
+  const dealer = state.supply.dealers.find(function(d){ return d.id===s.dealerId; });
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + esc(s.name) + '</h2>' +
+    '<p class="view-subtitle">' + esc(s.city) + (dealer?' · '+esc(dealer.company):' · Independent') + '</p></div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn-secondary" data-action="edit-supply" data-type="sc" data-id="' + s.id + '">Edit</button>' +
+      '<button class="data-btn" data-action="supply-back">← Service Centres</button>' +
+    '</div>' +
+  '</div>' +
+  '<div class="supply-detail-grid">' +
+    supplyInfoItem('Brands Serviced', s.brands||'—') +
+    supplyInfoItem('City', s.city||'—') +
+    supplyInfoItem('Address', s.address||'—') +
+    supplyInfoItem('Phone', s.phone||'—') +
+    supplyInfoItem('Email', s.email||'—') +
+    supplyInfoItem('Turnaround', s.turnaround||'—') +
+    supplyInfoItem('Linked Dealer', dealer?dealer.company:'Independent / None') +
+  '</div>' +
+  (s.warrantyProcess ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--cyan-400);border-radius:8px;padding:12px 16px;margin-bottom:12px;">' +
+    '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);margin-bottom:6px;">Warranty Process</div>' +
+    '<div style="font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(s.warrantyProcess) + '</div>' +
+  '</div>' : '') +
+  (s.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(s.notes) + '</div>' : '');
+}
+
+/* ── Add/Edit forms ── */
+function supplyFormHtml(type, data){
+  const d = data || {};
+  const isEdit = !!d.id;
+  const dealerOptions = [{ value:'', label:'— Not linked to a dealer —' }]
+    .concat(state.supply.dealers.map(function(dl){ return { value:dl.id, label:dl.company + ' (' + dl.city + ')' }; }));
+
+  if(type === 'dealer'){
+    return '<form data-form="supply-dealer" style="max-width:760px;">' +
+      '<div class="form-section-label">Company</div>' +
+      '<div class="field-row-2">' + fieldInput('Company name','company',d.company,'text','placeholder="e.g. Harman Professional India"') + fieldInput('City','city',d.city,'text','placeholder="Mumbai"') + '</div>' +
+      '<div class="field-row-2">' + fieldSelect('State','state',DEALER_STATES,d.state||'Maharashtra') + fieldInput('GST number','gst',d.gst,'text','placeholder="27AABCH1234F1Z5"') + '</div>' +
+      fieldInput('Brands carried (comma separated)','brands',d.brands,'text','placeholder="JBL, Crown, BSS, AMX"') +
+      fieldInput('Website','website',d.website,'text','placeholder="harmanpro.com"') +
+      '<div class="form-section-label" style="margin-top:14px;">Your Account</div>' +
+      '<div class="field-row-2">' + fieldInput('Your account / customer code','accountCode',d.accountCode,'text','placeholder="HPL-MH-2891"') + fieldInput('Trade discount %','tradeDiscount',d.tradeDiscount,'number','placeholder="28" min="0" max="100"') + '</div>' +
+      '<div class="field-row-2">' + fieldSelect('Payment terms','paymentTerms',PAYMENT_TERMS,d.paymentTerms||PAYMENT_TERMS[0]) + fieldInput('Credit limit (₹)','creditLimit',d.creditLimit,'number','placeholder="200000" min="0"') + '</div>' +
+      '<div class="field-row-2">' + fieldInput('Typical lead time (days)','leadTimeDays',d.leadTimeDays,'number','placeholder="5" min="1"') + fieldInput('Phone','phone',d.phone,'text','placeholder="+91 22 ..."') + '</div>' +
+      fieldInput('Email','email',d.email,'email','placeholder="trade@dealer.com"') +
+      fieldTextarea('Notes','notes',d.notes,'placeholder="Key contacts, reliability, special terms, payment notes..."') +
+      '<div class="form-actions"><button type="button" class="btn-secondary" data-action="supply-back">Cancel</button><button type="submit" class="btn-primary">' + (isEdit?'Save Changes':'Add Dealer') + '</button></div>' +
+    '</form>';
+  }
+  if(type === 'rep'){
+    return '<form data-form="supply-rep" style="max-width:760px;">' +
+      '<div class="form-section-label">Person</div>' +
+      '<div class="field-row-2">' + fieldInput('Full name','name',d.name,'text','placeholder="e.g. Sunil Patkar"') + fieldInput('Phone / WhatsApp','phone',d.phone,'text','placeholder="+91 98..."') + '</div>' +
+      '<div class="field-row-2">' + fieldInput('Email','email',d.email,'email','placeholder="rep@company.com"') + fieldInput('Brands they handle','brands',d.brands,'text','placeholder="JBL, Crown"') + '</div>' +
+      '<div class="form-section-label" style="margin-top:14px;">Relationship</div>' +
+      '<div class="field-row-2">' + fieldSelect('Current dealer / employer','dealerId',dealerOptions,d.dealerId||'') + fieldSelect('Reliability','reliability',REP_RELIABILITY,d.reliability||'Good') + '</div>' +
+      fieldInput('Last contacted','lastContacted',d.lastContacted||'','date') +
+      fieldTextarea('Notes','notes',d.notes,'placeholder="Response time, approach, what they\'re good at, any concerns..."') +
+      '<div class="form-actions"><button type="button" class="btn-secondary" data-action="supply-back">Cancel</button><button type="submit" class="btn-primary">' + (isEdit?'Save Changes':'Add Rep') + '</button></div>' +
+    '</form>';
+  }
+  if(type === 'sc'){
+    return '<form data-form="supply-sc" style="max-width:760px;">' +
+      '<div class="form-section-label">Centre</div>' +
+      '<div class="field-row-2">' + fieldInput('Name','name',d.name,'text','placeholder="Harman Authorized Service — Pune"') + fieldInput('City','city',d.city,'text','placeholder="Pune"') + '</div>' +
+      fieldInput('Address','address',d.address,'text','placeholder="Street, Area, City, PIN"') +
+      '<div class="field-row-2">' + fieldInput('Phone','phone',d.phone,'text','placeholder="+91 20 ..."') + fieldInput('Email','email',d.email,'email','placeholder="service@example.com"') + '</div>' +
+      fieldInput('Brands serviced (comma separated)','brands',d.brands,'text','placeholder="JBL, Crown, AMX"') +
+      '<div class="form-section-label" style="margin-top:14px;">Service Details</div>' +
+      '<div class="field-row-2">' + fieldSelect('Linked dealer (if any)','dealerId',dealerOptions,d.dealerId||'') + fieldSelect('Typical turnaround','turnaround',SC_TURNAROUND,d.turnaround||'3–7 days') + '</div>' +
+      fieldTextarea('Warranty process / how to raise a claim','warrantyProcess',d.warrantyProcess,'placeholder="e.g. Call 1800-XXX and register job card. Engineer visits within 48 hours..."') +
+      fieldTextarea('Notes','notes',d.notes,'placeholder="Brand-authorised or independent? Any quirks?"') +
+      '<div class="form-actions"><button type="button" class="btn-secondary" data-action="supply-back">Cancel</button><button type="submit" class="btn-primary">' + (isEdit?'Save Changes':'Add Service Centre') + '</button></div>' +
+    '</form>';
+  }
+  return '';
+}
+
+/* ── Main Supply Chain renderer ── */
+function renderSupply(){
+  const tab = state.supplyTab || 'dealers';
+  const view = state.supplyView || 'list';
+
+  // Sub-views
+  if(view === 'detail' && state.selectedSupplyId){
+    const type = state.selectedSupplyType;
+    if(type === 'dealer'){
+      const d = state.supply.dealers.find(function(x){ return x.id===state.selectedSupplyId; });
+      if(d) return '<div class="view-header"><div><h2 class="view-title">Supply Chain</h2></div></div>' + dealerDetailHtml(d);
+    }
+    if(type === 'rep'){
+      const r = state.supply.reps.find(function(x){ return x.id===state.selectedSupplyId; });
+      if(r) return '<div class="view-header"><div><h2 class="view-title">Supply Chain</h2></div></div>' + repDetailHtml(r);
+    }
+    if(type === 'sc'){
+      const s = state.supply.serviceCentres.find(function(x){ return x.id===state.selectedSupplyId; });
+      if(s) return '<div class="view-header"><div><h2 class="view-title">Supply Chain</h2></div></div>' + scDetailHtml(s);
+    }
+    state.supplyView = 'list';
+  }
+
+  if(view === 'pricelist' && state.selectedSupplyId){
+    return importPriceListHtml(state.selectedSupplyId);
+  }
+
+  if(view === 'add' || view === 'edit'){
+    const type = state.selectedSupplyType;
+    const isEdit = view === 'edit';
+    let data = null;
+    if(isEdit){
+      if(type==='dealer') data = state.supply.dealers.find(function(x){ return x.id===state.selectedSupplyId; });
+      if(type==='rep')    data = state.supply.reps.find(function(x){ return x.id===state.selectedSupplyId; });
+      if(type==='sc')     data = state.supply.serviceCentres.find(function(x){ return x.id===state.selectedSupplyId; });
+    }
+    const titles = { dealer:'Dealer / Distributor', rep:'Sales Rep', sc:'Service Centre' };
+    const action = isEdit ? 'Edit' : 'Add';
+    return '' +
+    '<div class="view-header">' +
+      '<div><h2 class="view-title">' + action + ' ' + (titles[type]||'') + '</h2></div>' +
+      '<button class="data-btn" data-action="supply-back">← Cancel</button>' +
+    '</div>' +
+    supplyFormHtml(type, data);
+  }
+
+  // ── List view ──
+  const dealers = state.supply.dealers;
+  const reps = state.supply.reps;
+  const scs = state.supply.serviceCentres;
+  const tabLabels = [
+    { id:'dealers', label:'Dealers (' + dealers.length + ')' },
+    { id:'reps',    label:'Sales Reps (' + reps.length + ')' },
+    { id:'sc',      label:'Service Centres (' + scs.length + ')' },
+  ];
+  const addLabels = { dealers:'+ Add Dealer', reps:'+ Add Rep', sc:'+ Add Service Centre' };
+  const addTypes  = { dealers:'dealer', reps:'rep', sc:'sc' };
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">Supply Chain</h2>' +
+    '<p class="view-subtitle">Dealers, sales reps and service centres — your procurement network</p></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-secondary" data-action="download-template">↓ Price List Template</button>' +
+      '<button class="btn-primary" data-action="new-supply" data-type="' + addTypes[tab] + '">' + addLabels[tab] + '</button>' +
+    '</div>' +
+  '</div>' +
+
+  // Stats row
+  '<div class="prospects-dash" style="margin-bottom:16px;">' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val">' + dealers.length + '</div><div class="prospects-kpi-label">Dealers</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val">' + reps.length + '</div><div class="prospects-kpi-label">Sales Reps</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val">' + scs.length + '</div><div class="prospects-kpi-label">Service Centres</div></div>' +
+    '<div class="prospects-kpi"><div class="prospects-kpi-val" style="color:var(--emerald-400);">' + dealers.reduce(function(n,d){ return n+(d.priceLists||[]).length; },0) + '</div><div class="prospects-kpi-label">Price Lists</div></div>' +
+  '</div>' +
+
+  // Tabs
+  '<div class="supply-tabs">' +
+    tabLabels.map(function(t){
+      return '<button class="supply-tab ' + (tab===t.id?'active':'') + '" data-action="supply-tab" data-tab="' + t.id + '">' + esc(t.label) + '</button>';
+    }).join('') +
+  '</div>' +
+
+  // Content
+  (tab === 'dealers' ?
+    (dealers.length === 0
+      ? '<div class="empty-msg">No dealers added yet. Add your first dealer to start tracking your supply chain.</div>'
+      : '<div class="supply-grid">' + dealers.map(dealerCardHtml).join('') + '</div>') :
+  tab === 'reps' ?
+    (reps.length === 0
+      ? '<div class="empty-msg">No reps added yet.</div>'
+      : '<div class="supply-grid">' + reps.map(repCardHtml).join('') + '</div>') :
+    (scs.length === 0
+      ? '<div class="empty-msg">No service centres added yet.</div>'
+      : '<div class="supply-grid">' + scs.map(scCardHtml).join('') + '</div>')
+  );
+}
+
+/* ── Price list Excel template download ── */
+function downloadPriceListTemplate(){
+  if(!window.XLSX){ showToast('Excel library not loaded.'); return; }
+  const wb = XLSX.utils.book_new();
+
+  // Main data sheet — matches Catalog import format exactly
+  const headers = ['Product Name','Category','Brand','Model No.','Unit','Purchase Price (₹)','Selling Price (₹)','GST %','Key Specs','Notes'];
+  const example = ['Epson EH-LS300W','Projector & Display','Epson','EH-LS300W','Nos','95000','135000','18%','4K UST Laser, 3600lm, HDMI 2.0','2yr on-site warranty'];
+  const ws = XLSX.utils.aoa_to_sheet([headers, example]);
+  // Column widths
+  ws['!cols'] = [30,25,15,18,8,18,18,8,35,30].map(function(w){ return { wch:w }; });
+  XLSX.utils.book_append_sheet(wb, ws, 'Price List');
+
+  // Reference sheet — valid categories
+  const ref = [
+    ['VALID CATEGORY VALUES — copy exactly'],[''],
+    ...PRODUCT_CATEGORIES.map(function(c){ return [c]; }),
+    [''],['VALID UNIT VALUES'],[''],
+    ...PRODUCT_UNITS.map(function(u){ return [u]; }),
+    [''],['VALID GST VALUES'],[''],
+    ['5%'],['12%'],['18%'],['28%']
+  ];
+  const wsRef = XLSX.utils.aoa_to_sheet(ref);
+  wsRef['!cols'] = [{ wch:40 }];
+  XLSX.utils.book_append_sheet(wb, wsRef, 'Reference');
+
+  XLSX.writeFile(wb, 'Alekh_Niranjan_PriceList_Template.xlsx');
+  showToast('Template downloaded ✓');
+}
+
+/* ── Price list file handler ── */
+var _importData = null;
+var _importDealerId = null;
+
+function handlePriceListFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb = XLSX.read(e.target.result, { type:'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
+      if(rows.length < 2){ showToast('Template appears empty.'); return; }
+      const header = rows[0].map(function(h){ return String(h).trim(); });
+      const nameIdx  = header.indexOf('Product Name');
+      const catIdx   = header.indexOf('Category');
+      const brandIdx = header.indexOf('Brand');
+      const modelIdx = header.indexOf('Model No.');
+      const unitIdx  = header.indexOf('Unit');
+      const buyIdx   = header.indexOf('Purchase Price (₹)');
+      const sellIdx  = header.indexOf('Selling Price (₹)');
+      const gstIdx   = header.indexOf('GST %');
+      const specIdx  = header.indexOf('Key Specs');
+      const noteIdx  = header.indexOf('Notes');
+      if(nameIdx === -1 || modelIdx === -1){
+        showToast('File does not match the template. Download the template and try again.');
+        return;
+      }
+      // Preview
+      const dealer = state.supply.dealers.find(function(x){ return x.id===_importDealerId; });
+      const dealerName = dealer ? dealer.company : '';
+      var toAdd = [], toUpdate = [], toSkip = 0;
+      rows.slice(1).forEach(function(row){
+        const name = String(row[nameIdx]||'').trim();
+        const modelNo = String(row[modelIdx]||'').trim();
+        if(!name){ toSkip++; return; }
+        const existing = state.products.find(function(p){
+          return p.modelNo && modelNo && p.modelNo.toLowerCase() === modelNo.toLowerCase();
+        });
+        const item = {
+          name:  name,
+          category: PRODUCT_CATEGORIES.includes(String(row[catIdx]||'').trim()) ? String(row[catIdx]).trim() : PRODUCT_CATEGORIES[0],
+          brand: String(row[brandIdx]||'').trim(),
+          modelNo: modelNo,
+          unit:  String(row[unitIdx]||'Nos').trim(),
+          purchasePrice: String(row[buyIdx]||'').trim(),
+          sellingPrice:  String(row[sellIdx]||'').trim(),
+          gst:   String(row[gstIdx]||'18%').trim(),
+          keySpecs: String(row[specIdx]||'').trim(),
+          notes: String(row[noteIdx]||'').trim(),
+          supplier: dealerName
+        };
+        if(existing){ toUpdate.push({ existing, item }); }
+        else { toAdd.push(item); }
+      });
+      _importData = { toAdd, toUpdate, toSkip };
+      // Show preview
+      var preview = '<div class="import-result">' +
+        '<div style="font-family:ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);margin-bottom:10px;">Import Preview</div>' +
+        '<div class="import-result-row"><div class="import-dot-new"></div><strong style="color:var(--emerald-400);">' + toAdd.length + ' new products</strong> will be added to Catalog</div>' +
+        '<div class="import-result-row"><div class="import-dot-updated"></div><strong style="color:var(--cyan-400);">' + toUpdate.length + ' existing products</strong> will have purchase price updated</div>' +
+        (toSkip ? '<div class="import-result-row"><div class="import-dot-skip"></div><span style="color:var(--zinc-500);">' + toSkip + ' blank rows skipped</span></div>' : '') +
+        (toAdd.length > 0 ? '<div style="margin-top:10px;font-size:12px;color:var(--zinc-500);">First 3 new: ' + toAdd.slice(0,3).map(function(p){ return esc(p.name); }).join(', ') + (toAdd.length>3?'…':'') + '</div>' : '') +
+      '</div>';
+      document.getElementById('import-preview').innerHTML = preview;
+      const btn = document.getElementById('import-confirm-btn');
+      if(btn){ btn.style.display = ''; }
+    }catch(err){
+      console.error(err);
+      showToast('Could not read file. Make sure it is a valid .xlsx file.');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function confirmPriceListImport(dealerId, summary){
+  if(!_importData) return;
+  const { toAdd, toUpdate } = _importData;
+  // Add new products
+  toAdd.forEach(function(item){
+    state.products.push(Object.assign({ id:uid() }, item));
+  });
+  // Update existing — purchase price + supplier only (preserve your selling price)
+  toUpdate.forEach(function(pair){
+    const p = state.products.find(function(x){ return x.id===pair.existing.id; });
+    if(p){
+      p.purchasePrice = pair.item.purchasePrice;
+      p.supplier = pair.item.supplier;
+      if(pair.item.keySpecs) p.keySpecs = pair.item.keySpecs;
+    }
+  });
+  // Log price list entry on dealer
+  const dealer = state.supply.dealers.find(function(x){ return x.id===dealerId; });
+  if(dealer){
+    if(!dealer.priceLists) dealer.priceLists = [];
+    dealer.priceLists.push({
+      id: uid(),
+      date: todayStr(),
+      format: 'Excel',
+      summary: summary || (toAdd.length + ' new, ' + toUpdate.length + ' updated')
+    });
+  }
+  persist();
+  _importData = null;
+  state.supplyView = 'detail';
+  state.selectedSupplyId = dealerId;
+  state.selectedSupplyType = 'dealer';
+  render();
+  showToast(toAdd.length + ' added, ' + toUpdate.length + ' updated in Catalog ✓');
+}
+
 const VIEW_RENDERERS = {
   dashboard: renderDashboard,
   clients:   renderClients,
   contacts:  renderContacts,
   jobs:      renderJobs,
   catalog:   renderCatalog,
+  network:   renderNetwork,
   calendar:  renderCalendar,
   comms:     renderComms,
   design:    renderDesignTools,
+  supply:    renderSupply,
 };
 
 
@@ -1810,23 +3375,51 @@ function fieldCheckbox(label, field, checked){
 }
 
 function clientFormHtml(d){
-  return '' +
+  const networkOptions = [{ value:'', label:'— Not referred / unknown —' }]
+    .concat(state.network.map(function(n){
+      const c = contactOf(n);
+      return { value:n.id, label:(c.name||'Unknown') + (c.company?' — '+c.company:'') };
+    }));
+
+  // Contact picker — only shown when creating new (not editing existing)
+  const isNew = !d.id;
+  const contactPickerHtml = isNew
+    ? '<div class="form-section-label">Import from Contacts (optional)</div>' +
+      '<label class="field"><span class="field-label">Pick an existing contact to pre-fill</span>' +
+        '<select class="field-select" id="client-contact-picker" onchange="prefillClientFromContact(this.value)">' +
+          '<option value="">— Type or pick a contact —</option>' +
+          state.contacts.map(function(c){
+            return '<option value="' + esc(c.id) + '">' + esc((c.salutation?c.salutation+' ':'') + c.name + (c.company?' — '+c.company:'')) + '</option>';
+          }).join('') +
+        '</select>' +
+      '</label>' +
+      '<div class="form-section-label" style="margin-top:14px;">Client Details</div>'
+    : '';
+
+  return contactPickerHtml +
     fieldInput('Name','name',d.name) +
     fieldInput('Company / Organization','company',d.company) +
     fieldSelect('Client type','type',CLIENT_TYPES,d.type) +
     fieldInput('Phone','phone',d.phone) +
     fieldInput('Email','email',d.email,'email') +
     fieldInput('Address','address',d.address) +
+    fieldSelect('Referred by (Network contact)','referredByNetworkId',networkOptions,d.referredByNetworkId||'') +
     fieldInput('Tags (comma separated)','tags',d.tags,'text','placeholder="Recurring, High-value"') +
     fieldTextarea('Notes','notes',d.notes);
 }
 
 function contactFormHtml(d){
   return '' +
-    fieldInput('Name','name',d.name) +
+    '<div class="field-row-2">' +
+      fieldSelect('Salutation','salutation',SALUTATION,d.salutation||'') +
+      fieldInput('Full name','name',d.name) +
+    '</div>' +
     fieldSelect('Trade / category','category',CONTACT_CATEGORIES,d.category) +
     fieldInput('Company / Firm (optional)','company',d.company) +
-    fieldInput('Phone','phone',d.phone) +
+    '<div class="field-row-2">' +
+      fieldInput('Phone','phone',d.phone) +
+      fieldInput('Date of Birth (optional)','dob',d.dob||'','date') +
+    '</div>' +
     fieldInput('Email (optional)','email',d.email,'email') +
     fieldInput('Area / location','area',d.area,'text','placeholder="e.g. Wakad, Pune"') +
     fieldCheckbox('This contact can refer/send me leads','leadSource',d.leadSource) +
@@ -1838,6 +3431,11 @@ function jobFormHtml(d){
     return '<p class="empty-msg">Add a client first before creating a job.</p><div class="form-actions"><button type="button" class="btn-secondary" data-action="close-modal">Close</button></div>';
   }
   const clientOptions = state.clients.map(function(c){ return { value: c.id, label: c.name + ' \u2014 ' + (c.company || c.name) }; });
+  const networkOptions = [{ value:'', label:'— No network source / direct —' }]
+    .concat(state.network.map(function(n){
+      const c = contactOf(n);
+      return { value:n.id, label:(c.name||'Unknown') + (c.company?' — '+c.company:'') };
+    }));
   return '' +
     fieldInput('Job title','title',d.title) +
     fieldSelect('Client','clientId',clientOptions,d.clientId) +
@@ -1846,6 +3444,7 @@ function jobFormHtml(d){
     fieldInput('Site / location','siteLocation',d.siteLocation) +
     fieldSelect('Status','status',JOB_STATUSES,d.status) +
     fieldInput('Value (\u20B9)','value',d.value,'number','min="0"') +
+    fieldSelect('Source (Network contact, if any)','networkId',networkOptions,d.networkId||'') +
     fieldTextarea('Notes','notes',d.notes);
 }
 
@@ -1912,11 +3511,11 @@ function commFormHtml(d){
 function buildDraft(type, data){
   if(type === 'client'){
     return data ? Object.assign({}, data, { tags: (data.tags || []).join(', ') })
-      : { name:'', company:'', type:CLIENT_TYPES[0], phone:'', email:'', address:'', tags:'', notes:'', id:null };
+      : { name:'', company:'', type:CLIENT_TYPES[0], phone:'', email:'', address:'', referredByNetworkId:'', tags:'', notes:'', id:null };
   }
   if(type === 'job'){
     return data ? Object.assign({}, data)
-      : { title:'', clientId: (state.clients[0] && state.clients[0].id) || '', jobType:JOB_TYPES[0], projectDate:todayStr(), siteLocation:'', status:'Lead', value:'', notes:'', id:null };
+      : { title:'', clientId: (state.clients[0] && state.clients[0].id) || '', jobType:JOB_TYPES[0], projectDate:todayStr(), siteLocation:'', status:'Lead', value:'', networkId:'', notes:'', id:null };
   }
   if(type === 'product' || type === 'service'){
     const defaults = type === 'product'
@@ -1926,7 +3525,7 @@ function buildDraft(type, data){
   }
   if(type === 'contact'){
     return data ? Object.assign({}, data, { leadSource: !!data.leadSource })
-      : { name:'', category:CONTACT_CATEGORIES[0], company:'', phone:'', email:'', area:'', leadSource:false, notes:'', id:null };
+      : { salutation:'', name:'', category:CONTACT_CATEGORIES[0], company:'', phone:'', dob:'', email:'', area:'', leadSource:false, notes:'', id:null };
   }
   if(type === 'comm'){
     return data ? Object.assign({}, data)
@@ -1993,11 +3592,27 @@ function onBodyClick(e){
   const action = el.dataset.action;
 
   switch(action){
-    case 'set-view':
-      state.view = el.dataset.view;
+    case 'set-view': {
+      const fromView = state.view;
+      const toView = el.dataset.view;
+      // Only reset sub-view state for the module we're LEAVING
+      // This preserves in-progress forms in other modules
+      if(fromView !== toView){
+        if(fromView === 'network'){
+          state.networkView = 'list'; state.selectedNetworkId = null;
+        }
+        if(fromView === 'supply'){
+          state.supplyView = 'list'; state.selectedSupplyId = null;
+        }
+        if(fromView === 'clients'){
+          state.clientView = 'list'; state.selectedClientId = null;
+        }
+      }
+      state.view = toView;
       state.confirmDelete = null;
       render();
       break;
+    }
     case 'open-modal': {
       const type = el.dataset.type;
       const id = el.dataset.id;
@@ -2046,6 +3661,10 @@ function onBodyClick(e){
       else if(t === 'contact') deleteContact(id);
       else if(t === 'job') deleteJob(id);
       else if(t === 'product' || t === 'service') deleteInvItem(t, id);
+      else if(t === 'network') deleteNetworkEntry(id);
+      else if(t === 'dealer' || t === 'rep' || t === 'sc') deleteSupplyEntry(t, id);
+      else if(t === 'comm') deleteCommEntry(id);
+      else if(t === 'meeting') deleteMeeting(el.dataset.networkId, id);
       break;
     }
     case 'export-excel':
@@ -2077,6 +3696,221 @@ function onBodyClick(e){
     case 'clear-all-data':
       closeMobileMenu();
       showClearConfirmModal();
+      break;
+    case 'log-activity-for-client':
+      // Open the Activity/comm modal pre-filled with this client
+      state.modal = { type:'comm', data:null };
+      state.formDraft = buildDraft('comm', null);
+      state.formDraft.clientId = el.dataset.id;
+      render();
+      break;
+    case 'add-contact-to-client':
+      // Open New Client modal with this contact pre-selected
+      state.modal = { type:'client', data:null };
+      state.formDraft = buildDraft('client', null);
+      state.view = 'clients';
+      state.clientView = 'list';
+      render();
+      // Trigger the contact prefill after render
+      setTimeout(function(){
+        var picker = document.getElementById('client-contact-picker');
+        if(picker){
+          picker.value = el.dataset.id;
+          prefillClientFromContact(el.dataset.id);
+        }
+      }, 80);
+      break;
+    case 'add-contact-to-network':
+      state.selectedNetworkId = null;
+      state.networkView = 'add';
+      // Pre-select the contact in the form
+      state._preselectedContactId = el.dataset.id;
+      state.view = 'network';
+      render();
+      break;
+    case 'supply-tab':
+      state.supplyTab = el.dataset.tab;
+      state.supplyView = 'list';
+      render();
+      break;
+    case 'open-supply':
+      state.selectedSupplyId = el.dataset.id;
+      state.selectedSupplyType = el.dataset.type;
+      state.supplyView = 'detail';
+      state.view = 'supply';
+      render();
+      break;
+    case 'new-supply':
+      state.selectedSupplyType = el.dataset.type;
+      state.selectedSupplyId = null;
+      state.supplyView = 'add';
+      state.view = 'supply';
+      render();
+      break;
+    case 'edit-supply':
+      state.selectedSupplyId = el.dataset.id;
+      state.selectedSupplyType = el.dataset.type;
+      state.supplyView = 'edit';
+      state.view = 'supply';
+      render();
+      break;
+    case 'delete-supply-request':
+      state.confirmDelete = { type: el.dataset.type, id: el.dataset.id };
+      render();
+      break;
+    case 'supply-back':
+      if(state.supplyView === 'detail' || state.supplyView === 'pricelist'){
+        state.supplyView = 'list';
+        state.selectedSupplyId = null;
+      } else if(state.supplyView === 'add' || state.supplyView === 'edit'){
+        state.supplyView = state.selectedSupplyId ? 'detail' : 'list';
+      } else {
+        state.supplyView = 'list';
+      }
+      render();
+      break;
+    case 'back-to-dealer':
+      state.selectedSupplyId = el.dataset.id;
+      state.selectedSupplyType = 'dealer';
+      state.supplyView = 'detail';
+      render();
+      break;
+    case 'import-pricelist':
+      _importData = null;
+      _importDealerId = el.dataset.id;
+      state.selectedSupplyId = el.dataset.id;
+      state.supplyView = 'pricelist';
+      state.view = 'supply';
+      render();
+      // Wire up drop zone click after render
+      setTimeout(function(){
+        var zone = document.getElementById('import-drop-zone');
+        var input = document.getElementById('import-file-input');
+        if(zone && input){
+          zone.onclick = function(){ input.click(); };
+          zone.ondragover = function(e){ e.preventDefault(); zone.classList.add('drag'); };
+          zone.ondragleave = function(){ zone.classList.remove('drag'); };
+          zone.ondrop = function(e){
+            e.preventDefault(); zone.classList.remove('drag');
+            if(e.dataTransfer.files[0]){ input.files = e.dataTransfer.files; handlePriceListFile(input); }
+          };
+        }
+      }, 100);
+      break;
+    case 'download-template':
+      downloadPriceListTemplate();
+      break;
+    case 'goto-contacts-from-network':
+      // Navigate to Contacts without resetting Network's in-progress add/edit state
+      // User can add a contact then come back to Network and continue
+      state.view = 'contacts';
+      state.confirmDelete = null;
+      render();
+      break;
+    case 'goto-contact':
+      state.view = 'contacts';
+      render();
+      break;
+    case 'open-client':
+      state.selectedClientId = el.dataset.id;
+      state.clientView = 'detail';
+      render();
+      break;
+    case 'clients-back':
+      state.clientView = 'list';
+      state.selectedClientId = null;
+      render();
+      break;
+    case 'new-job-for-client':
+      state.modal = { type:'job', data:null };
+      state.formDraft = buildDraft('job', null);
+      state.formDraft.clientId = el.dataset.id;
+      render();
+      break;
+    case 'open-job-detail':
+      // Jobs has no separate detail view yet — jump to the Jobs board, the job's card is visible there
+      state.view = 'jobs';
+      state.clientView = 'list';
+      render();
+      break;
+    case 'open-network':
+      state.selectedNetworkId = el.dataset.id;
+      state.networkView = 'detail';
+      state.view = 'network';
+      render();
+      break;
+    case 'new-network':
+      state.networkView = 'add';
+      state.selectedNetworkId = null;
+      state.view = 'network';
+      render();
+      break;
+    case 'edit-network':
+      state.selectedNetworkId = el.dataset.id;
+      state.networkView = 'edit';
+      state.view = 'network';
+      render();
+      break;
+    case 'add-network-meeting':
+      state.selectedNetworkId = el.dataset.id;
+      state.networkView = 'meeting';
+      state.networkMeetingDraft = { date: todayStr() };
+      state._editMeetingId = null;
+      state.view = 'network';
+      render();
+      break;
+    case 'edit-meeting': {
+      const pid = el.dataset.pid, mid = el.dataset.mid;
+      const pr = state.network.find(function(x){ return x.id===pid; });
+      const mt = pr && (pr.meetings||[]).find(function(m){ return m.id===mid; });
+      if(mt){
+        state.selectedNetworkId = pid;
+        state.networkMeetingDraft = Object.assign({}, mt);
+        state._editMeetingId = mid;
+        state.networkView = 'edit-meeting';
+        state.view = 'network';
+        render();
+      }
+      break;
+    }
+    case 'back-to-network':
+      state.selectedNetworkId = el.dataset.id;
+      state.networkView = 'detail';
+      render();
+      break;
+    case 'network-back':
+      if(state.networkView === 'detail'){
+        // from detail → go to list, clear selection
+        state.networkView = 'list';
+        state.selectedNetworkId = null;
+      } else if(state.networkView === 'edit'){
+        // from edit → back to detail (cancel edit)
+        state.networkView = 'detail';
+      } else if(state.networkView === 'add'){
+        // from add → back to list
+        state.networkView = 'list';
+        state.selectedNetworkId = null;
+      } else if(state.networkView === 'meeting' || state.networkView === 'edit-meeting'){
+        // from meeting log form → back to detail
+        state._editMeetingId = null;
+        state.networkMeetingDraft = null;
+        state.networkView = 'detail';
+      } else {
+        state.networkView = 'list';
+        state.selectedNetworkId = null;
+      }
+      render();
+      break;
+    case 'mark-followup-done': {
+      const pid = el.dataset.pid, mid = el.dataset.mid;
+      const pr = state.network.find(x=>x.id===pid);
+      if(pr){ const mt = (pr.meetings||[]).find(m=>m.id===mid); if(mt) mt.done=true; }
+      persist(); render();
+      break;
+    }
+    case 'open-job-from-prospect':
+      state.view = 'jobs';
+      render();
       break;
     case 'open-design':
       state.designJobId = el.dataset.id || null;
@@ -2201,12 +4035,190 @@ function onBodyInput(e){
   }
 }
 
+function prefillClientFromContact(contactId){
+  if(!contactId) return;
+  const c = state.contacts.find(function(x){ return x.id === contactId; });
+  if(!c) return;
+  // Fill form fields
+  var nameField = document.querySelector('[data-field="name"]');
+  var companyField = document.querySelector('[data-field="company"]');
+  var phoneField = document.querySelector('[data-field="phone"]');
+  var emailField = document.querySelector('[data-field="email"]');
+  if(nameField) nameField.value = (c.salutation ? c.salutation + ' ' : '') + c.name;
+  if(companyField && c.company) companyField.value = c.company;
+  if(phoneField && c.phone) phoneField.value = c.phone;
+  if(emailField && c.email) emailField.value = c.email;
+  // Also update the formDraft so if they immediately submit it's captured
+  if(nameField) state.formDraft.name = nameField.value;
+  if(companyField && c.company) state.formDraft.company = c.company;
+  if(phoneField && c.phone) state.formDraft.phone = c.phone;
+  if(emailField && c.email) state.formDraft.email = c.email;
+}
+
+/* ---------- form validation ---------- */
+// Checks required fields are non-blank. Returns true if valid; otherwise shows
+// an inline error on the form and returns false, without losing what was typed.
+function validateRequired(formEl, checks){
+  // checks: array of [fieldName, humanLabel]
+  for(var i=0;i<checks.length;i++){
+    var fieldName = checks[i][0], label = checks[i][1];
+    var input = formEl.querySelector('[data-field="' + fieldName + '"]');
+    var val = input ? String(input.value || '').trim() : '';
+    if(!val){
+      if(input) input.classList.add('field-error');
+      showFormError(formEl, label + ' is required.');
+      if(input) input.focus();
+      return false;
+    } else if(input){
+      input.classList.remove('field-error');
+    }
+  }
+  return true;
+}
+function showFormError(formEl, message){
+  var existing = formEl.querySelector('.form-error-msg');
+  if(existing) existing.remove();
+  var div = document.createElement('div');
+  div.className = 'form-error-msg';
+  div.textContent = '⚠ ' + message;
+  formEl.insertBefore(div, formEl.firstChild);
+}
+
 function onBodySubmit(e){
-  if(e.target.id !== 'entity-form') return;
   e.preventDefault();
+  const formEl = e.target;
+
+  // Price list import confirmation
+  if(formEl.dataset.form === 'pricelist-import'){
+    const summary = formEl.querySelector('[data-field="summary"]');
+    const summaryVal = summary ? summary.value : '';
+    const dealerId = formEl.dataset.dealerId;
+    confirmPriceListImport(dealerId, summaryVal);
+    return;
+  }
+
+  // Supply Chain forms
+  if(formEl.dataset.form === 'supply-dealer' || formEl.dataset.form === 'supply-rep' || formEl.dataset.form === 'supply-sc'){
+    const formType = formEl.dataset.form;
+    const requiredChecks = formType === 'supply-dealer' ? [['company','Company name']]
+                          : formType === 'supply-rep'    ? [['name','Name']]
+                          : [['name','Name']];
+    if(!validateRequired(formEl, requiredChecks)) return;
+    const fields = formEl.querySelectorAll('[data-field]');
+    const data = {};
+    fields.forEach(function(f){ data[f.dataset.field] = f.value; });
+    const isEdit = state.supplyView === 'edit' && state.selectedSupplyId;
+    const collection = formType==='supply-dealer' ? 'dealers' : formType==='supply-rep' ? 'reps' : 'serviceCentres';
+    if(isEdit){
+      const idx = state.supply[collection].findIndex(function(x){ return x.id===state.selectedSupplyId; });
+      if(idx>=0){
+        const existing = state.supply[collection][idx];
+        state.supply[collection][idx] = Object.assign({}, existing, data);
+      }
+    } else {
+      const newItem = Object.assign({ id:uid() }, data);
+      if(collection === 'dealers') newItem.priceLists = [];
+      state.supply[collection].push(newItem);
+      state.selectedSupplyId = newItem.id;
+      state.selectedSupplyType = formType==='supply-dealer' ? 'dealer' : formType==='supply-rep' ? 'rep' : 'sc';
+      state.supplyView = 'detail';
+    }
+    if(isEdit){
+      state.supplyView = 'detail';
+    }
+    persist(); render();
+    return;
+  }
+  if(formEl.dataset.form === 'network'){
+    const fields = formEl.querySelectorAll('[data-field]');
+    const data = {};
+    fields.forEach(function(f){ if(f.value !== '__sep__') data[f.dataset.field] = f.value; });
+    if(!data.contactId){
+      showFormError(formEl, 'Please select a contact first.');
+      return;
+    }
+    const editing = state.networkView === 'edit' && state.selectedNetworkId;
+    if(editing){
+      const idx = state.network.findIndex(function(x){ return x.id===state.selectedNetworkId; });
+      if(idx>=0) state.network[idx] = Object.assign({}, state.network[idx], data);
+    } else {
+      state.network.push(Object.assign({ id:uid(), meetings:[] }, data));
+      // Auto-set leadSource on the linked contact
+      const ct = state.contacts.find(function(c){ return c.id===data.contactId; });
+      if(ct) ct.leadSource = true;
+    }
+    state.networkView = editing ? 'detail' : 'list';
+    persist(); render();
+    return;
+  }
+
+  // Meeting form
+  if(formEl.dataset.form === 'meeting'){
+    if(!validateRequired(formEl, [['date','Date']])) return;
+    const fields = formEl.querySelectorAll('[data-field]');
+    const data = {};
+    fields.forEach(function(f){
+      if(f.tagName === 'SELECT' && f.multiple){
+        data[f.dataset.field] = Array.from(f.selectedOptions).map(o=>o.value);
+      } else {
+        data[f.dataset.field] = f.value;
+      }
+    });
+    const pr = state.network.find(x=>x.id===state.selectedNetworkId);
+    const isEditing = state.networkView === 'edit-meeting' && state._editMeetingId;
+    if(pr){
+      if(!pr.meetings) pr.meetings = [];
+      const meetingData = {
+        date: data.date || todayStr(),
+        type: data.meetingType || 'Meeting',
+        discussed: data.discussed || '',
+        offered: data.offered || [],
+        reaction: data.reaction || '',
+        projectsMentioned: data.projectsMentioned || '',
+        myCommitments: data.myCommitments || '',
+        theirCommitments: data.theirCommitments || '',
+        followUpAction: data.followUpAction || '',
+        followUpDate: data.followUpDate || '',
+      };
+      if(isEditing){
+        // Update existing meeting — preserve id and done status
+        const idx = pr.meetings.findIndex(function(m){ return m.id === state._editMeetingId; });
+        if(idx >= 0){
+          pr.meetings[idx] = Object.assign({}, pr.meetings[idx], meetingData);
+        }
+      } else {
+        // New meeting
+        pr.meetings.push(Object.assign({ id: uid(), done: false }, meetingData));
+        // Only update stage/heat when logging new meeting
+        if(data.newStage && data.newStage !== '(no change)') pr.stage = data.newStage;
+        if(data.newHeat && data.newHeat !== '(no change)') pr.heat = data.newHeat;
+      }
+      // Update next follow-up date whenever a new date is set
+      if(data.followUpDate) pr.nextFollowUp = data.followUpDate;
+    }
+    state.networkView = 'detail';
+    state.networkMeetingDraft = null;
+    state._editMeetingId = null;
+    persist(); render();
+    return;
+  }
+
+  // Existing modal form handling
+  if(formEl.id !== 'entity-form') return;
   if(!state.modal) return;
   const type = state.modal.type;
   const draft = Object.assign({}, state.formDraft);
+
+  const requiredByType = {
+    client:  [['name','Name']],
+    contact: [['name','Name']],
+    job:     [['title','Job title'], ['clientId','Client']],
+    product: [['name','Product name']],
+    service: [['name','Service name']],
+    comm:    [['date','Date'], ['note','Note']],
+  };
+  if(requiredByType[type] && !validateRequired(formEl, requiredByType[type])) return;
+
   if(type === 'client'){
     draft.tags = (draft.tags || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
     saveClient(draft);
