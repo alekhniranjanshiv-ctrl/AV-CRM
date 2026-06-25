@@ -126,6 +126,9 @@
   @media (max-width:767px){ .mobile-topbar{display:flex;} }
   .mobile-topbar-title{font-size:17px; font-weight:600; color:var(--text-strong); letter-spacing:-0.01em;}
   .mobile-topbar-brand{font-family:ui-monospace,monospace; font-size:9px; letter-spacing:0.18em; color:var(--zinc-500); text-transform:uppercase;}
+  #live-clock{font-family:ui-monospace,monospace; font-size:13px; font-weight:600; color:var(--accent-text); letter-spacing:0.05em; padding:4px 10px; background:rgba(34,211,238,0.08); border:1px solid rgba(34,211,238,0.2); border-radius:8px;}
+  .reminder-strip{position:fixed;top:0;left:0;right:0;z-index:999;background:var(--amber-400);color:#1a1100;font-size:14px;font-weight:700;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.4);}
+  .reminder-strip button{background:rgba(0,0,0,0.15);border:none;border-radius:6px;padding:5px 12px;font-weight:700;cursor:pointer;font-size:13px;}
   .mobile-topbar-actions{display:flex; align-items:center; gap:6px;}
   .topbar-btn{width:38px; height:38px; border-radius:9px; border:1px solid var(--zinc-800); background:var(--zinc-900);
     color:var(--zinc-300); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
@@ -239,32 +242,38 @@
   .cancel-btn{background:none; border:none; font-size:12px; color:var(--zinc-500); cursor:pointer; padding:0;}
 
   /* ---------- dashboard ---------- */
-  .stats-grid{display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:24px;}
-  @media (min-width:640px){ .stats-grid{grid-template-columns:1fr 1fr;} }
-  @media (min-width:1024px){ .stats-grid{grid-template-columns:1fr 1fr 1fr 1fr;} }
-  .stat-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:12px; cursor:pointer; transition:border-color 0.15s;}
+  .stats-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;}
+  @media (min-width:1024px){ .stats-grid{grid-template-columns:1fr 1fr 1fr 1fr; gap:16px;} }
+  .stat-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px; cursor:pointer; transition:border-color 0.15s;}
+  @media(max-width:640px){.stat-card{padding:12px;border-radius:10px;}}
+  .stat-value{font-size:28px;font-weight:800;color:var(--text-strong);letter-spacing:-0.03em;line-height:1;}
+  @media(max-width:640px){.stat-value{font-size:22px;}}
+  .stat-label{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--zinc-500);}
+  .stat-sub{font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-600);}
+  @media(max-width:640px){.stat-sub{font-size:10px;}}
   .stat-card:hover{border-color:var(--accent-text);}
   .stat-card.urgent{border-left:3px solid var(--red-400);}
   .stat-card.active{border-left:3px solid var(--emerald-400);}
   .stat-card.money{border-left:3px solid var(--amber-400);}
   .stat-card.visits{border-left:3px solid var(--cyan-400);}
   .task-board{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
-  .task-row{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color 0.15s;}
+  .task-row{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:border-color 0.15s;overflow:hidden;}
   .task-row:hover{border-color:var(--accent-text);}
-  .task-stage{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;padding:3px 8px;border-radius:4px;flex-shrink:0;min-width:110px;text-align:center;}
+  .task-stage{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.08em;padding:3px 7px;border-radius:4px;flex-shrink:0;white-space:nowrap;}
   .task-stage.ts-lead{background:rgba(161,161,170,0.15);color:var(--zinc-400);}
   .task-stage.ts-site{background:rgba(167,139,250,0.15);color:#a78bfa;}
   .task-stage.ts-quoted{background:rgba(251,191,36,0.12);color:var(--amber-400);}
   .task-stage.ts-booked{background:rgba(34,211,238,0.12);color:var(--accent-text);}
   .task-stage.ts-wip{background:rgba(96,165,250,0.12);color:#60a5fa;}
   .task-stage.ts-completed{background:rgba(52,211,153,0.12);color:var(--emerald-400);}
-  .task-info{flex:1;min-width:0;}
+  .task-info{flex:1;min-width:0;overflow:hidden;}
   .task-title{font-size:14px;font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .task-client{font-size:12px;color:var(--zinc-500);margin-top:1px;}
-  .task-meta{text-align:right;flex-shrink:0;}
-  .task-value{font-size:13px;font-family:ui-monospace,monospace;color:var(--zinc-400);}
-  .task-date{font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-600);margin-top:2px;}
-  .task-action{font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-500);font-style:italic;flex-shrink:0;max-width:160px;text-align:right;}
+  .task-client{font-size:12px;color:var(--zinc-500);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .task-meta{text-align:right;flex-shrink:0;min-width:72px;}
+  .task-value{font-size:12px;font-family:ui-monospace,monospace;color:var(--zinc-400);}
+  .task-date{font-size:10px;font-family:ui-monospace,monospace;color:var(--zinc-600);margin-top:2px;}
+  .task-action{font-size:11px;font-family:ui-monospace,monospace;color:var(--accent-text);flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
+  @media(max-width:480px){.task-action{display:none;}.task-stage{letter-spacing:0;font-size:9px;}.task-title{font-size:13px;}}
   .dash-section-head{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--zinc-500);font-family:ui-monospace,monospace;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--zinc-800);display:flex;align-items:center;justify-content:space-between;}
   .dash-empty{text-align:center;padding:28px 16px;color:var(--zinc-600);font-size:13px;background:var(--zinc-900);border:1px dashed var(--zinc-800);border-radius:10px;}
   .network-overdue-strip{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--red-400);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -348,6 +357,35 @@
   .kanban-cards{display:flex; flex-direction:column; gap:8px; min-height:60px;}
 
   .job-card{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;}
+
+  /* ---------- job checklist (ADHD) ---------- */
+  .job-progress-wrap{margin:6px 0;}
+  .job-progress-bar{height:8px;background:var(--zinc-800);border-radius:6px;overflow:hidden;}
+  .job-progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan-400),var(--emerald-400));border-radius:6px;transition:width 0.4s ease;}
+  .job-progress-text{font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-500);margin-top:4px;display:flex;justify-content:space-between;align-items:center;}
+  .next-step-banner{background:linear-gradient(135deg,rgba(34,211,238,0.12),rgba(52,211,153,0.08));border:1px solid rgba(34,211,238,0.25);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+  .next-step-label{font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin-bottom:4px;}
+  .next-step-title{font-size:17px;font-weight:700;color:var(--text-strong);}
+  .next-step-hint{font-size:13px;color:var(--zinc-400);margin-top:2px;}
+  .next-step-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .checklist{display:flex;flex-direction:column;gap:4px;}
+  .check-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;cursor:pointer;transition:all 0.15s;}
+  .check-item:hover{border-color:var(--zinc-700);}
+  .check-item.done{opacity:0.55;}
+  .check-item.done .check-label{text-decoration:line-through;color:var(--zinc-500);}
+  .check-item.next{border-color:var(--accent-text);background:rgba(34,211,238,0.05);box-shadow:0 0 0 1px rgba(34,211,238,0.15);}
+  .check-box{width:24px;height:24px;border-radius:7px;border:2px solid var(--zinc-600);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
+  .check-item.done .check-box{background:var(--emerald-400);border-color:var(--emerald-400);color:#06281c;}
+  .check-item.next .check-box{border-color:var(--accent-text);}
+  .check-num{font-size:10px;font-family:ui-monospace,monospace;color:var(--zinc-600);width:18px;flex-shrink:0;text-align:center;}
+  .check-label{font-size:14px;color:var(--text-strong);flex:1;}
+  .check-item.next .check-label{font-weight:600;}
+  .check-action-btn{font-size:11px;font-family:ui-monospace,monospace;padding:5px 10px;border-radius:6px;border:1px solid var(--accent-text);background:transparent;color:var(--accent-text);cursor:pointer;flex-shrink:0;}
+  .check-next-tag{font-size:9px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);background:rgba(34,211,238,0.1);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+  .completion-celebrate{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);border-radius:10px;padding:16px;text-align:center;color:var(--emerald-400);font-size:15px;font-weight:600;margin-bottom:16px;}
+  .job-card-progress{height:5px;background:var(--zinc-800);border-radius:4px;overflow:hidden;margin-top:6px;}
+  .job-card-progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan-400),var(--emerald-400));border-radius:4px;}
+  .job-card-next{font-size:11px;color:var(--accent-text);margin-top:5px;font-family:ui-monospace,monospace;display:flex;align-items:center;gap:4px;}
   .job-card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:8px;}
   .job-card-title{font-size:14px; font-weight:600; color:var(--text-strong); line-height:1.3;}
   .job-card-client{font-size:12px; color:var(--zinc-500);}
@@ -512,9 +550,15 @@
   .cal-cell{background:var(--zinc-900); border:1px solid var(--zinc-800); border-radius:6px; min-height:70px; padding:4px; display:flex; flex-direction:column; gap:2px;}
   .cal-cell.empty{background:var(--input-bg); border:none;}
   .cal-cell.today{border-color:var(--cyan-400);}
+  .cal-cell.cal-cell-selected{border-color:var(--accent-text);background:rgba(34,211,238,0.05);}
   .cal-date{font-size:12px; font-family:ui-monospace,monospace; color:var(--zinc-500);}
   .cal-cell.today .cal-date{color:var(--accent-text); font-weight:700;}
   .cal-job-chip{font-size:11px; line-height:1.3; border-radius:4px; padding:2px 4px; background:var(--zinc-800);
+    color:var(--zinc-300); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; border:none; width:100%; text-align:left;}
+  .cal-chip-network{background:rgba(34,211,238,0.15);color:var(--accent-text);}
+  .cal-chip-client-meeting{background:rgba(52,211,153,0.15);color:var(--emerald-400);}
+  .cal-chip-followup{background:rgba(251,191,36,0.12);color:var(--amber-400);}
+  .cal-more{font-size:10px; color:var(--zinc-600); font-family:ui-monospace,monospace; padding:1px 2px;}
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; border:none; text-align:left;
     font-family:inherit; width:100%; display:block; transition:filter .1s;}
   .cal-job-chip:hover{filter:brightness(1.4);}
@@ -528,10 +572,10 @@
 
   /* ---------- modal / forms ---------- */
   .modal-overlay{position:fixed; inset:0; background:var(--overlay); display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;}
-  .modal{background:var(--zinc-900); border:1px solid var(--zinc-700); border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;}
-  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid var(--zinc-800); position:sticky; top:0; background:var(--zinc-900);}
+  .modal{background:var(--zinc-900); border:1px solid var(--zinc-700); border-radius:12px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto; display:flex; flex-direction:column;}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid var(--zinc-800); position:sticky; top:0; background:var(--zinc-900); z-index:1; flex-shrink:0;}
   .modal-title{font-weight:700; color:var(--text-strong); letter-spacing:-0.01em;}
-  .modal-body{padding:16px;}
+  .modal-body{padding:16px; overflow-y:auto; flex:1;}
   .field{display:block; margin-bottom:12px;}
   .field-label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--zinc-500); font-family:ui-monospace,monospace; margin-bottom:4px;}
   .field-input, .field-select, .field-textarea{width:100%; background:var(--input-bg); border:1px solid var(--zinc-700);
@@ -541,11 +585,16 @@
   .form-error-msg{background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.25); color:var(--red-400);
     border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:14px;}
   .field-textarea{resize:vertical; min-height:64px;}
-  .form-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:16px; border-top:1px solid var(--zinc-800); padding-top:16px;}
+  .form-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:20px; border-top:1px solid var(--zinc-800); padding-top:16px;}
+  .modal .form-actions{position:sticky; bottom:0; background:var(--zinc-900); padding-bottom:6px; z-index:1;}
   .form-section-label{font-family:ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin-bottom:8px;margin-top:4px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);}
   .field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .field-row-3{display:grid;grid-template-columns:1fr 1fr 120px;gap:12px;}
   @media(max-width:540px){.field-row-2,.field-row-3{grid-template-columns:1fr;}}
+  /* Text overflow global fixes for cards */
+  .inv-card-name, .inv-card-ref, .inv-card-notes, .job-card-title, .client-name, .supply-card-name{word-break:break-word; overflow-wrap:break-word;}
+  .inv-card-ref{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  @media(max-width:640px){ .modal{max-height:85vh; margin-bottom:env(safe-area-inset-bottom,0px);} }
   .empty-msg{font-size:14px; color:var(--zinc-400); margin-bottom:12px;}
   .cinema-frame-wrap{border:1px solid var(--zinc-800); border-radius:8px; overflow:hidden; background:#0B0D10;}
   .cinema-frame{display:block; width:100%; height:75vh; min-height:520px; border:none; background:#0B0D10;}
@@ -596,6 +645,7 @@
           <div class="mobile-topbar-brand">Signal Flow</div>
           <div class="mobile-topbar-title" id="mobile-page-title">Dashboard</div>
         </div>
+        <span id="live-clock">--:--</span>
         <div class="mobile-topbar-actions">
           <button class="topbar-btn" id="theme-toggle-mobile" data-action="toggle-theme" title="Toggle day / night"></button>
           <button class="topbar-btn" data-action="open-mobile-menu" title="Menu" aria-label="Menu">
@@ -637,14 +687,66 @@ const NAV = [
   { id:'network',      label:'Network',       icon:'star',       num:'03' },
   { id:'clients',      label:'Clients',       icon:'users',      num:'04' },
   { id:'jobs',         label:'Jobs',          icon:'briefcase',  num:'05' },
-  { id:'design',       label:'Design Tools',  icon:'monitor',    num:'06' },
-  { id:'catalog',      label:'Catalog',       icon:'package',    num:'07' },
-  { id:'supply',       label:'Supply Chain',  icon:'truck',      num:'08' },
-  { id:'calendar',     label:'Calendar',      icon:'calendar',   num:'09' },
-  { id:'comms',        label:'Activity',      icon:'message',    num:'10' },
+  { id:'catalog',      label:'Catalog',       icon:'package',    num:'06' },
+  { id:'supply',       label:'Supply Chain',  icon:'truck',      num:'07' },
+  { id:'calendar',     label:'Calendar',      icon:'calendar',   num:'08' },
+  { id:'comms',        label:'Activity',      icon:'message',    num:'09' },
 ];
 
 const JOB_STATUSES = ['Lead','Site Visit','Quoted','Booked','Work in Progress','Completed','Paid'];
+
+// ADHD-friendly job checklist — every job gets these steps.
+// Each step breaks the big scary "job" into small finishable wins.
+const JOB_STEPS = [
+  { key:'lead',       label:'New lead / referral received',  hint:'Got the enquiry' },
+  { key:'meet',       label:'Meet client',                    hint:'First conversation' },
+  { key:'sitevisit',  label:'Site visit + measure room',      hint:'Go see the space' },
+  { key:'requirement',label:'Understand requirement',         hint:'What do they want' },
+  { key:'drawing',    label:'Make drawings / design',         hint:'Design the system' },
+  { key:'prices',     label:'Get prices from dealer reps',    hint:'Check supply chain', action:'supply' },
+  { key:'quote',      label:'Build quote',                    hint:'Put it together' },
+  { key:'sendquote',  label:'Send quote to client',           hint:'Deliver it', action:'whatsapp' },
+  { key:'confirm',    label:'Client confirms → booked',       hint:'Got the yes' },
+  { key:'install',    label:'Installation',                   hint:'Do the work' },
+  { key:'handover',   label:'Handover / complete',            hint:'Wrap it up' },
+  { key:'payment',    label:'Payment received',               hint:'Get paid' },
+];
+
+function defaultJobSteps(){
+  return JOB_STEPS.map(function(s){ return { key:s.key, done:false }; });
+}
+
+// When a job already has a status, pre-tick the steps that logically precede it
+function migrateStepsFromStatus(job){
+  if(!job.steps) job.steps = defaultJobSteps();
+  // Map each status to how many steps should be considered done
+  const STATUS_STEP_COUNT = {
+    'Lead': 1,                // lead received
+    'Site Visit': 2,          // + meet
+    'Quoted': 8,              // through send quote
+    'Booked': 9,              // + confirm
+    'Work in Progress': 10,   // + install started
+    'Completed': 11,          // + handover
+    'Paid': 12                // everything
+  };
+  const count = STATUS_STEP_COUNT[job.status] || 0;
+  job.steps.forEach(function(s, idx){ s.done = idx < count; });
+}
+
+// Returns {done, total, nextStep, pct} for a job's checklist
+function jobProgress(job){
+  const steps = job.steps && job.steps.length ? job.steps : defaultJobSteps();
+  const total = steps.length;
+  const done = steps.filter(function(s){ return s.done; }).length;
+  let nextStep = null;
+  for(var i=0;i<steps.length;i++){
+    if(!steps[i].done){
+      nextStep = JOB_STEPS.find(function(t){ return t.key === steps[i].key; });
+      break;
+    }
+  }
+  return { done:done, total:total, nextStep:nextStep, pct: Math.round(done/total*100) };
+}
 const STATUS_LED  = { Lead:'led-zinc', 'Site Visit':'led-purple', Quoted:'led-amber', Booked:'led-cyan', 'Work in Progress':'led-blue', Completed:'led-emerald', Paid:'led-emerald' };
 const STATUS_TEXT = { Lead:'text-zinc', 'Site Visit':'text-purple', Quoted:'text-amber', Booked:'text-cyan', 'Work in Progress':'text-blue', Completed:'text-emerald', Paid:'text-emerald' };
 
@@ -760,10 +862,11 @@ const CLIENT_TYPES = [
   'Other',
 ];
 
-const CONTACT_CATEGORIES = ['Electrician','Carpenter','POP / False Ceiling','Painter','Civil / Labour','Plumber','Architect','Interior Designer','Other'];
+const CONTACT_CATEGORIES = ['Electrician','Carpenter','POP / False Ceiling','Painter','Civil / Labour','Plumber','Architect','Interior Designer','Client','Other'];
 const CONTACT_CATEGORY_ICONS = {
   Electrician:'bolt', Carpenter:'hammer', 'POP / False Ceiling':'layers', Painter:'paintroller',
-  'Civil / Labour':'hardhat', Plumber:'droplet', Architect:'ruler', 'Interior Designer':'bulb', Other:'users'
+  'Civil / Labour':'hardhat', Plumber:'droplet', Architect:'ruler', 'Interior Designer':'bulb',
+  Client:'users', Other:'users'
 };
 
 const PRODUCT_CATEGORIES = [
@@ -899,6 +1002,8 @@ const ICONS = {
   idcard: '<rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M15 8h2"/><path d="M15 12h2"/><path d="M5 17h14"/>',
   star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
   speaker: '<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1"/><path d="M12 6h.01"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
 };
 function icon(name, size){
   size = size || 16;
@@ -936,6 +1041,106 @@ function fmtDate(d){
 function todayStr(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+// Clickable phone → WhatsApp, email → mailto
+function waLink(phone, label){
+  if(!phone) return label || '—';
+  const num = phone.replace(/[^+\d]/g,'');
+  const displayNum = label || phone;
+  return '<a href="https://wa.me/' + esc(num) + '" target="_blank" style="color:var(--emerald-400);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">' +
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+    esc(displayNum) + '</a>';
+}
+function emailLink(email){
+  if(!email) return '—';
+  return '<a href="mailto:' + esc(email) + '" style="color:var(--accent-text);text-decoration:none;">' + icon('mail',12) + ' ' + esc(email) + '</a>';
+}
+
+function nowTimeStr(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function fmtTime(t){
+  // t is "HH:MM" in 24h — display in 12h
+  if(!t) return '';
+  const parts = t.split(':');
+  if(parts.length < 2) return t;
+  let h = parseInt(parts[0],10), m = parts[1];
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + ':' + m + ' ' + ampm;
+}
+function fmtDateTime(date, time){
+  const d = fmtDate(date);
+  const t = time ? ' · ' + fmtTime(time) : '';
+  return d + t;
+}
+
+// Live clock — updates every second
+function startClock(){
+  function tick(){
+    const el = document.getElementById('live-clock');
+    if(!el) return;
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    el.textContent = h + ':' + m + ':' + s;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// Reminder engine — checks every minute if any follow-up time has arrived
+var _remindersSeen = {};
+function checkReminders(){
+  var now = new Date();
+  var todayDate = todayStr();
+  var currentTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  var reminders = [];
+
+  // Check network follow-ups with time
+  state.network.forEach(function(n){
+    if(!n.nextFollowUp || !n.nextFollowUpTime) return;
+    if(n.nextFollowUp !== todayDate) return;
+    if(n.nextFollowUpTime !== currentTime) return;
+    var key = 'net_' + n.id + '_' + todayDate + '_' + currentTime;
+    if(_remindersSeen[key]) return;
+    _remindersSeen[key] = true;
+    var c = contactOf(n);
+    reminders.push({ label: 'Follow up: ' + (c.name||'Unknown') + (c.company?' — '+c.company:''), networkId: n.id });
+  });
+
+  // Check network meeting follow-ups with time
+  state.network.forEach(function(n){
+    (n.meetings||[]).forEach(function(m){
+      if(!m.followUpDate || !m.followUpTime || m.done) return;
+      if(m.followUpDate !== todayDate) return;
+      if(m.followUpTime !== currentTime) return;
+      var key = 'mtg_' + m.id + '_' + todayDate + '_' + currentTime;
+      if(_remindersSeen[key]) return;
+      _remindersSeen[key] = true;
+      var c = contactOf(n);
+      reminders.push({ label: '⏰ ' + m.followUpAction + ' — ' + (c.name||'Unknown'), networkId: n.id });
+    });
+  });
+
+  if(reminders.length === 0) return;
+  var root = document.getElementById('reminder-root');
+  if(!root) return;
+  root.innerHTML = reminders.map(function(r){
+    return '<div class="reminder-strip">' +
+      '<span>⏰ Reminder: ' + esc(r.label) + '</span>' +
+      (r.networkId ? '<button onclick="state.view=\'network\';state.networkView=\'detail\';state.selectedNetworkId=\'' + r.networkId + '\';render();this.closest(\'.reminder-strip\').remove();">Open →</button>' : '') +
+      '<button onclick="this.closest(\'.reminder-strip\').remove();">Dismiss</button>' +
+    '</div>';
+  }).join('');
+  // Auto-dismiss after 5 minutes
+  setTimeout(function(){ if(root) root.innerHTML=''; }, 300000);
+}
+function startReminderEngine(){
+  checkReminders();
+  setInterval(checkReminders, 60000); // check every minute
 }
 function esc(str){
   return String(str === undefined || str === null ? '' : str).replace(/[&<>"']/g, function(c){
@@ -1097,8 +1302,12 @@ let state = {
   modal: null,        // { type, data }
   formDraft: {},
   clientSearch: '',
-  clientView: 'list',  // 'list' | 'detail'
+  clientView: 'list',  // 'list' | 'detail' | 'meeting' | 'edit-meeting'
   selectedClientId: null,
+  clientMeetingDraft: null,
+  _editClientMeetingId: null,
+  jobView: 'board',  // 'board' | 'detail'
+  selectedJobId: null,
   commFilter: 'all',
   confirmDelete: null, // { type, id }
   theme: 'dark',
@@ -1115,7 +1324,8 @@ let state = {
     service: { category:'all', status:'all', search:'' }
   },
   contactFilter: { category:'all', search:'', leadOnly:false },
-  calMonth: (function(){ const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })()
+  calMonth: (function(){ const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })(),
+  calSelectedDate: null,
 };
 
 function applyTheme(){
@@ -1173,12 +1383,17 @@ function loadData(){
     state.comms    = saved.comms    || [];
     state.network= saved.network || saved.prospects || [];
     state.supply = saved.supply  || { dealers:[], reps:[], serviceCentres:[] };
+    // Migration — give any job without a checklist the default steps
+    state.jobs.forEach(function(j){
+      if(!j.steps || !j.steps.length){ j.steps = defaultJobSteps(); migrateStepsFromStatus(j); }
+    });
     if(saved.theme) state.theme = saved.theme;
   } else {
     // First run ever — load demo seed data so the app isn't empty
     state.clients   = JSON.parse(JSON.stringify(SEED_CLIENTS));
     state.contacts  = JSON.parse(JSON.stringify(SEED_CONTACTS));
     state.jobs      = JSON.parse(JSON.stringify(SEED_JOBS));
+    state.jobs.forEach(function(j){ j.steps = defaultJobSteps(); migrateStepsFromStatus(j); });
     state.products  = JSON.parse(JSON.stringify(SEED_PRODUCTS));
     state.services  = JSON.parse(JSON.stringify(SEED_SERVICES));
     state.comms     = JSON.parse(JSON.stringify(SEED_COMMS));
@@ -1349,8 +1564,19 @@ function deleteContact(id){
 }
 
 function saveJob(data){
-  if(data.id){ state.jobs = state.jobs.map(j => j.id === data.id ? Object.assign({}, data) : j); }
-  else { state.jobs.push(Object.assign({}, data, { id: uid() })); }
+  if(data.id){
+    state.jobs = state.jobs.map(function(j){
+      if(j.id !== data.id) return j;
+      // Preserve existing steps on edit
+      const merged = Object.assign({}, data);
+      if(!merged.steps || !merged.steps.length) merged.steps = j.steps || defaultJobSteps();
+      return merged;
+    });
+  } else {
+    const newJob = Object.assign({}, data, { id: uid() });
+    if(!newJob.steps || !newJob.steps.length) newJob.steps = defaultJobSteps();
+    state.jobs.push(newJob);
+  }
   state.modal = null; render();
 }
 function deleteJob(id){
@@ -1402,6 +1628,14 @@ function deleteMeeting(networkId, meetingId){
   const n = state.network.find(function(x){ return x.id === networkId; });
   if(n && n.meetings){
     n.meetings = n.meetings.filter(function(m){ return m.id !== meetingId; });
+  }
+  state.confirmDelete = null;
+  persist(); render();
+}
+function deleteClientMeeting(clientId, meetingId){
+  const c = state.clients.find(function(x){ return x.id === clientId; });
+  if(c && c.meetings){
+    c.meetings = c.meetings.filter(function(m){ return m.id !== meetingId; });
   }
   state.confirmDelete = null;
   persist(); render();
@@ -1459,7 +1693,7 @@ function commRowHtml(m){
   return '<div class="comm-row">' +
     '<span class="comm-icon">' + icon(iconName, 16) + '</span>' +
     '<div class="comm-body">' +
-      '<div class="comm-top"><span class="comm-client">' + esc(client ? client.name : 'Unknown client') + '</span><span class="comm-date">' + fmtDate(m.date) + '</span></div>' +
+      '<div class="comm-top"><span class="comm-client">' + esc(client ? client.name : 'Unknown client') + '</span><span class="comm-date">' + fmtDateTime(m.date, m.time) + '</span></div>' +
       (job ? '<div class="comm-job">' + esc(job.title) + '</div>' : '') +
       '<p class="comm-note">' + esc(m.note) + '</p>' +
     '</div>' +
@@ -1522,14 +1756,19 @@ function renderDashboard(){
     const client = state.clients.find(function(c){ return c.id===j.clientId; });
     const clientName = client ? client.name : '';
     const clientCo = client && client.company && client.company !== client.name ? client.company : '';
-    return '<div class="task-row" data-action="set-view" data-view="jobs">' +
+    const prog = jobProgress(j);
+    const nextLabel = prog.nextStep ? prog.nextStep.label : 'All steps done';
+    return '<div class="task-row" data-action="open-job" data-id="' + j.id + '">' +
       '<span class="led ' + STATUS_LED[j.status] + '"></span>' +
       '<span class="task-stage ' + (STAGE_CLASS[j.status]||'ts-lead') + '">' + esc(j.status) + '</span>' +
       '<div class="task-info">' +
         '<div class="task-title">' + esc(j.title) + '</div>' +
         '<div class="task-client">' + esc(clientName) + (clientCo?' · '+esc(clientCo):'') + '</div>' +
       '</div>' +
-      '<div class="task-action">' + esc(STAGE_ACTION[j.status]||'') + '</div>' +
+      '<div class="task-action" style="color:var(--accent-text);font-style:normal;">' +
+        (prog.nextStep ? '→ ' + esc(nextLabel) : '✓ ' + esc(nextLabel)) +
+        '<div style="font-size:10px;color:var(--zinc-600);margin-top:2px;">' + prog.done + '/' + prog.total + ' steps</div>' +
+      '</div>' +
       '<div class="task-meta">' +
         '<div class="task-value">' + fmtINR(j.value) + '</div>' +
         (j.projectDate ? '<div class="task-date">' + fmtDate(j.projectDate) + '</div>' : '') +
@@ -1541,9 +1780,9 @@ function renderDashboard(){
   function actionStatCard(label, count, sub, colorClass, view){
     const isEmpty = count === 0;
     return '<div class="stat-card ' + colorClass + '" data-action="set-view" data-view="' + view + '">' +
-      '<div class="stat-top"><span class="stat-label">' + esc(label) + '</span></div>' +
+      '<span class="stat-label">' + esc(label) + '</span>' +
       '<div class="stat-value" style="' + (isEmpty?'color:var(--zinc-700)':'') + '">' + count + '</div>' +
-      '<div style="font-size:11px;font-family:ui-monospace,monospace;color:' + (isEmpty?'var(--zinc-700)':'var(--zinc-500)') + ';">' + esc(sub) + '</div>' +
+      '<span class="stat-sub" style="' + (isEmpty?'color:var(--zinc-700)':'') + '">' + esc(sub) + '</span>' +
     '</div>';
   }
 
@@ -1600,13 +1839,127 @@ function renderDashboard(){
     });
   });
 
-  const allRecentItems = commItems.concat(networkItems)
+  // Client meeting items
+  const clientMeetingItems = [];
+  state.clients.forEach(function(cl){
+    (cl.meetings||[]).forEach(function(m){
+      clientMeetingItems.push({
+        _type: 'client-meeting',
+        _date: m.date||'',
+        _data: m,
+        _clientId: cl.id,
+        _clientName: cl.name,
+        _company: cl.company||''
+      });
+    });
+  });
+
+  const allRecentItems = commItems.concat(networkItems).concat(clientMeetingItems)
     .sort(function(a,b){ return b._date.localeCompare(a._date); })
-    .slice(0, 8);
+    .slice(0, 10);
+
+  // Upcoming meetings — future-dated from both Network and Clients
+  const todayD = todayStr();
+  const upcomingMeetings = [];
+  state.network.forEach(function(n){
+    const c = contactOf(n);
+    (n.meetings||[]).forEach(function(m){
+      if((m.date||'') > todayD){
+        upcomingMeetings.push({
+          _type: 'network',
+          _date: m.date, _time: m.time||'',
+          _name: (c.salutation?c.salutation+' ':'') + (c.name||'Unknown'),
+          _sub: c.company||'Network contact',
+          _note: m.discussed||'',
+          _id: n.id
+        });
+      }
+    });
+    // Also check nextFollowUp as a scheduled event
+    if(n.nextFollowUp && n.nextFollowUp >= todayD){
+      upcomingMeetings.push({
+        _type: 'followup',
+        _date: n.nextFollowUp, _time: n.nextFollowUpTime||'',
+        _name: (c.salutation?c.salutation+' ':'') + (c.name||'Unknown'),
+        _sub: c.company||'',
+        _note: 'Scheduled follow-up',
+        _id: n.id
+      });
+    }
+  });
+  state.clients.forEach(function(cl){
+    (cl.meetings||[]).forEach(function(m){
+      if((m.date||'') > todayD){
+        upcomingMeetings.push({
+          _type: 'client',
+          _date: m.date, _time: m.time||'',
+          _name: cl.name,
+          _sub: cl.company||'Client',
+          _note: m.discussed||m.followUpAction||'',
+          _id: cl.id
+        });
+      }
+    });
+    // follow-up actions from client meetings
+    (cl.meetings||[]).forEach(function(m){
+      if(m.followUpDate && m.followUpDate >= todayD && !m.done){
+        upcomingMeetings.push({
+          _type: 'client-followup',
+          _date: m.followUpDate, _time: m.followUpTime||'',
+          _name: cl.name,
+          _sub: cl.company||'Client',
+          _note: m.followUpAction||'Follow up',
+          _id: cl.id
+        });
+      }
+    });
+  });
+  upcomingMeetings.sort(function(a,b){ return (a._date+(a._time||'')).localeCompare(b._date+(b._time||'')); });
+
+  const TYPE_ICON = { network:'star', followup:'star', client:'users', 'client-followup':'users' };
+  const TYPE_COLOR = { network:'var(--accent-text)', followup:'var(--amber-400)', client:'var(--emerald-400)', 'client-followup':'var(--amber-400)' };
+
+  const upcomingSection = upcomingMeetings.length === 0 ? '' :
+    '<div class="dash-section-head" style="margin-top:8px;">' +
+      '<span>📅 Upcoming Meetings &amp; Follow-ups</span>' +
+    '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">' +
+    upcomingMeetings.slice(0,6).map(function(u){
+      const isToday = u._date === todayD;
+      return '<div class="task-row" style="padding:10px 14px;cursor:pointer;" data-action="' + (u._type.includes('client')?'open-client':'open-network') + '" data-id="' + esc(u._id) + '">' +
+        '<span style="color:' + TYPE_COLOR[u._type] + ';flex-shrink:0;">' + icon(TYPE_ICON[u._type],15) + '</span>' +
+        '<div class="task-info">' +
+          '<div class="task-title">' + esc(u._name) + '</div>' +
+          '<div class="task-client">' + esc(u._sub) + (u._note?' · '+esc(u._note.slice(0,50)):'') + '</div>' +
+        '</div>' +
+        '<div style="text-align:right;flex-shrink:0;">' +
+          '<div style="font-size:13px;font-family:ui-monospace,monospace;font-weight:600;color:' + (isToday?'var(--amber-400)':'var(--zinc-400)') + ';">' + (isToday?'Today':fmtDate(u._date)) + '</div>' +
+          (u._time ? '<div style="font-size:11px;font-family:ui-monospace,monospace;color:var(--zinc-500);">' + fmtTime(u._time) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('') +
+    '</div>';
 
   function recentItemHtml(item){
     if(item._type === 'comm'){
       return commRowHtml(item._data);
+    }
+    if(item._type === 'client-meeting'){
+      const m = item._data;
+      return '<div class="comm-row" style="cursor:pointer;" data-action="open-client" data-id="' + esc(item._clientId) + '">' +
+        '<span class="comm-icon" style="color:var(--emerald-400);">' + icon('users',16) + '</span>' +
+        '<div class="comm-body">' +
+          '<div class="comm-top">' +
+            '<span class="comm-client">' + esc(item._clientName) + (item._company?' · <span style="font-weight:400;color:var(--zinc-500);">'+esc(item._company)+'</span>':'') + '</span>' +
+            '<span class="comm-date">' + fmtDateTime(m.date, m.time) + '</span>' +
+          '</div>' +
+          '<div class="comm-job" style="color:var(--zinc-500);">' + esc(m.type||'Meeting') + '</div>' +
+          (m.discussed ? '<p class="comm-note">' + esc(m.discussed.slice(0,100)) + (m.discussed.length>100?'…':'') + '</p>' : '') +
+        '</div>' +
+        '<div class="comm-actions">' +
+          '<button class="icon-btn" data-action="open-client" data-id="' + esc(item._clientId) + '" title="View client">' + icon('users',13) + '</button>' +
+        '</div>' +
+      '</div>';
     }
     // Network meeting log entry
     const m = item._data;
@@ -1676,6 +2029,8 @@ function renderDashboard(){
     : '<div class="task-board">' + taskJobs.map(taskRowHtml).join('') + '</div>'
   ) +
 
+  upcomingSection +
+
   birthdaySection +
 
   // Recent unified feed
@@ -1737,6 +2092,9 @@ function renderClients(){
     if(c) return renderClientDetail(c);
     state.clientView = 'list';
   }
+  if((state.clientView === 'meeting' || state.clientView === 'edit-meeting') && state.selectedClientId){
+    return renderClientMeetingForm();
+  }
   return '' +
   '<div class="view-header">' +
     '<div><h2 class="view-title">Clients</h2><p class="view-subtitle">' + state.clients.length + ' client' + (state.clients.length !== 1 ? 's' : '') + ' on file</p></div>' +
@@ -1769,7 +2127,8 @@ function renderClientDetail(c){
       '</div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-      '<button class="btn-primary" data-action="new-job-for-client" data-id="' + c.id + '">+ New Job</button>' +
+      '<button class="btn-primary" data-action="log-client-meeting" data-id="' + c.id + '">+ Log Meeting</button>' +
+      '<button class="btn-secondary" data-action="new-job-for-client" data-id="' + c.id + '">+ New Job</button>' +
       '<button class="btn-secondary" data-action="log-activity-for-client" data-id="' + c.id + '">+ Log Activity</button>' +
       '<button class="btn-secondary" data-action="open-modal" data-type="client" data-id="' + c.id + '">Edit</button>' +
       '<button class="data-btn" data-action="clients-back">← Clients</button>' +
@@ -1811,7 +2170,44 @@ function renderClientDetail(c){
   (activity.length > 0 ? '<div class="section-head"><div class="section-head-title">Recent Activity (' + activity.length + ')</div></div>' +
     '<div style="display:flex;flex-direction:column;gap:8px;">' +
     activity.slice(0,5).map(commRowHtml).join('') +
-    '</div>' : '');
+    '</div>' : '') +
+
+  // Client meeting log
+  (function(){
+    const meetings = (c.meetings||[]).slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+    return '<div class="section-head" style="margin-top:8px;">' +
+      '<div class="section-head-title">Meeting Log (' + meetings.length + ')</div>' +
+      '<button class="btn-primary" style="font-size:12px;padding:6px 12px;" data-action="log-client-meeting" data-id="' + c.id + '">+ Log Meeting</button>' +
+    '</div>' +
+    (meetings.length === 0
+      ? '<div class="empty-msg">No meetings logged yet. Tap + Log Meeting after every client visit.</div>'
+      : '<div class="meeting-timeline">' + meetings.map(function(m){
+          const isConfirm = state.confirmDelete && state.confirmDelete.type === 'client-meeting' && state.confirmDelete.id === m.id;
+          return '<div class="meeting-entry followup-' + (m.done?'done':'pending') + '">' +
+            '<div class="me-top">' +
+              '<span class="me-date">' + fmtDateTime(m.date, m.time) + '</span>' +
+              '<span class="me-type">' + esc(m.type||'Meeting') + '</span>' +
+              '<span style="margin-left:auto;display:flex;gap:4px;">' +
+                (isConfirm
+                  ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="client-meeting" data-client-id="' + c.id + '" data-id="' + m.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+                  : '<button class="icon-btn" data-action="edit-client-meeting" data-client-id="' + c.id + '" data-mid="' + m.id + '" title="Edit">' + icon('edit',12) + '</button>' +
+                    '<button class="icon-btn danger" data-action="delete-request" data-type="client-meeting" data-id="' + m.id + '" title="Delete">' + icon('trash',12) + '</button>') +
+              '</span>' +
+            '</div>' +
+            (m.discussed ? '<div class="me-label">Discussed</div><div class="me-val">' + esc(m.discussed) + '</div>' : '') +
+            (m.projectsMentioned ? '<div class="me-label">Projects / Requirements</div><div class="me-val">' + esc(m.projectsMentioned) + '</div>' : '') +
+            ((m.myCommitments||m.theirCommitments) ?
+              '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">' +
+                (m.myCommitments ? '<div><div class="me-label">You promised</div><div class="me-commit">' + esc(m.myCommitments) + '</div></div>' : '<div></div>') +
+                (m.theirCommitments ? '<div><div class="me-label">Client said</div><div class="me-commit">' + esc(m.theirCommitments) + '</div></div>' : '<div></div>') +
+              '</div>' : '') +
+            (m.followUpAction ? '<div class="me-followup-strip ' + (m.done?'done':'') + '">' +
+              (m.done?'✓ Done — ':'📅 Follow up: ') + esc(m.followUpAction) +
+              (m.followUpDate&&!m.done?' by '+fmtDate(m.followUpDate)+(m.followUpTime?' at '+fmtTime(m.followUpTime):''):'') +
+            '</div>' : '') +
+          '</div>';
+        }).join('') + '</div>');
+  })();
 }
 
 /* ---------- contacts (trades, vendors, lead sources) ---------- */
@@ -1820,27 +2216,35 @@ function contactCardHtml(c){
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'contact' && state.confirmDelete.id === c.id;
   const catIcon = CONTACT_CATEGORY_ICONS[c.category] || 'users';
   const displayName = (c.salutation ? c.salutation + ' ' : '') + c.name;
+  const isInNetwork = inNetwork(c.id);
+  const isInClient  = inClient(c.id);
   return '<div class="inv-card">' +
     '<div class="inv-card-top">' +
       '<span class="inv-cat-badge">' + icon(catIcon,13) + esc(c.category) + '</span>' +
-      (inNetwork(c.id) ? '<span class="lead-badge" style="background:rgba(34,211,238,0.1);color:var(--accent-text);" title="In Network">' + icon('star',13) + 'In Network</span>' : (c.leadSource ? '<span class="lead-badge" title="Lead source">' + icon('star',13) + 'Lead source</span>' : '')) +
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">' +
+        (isInNetwork ? '<span class="lead-badge" style="background:rgba(34,211,238,0.12);color:var(--accent-text);">' + icon('star',11) + 'Network</span>' : '') +
+        (isInClient  ? '<span class="lead-badge" style="background:rgba(52,211,153,0.1);color:var(--emerald-400);">' + icon('users',11) + 'Client</span>' : '') +
+        (!isInNetwork && !isInClient && c.leadSource ? '<span class="lead-badge">' + icon('star',11) + 'Lead source</span>' : '') +
+      '</div>' +
     '</div>' +
-    '<div class="inv-card-name">' + esc(displayName) + '</div>' +
-    (c.company ? '<div class="inv-card-ref">' + esc(c.company) + '</div>' : '') +
+    '<div class="inv-card-name" style="word-break:break-word;">' + esc(displayName) + '</div>' +
+    (c.company ? '<div class="inv-card-ref" style="word-break:break-word;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(c.company) + '</div>' : '') +
     '<div class="contact-list">' +
-      (c.phone ? '<div class="contact-row"><a class="contact-link" href="tel:' + esc(c.phone.replace(/[^+\d]/g,'')) + '">' + icon('phone',12) + ' ' + esc(c.phone) + '</a></div>' : '') +
-      (c.email ? '<div class="contact-row"><a class="contact-link" href="mailto:' + esc(c.email) + '">' + icon('mail',12) + ' ' + esc(c.email) + '</a></div>' : '') +
+      (c.phone ? '<div class="contact-row">' + waLink(c.phone) + '</div>' : '') +
+      (c.email ? '<div class="contact-row" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + emailLink(c.email) + '</div>' : '') +
       (c.area ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.area) + '</div>' : '') +
     '</div>' +
-    (c.notes ? '<div class="inv-card-notes">' + esc(c.notes) + '</div>' : '') +
-    '<div class="inv-card-footer" style="border-top:1px solid var(--zinc-800); padding-top:8px; justify-content:space-between; align-items:center;">' +
+    (c.notes ? '<div class="inv-card-notes" style="word-break:break-word;">' + esc(c.notes) + '</div>' : '') +
+    '<div class="inv-card-footer" style="border-top:1px solid var(--zinc-800);padding-top:8px;justify-content:space-between;align-items:center;">' +
       '<div style="display:flex;gap:6px;align-items:center;">' +
-        // Star = Network (filled cyan if already in, outline if not)
-        (!inNetwork(c.id)
-          ? '<button class="icon-btn" data-action="add-contact-to-network" data-id="' + c.id + '" title="Add to Network" style="color:var(--accent-text);">' + icon('star',16) + '</button>'
-          : '<span class="icon-btn" style="color:var(--accent-text);cursor:default;opacity:0.5;" title="Already in Network">' + icon('star',16) + '</span>') +
-        // Users = Add to Client
-        '<button class="icon-btn" data-action="add-contact-to-client" data-id="' + c.id + '" title="Add as Client" style="color:var(--zinc-400);">' + icon('users',16) + '</button>' +
+        // Star = Network — glows cyan when in network, dim when not
+        (isInNetwork
+          ? '<span class="icon-btn" style="color:var(--accent-text);filter:drop-shadow(0 0 4px rgba(34,211,238,0.7));cursor:default;" title="In Network">' + icon('star',16) + '</span>'
+          : '<button class="icon-btn" data-action="add-contact-to-network" data-id="' + c.id + '" title="Add to Network" style="color:var(--zinc-600);">' + icon('star',16) + '</button>') +
+        // People = Client — glows green when in client, dim when not
+        (isInClient
+          ? '<span class="icon-btn" style="color:var(--emerald-400);filter:drop-shadow(0 0 4px rgba(52,211,153,0.6));cursor:default;" title="Already a Client">' + icon('users',16) + '</span>'
+          : '<button class="icon-btn" data-action="add-contact-to-client" data-id="' + c.id + '" title="Add as Client" style="color:var(--zinc-600);">' + icon('users',16) + '</button>') +
       '</div>' +
       '<div class="equip-actions">' +
         '<button class="icon-btn" data-action="open-modal" data-type="contact" data-id="' + c.id + '" title="Edit contact">' + icon('edit',14) + '</button>' +
@@ -1912,19 +2316,24 @@ function renderContacts(){
 function jobCardHtml(job){
   const client = state.clients.find(function(c){ return c.id === job.clientId; });
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'job' && state.confirmDelete.id === job.id;
+  const prog = jobProgress(job);
   return '<div class="job-card">' +
-    '<div class="job-card-top"><div class="job-card-title">' + esc(job.title) + '</div><span class="led ' + STATUS_LED[job.status] + '" style="margin-top:4px;"></span></div>' +
+    '<div class="job-card-top" data-action="open-job" data-id="' + job.id + '" style="cursor:pointer;"><div class="job-card-title">' + esc(job.title) + '</div><span class="led ' + STATUS_LED[job.status] + '" style="margin-top:4px;"></span></div>' +
     '<div class="job-card-client">' + esc(client ? (client.company || client.name) : 'No client') + '</div>' +
     (job.jobType ? '<div class="job-type-badge">' + esc(job.jobType) + '</div>' : '') +
-    '<div class="job-card-meta">' + fmtDate(job.projectDate) + ' \u00B7 ' + esc(job.siteLocation || '\u2014') + '</div>' +
+    // Progress bar
+    '<div class="job-card-progress"><div class="job-card-progress-fill" style="width:' + prog.pct + '%"></div></div>' +
+    (prog.nextStep
+      ? '<div class="job-card-next">' + icon('arrow-right',11) + ' ' + esc(prog.nextStep.label) + '</div>'
+      : '<div class="job-card-next" style="color:var(--emerald-400);">' + icon('check',11) + ' All steps done!</div>') +
+    '<div class="job-card-meta">' + prog.done + '/' + prog.total + ' steps \u00B7 ' + fmtDate(job.projectDate) + '</div>' +
     '<div class="job-card-value">' + fmtINR(job.value) + '</div>' +
     '<div class="job-card-footer">' +
       '<select class="status-select job-status-select" data-id="' + job.id + '">' +
         JOB_STATUSES.map(function(s){ return '<option value="' + s + '" ' + (s === job.status ? 'selected' : '') + '>' + s + '</option>'; }).join('') +
       '</select>' +
       '<div class="job-card-actions">' +
-        '<button class="icon-btn job-action-btn" data-action="open-design" data-tab="cinema" data-id="' + job.id + '" title="Open in Cinema Design">' + icon('monitor',13) + '<span>Cinema</span></button>' +
-        '<button class="icon-btn job-action-btn" data-action="open-design" data-tab="audio" data-id="' + job.id + '" title="Open in Pro Audio">' + icon('speaker',13) + '<span>Audio</span></button>' +
+        '<button class="icon-btn job-action-btn" data-action="open-job" data-id="' + job.id + '" title="Open checklist">' + icon('briefcase',13) + '<span>Steps</span></button>' +
         '<button class="icon-btn job-action-btn" data-action="open-modal" data-type="job" data-id="' + job.id + '" title="Edit job">' + icon('edit',13) + '<span>Edit</span></button>' +
         (isConfirm
           ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="job" data-id="' + job.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
@@ -1934,7 +2343,88 @@ function jobCardHtml(job){
   '</div>';
 }
 
+function renderJobDetail(job){
+  const client = state.clients.find(function(c){ return c.id === job.clientId; });
+  const prog = jobProgress(job);
+  const steps = job.steps && job.steps.length ? job.steps : defaultJobSteps();
+  const allDone = prog.done === prog.total;
+
+  // Build checklist rows
+  let firstUndone = true;
+  const checklistHtml = steps.map(function(s, idx){
+    const tmpl = JOB_STEPS.find(function(t){ return t.key === s.key; }) || { label:s.key, hint:'' };
+    const isNext = !s.done && firstUndone;
+    if(isNext) firstUndone = false;
+    let actionBtn = '';
+    if(isNext && tmpl.action){
+      if(false && tmpl.action === 'design'){
+        // Design Tools removed — separate app
+        actionBtn = '';
+      } else if(tmpl.action === 'supply'){
+        actionBtn = '<button class="check-action-btn" data-action="set-view" data-view="supply">Supply Chain →</button>';
+      } else if(tmpl.action === 'whatsapp' && client && client.phone){
+        const wa = client.phone.replace(/[^+\d]/g,'');
+        const msg = encodeURIComponent('Hi ' + client.name + ', please find the quote for ' + job.title + '. Let me know if you have any questions.');
+        actionBtn = '<a class="check-action-btn" href="https://wa.me/' + wa + '?text=' + msg + '" target="_blank" style="text-decoration:none;">WhatsApp →</a>';
+      }
+    }
+    return '<div class="check-item ' + (s.done?'done':'') + (isNext?' next':'') + '" data-action="toggle-step" data-job="' + job.id + '" data-step="' + s.key + '">' +
+      '<span class="check-num">' + (idx+1) + '</span>' +
+      '<span class="check-box">' + (s.done ? icon('check',14) : '') + '</span>' +
+      '<span class="check-label">' + esc(tmpl.label) + '</span>' +
+      (isNext ? '<span class="check-next-tag">Next</span>' : '') +
+      actionBtn +
+    '</div>';
+  }).join('');
+
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + esc(job.title) + '</h2>' +
+    '<p class="view-subtitle">' + esc(client ? client.name + (client.company && client.company!==client.name ? ' · '+client.company : '') : 'No client') + ' · ' + esc(job.status) + '</p></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-secondary" data-action="open-modal" data-type="job" data-id="' + job.id + '">Edit</button>' +
+      '<button class="data-btn" data-action="jobs-back">← All Jobs</button>' +
+    '</div>' +
+  '</div>' +
+
+  // Celebration or next-step banner
+  (allDone
+    ? '<div class="completion-celebrate">🎉 Every step done — this job is fully complete. Great work!</div>'
+    : '<div class="next-step-banner">' +
+        '<div class="next-step-label">⚡ Your next step — just this one</div>' +
+        '<div class="next-step-title">' + esc(prog.nextStep.label) + '</div>' +
+        '<div class="next-step-hint">' + esc(prog.nextStep.hint) + '</div>' +
+      '</div>') +
+
+  // Progress
+  '<div class="job-progress-wrap">' +
+    '<div class="job-progress-bar"><div class="job-progress-fill" style="width:' + prog.pct + '%"></div></div>' +
+    '<div class="job-progress-text"><span>' + prog.done + ' of ' + prog.total + ' steps done</span><span>' + prog.pct + '%</span></div>' +
+  '</div>' +
+
+  '<div class="section-head" style="margin-top:16px;"><div class="section-head-title">Job Steps — tick as you go</div></div>' +
+  '<div class="checklist">' + checklistHtml + '</div>' +
+
+  // Job info below
+  '<div class="section-head" style="margin-top:24px;"><div class="section-head-title">Details</div></div>' +
+  '<div class="supply-detail-grid">' +
+    supplyInfoItem('Status', job.status) +
+    supplyInfoItem('Job Type', job.jobType) +
+    supplyInfoItem('Value', fmtINR(job.value)) +
+    supplyInfoItem('Project Date', job.projectDate ? fmtDate(job.projectDate) : '—') +
+    supplyInfoItem('Site / Location', job.siteLocation) +
+  '</div>' +
+  (job.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-top:8px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(job.notes) + '</div>' : '');
+}
+
 function renderJobs(){
+  // Detail view
+  if(state.jobView === 'detail' && state.selectedJobId){
+    const job = state.jobs.find(function(j){ return j.id === state.selectedJobId; });
+    if(job) return renderJobDetail(job);
+    state.jobView = 'board';
+  }
+
   const cols = JOB_STATUSES.map(function(status){
     const colJobs = state.jobs.filter(function(j){ return j.status === status; });
     const colValue = colJobs.reduce(function(s,j){ return s + Number(j.value || 0); }, 0);
@@ -2260,26 +2750,106 @@ function renderCalendar(){
 
   const now = new Date();
   const isCurrentMonth = (y === now.getFullYear() && m === now.getMonth());
-  const MAX_CHIPS = 3;
+  const MAX_CHIPS = 4;
+
+  // Build a map: dateStr → array of event objects
+  const eventMap = {};
+  function addEvent(dateStr, ev){ if(!dateStr) return; if(!eventMap[dateStr]) eventMap[dateStr]=[]; eventMap[dateStr].push(ev); }
+
+  // 1. Jobs by project date
+  state.jobs.forEach(function(j){
+    if(!j.projectDate) return;
+    addEvent(j.projectDate, { type:'Job', label: j.title, cls: STATUS_TEXT[j.status]||'', action:'open-job', id:j.id });
+  });
+
+  // 2. Network follow-up dates
+  state.network.forEach(function(n){
+    const c = contactOf(n);
+    const name = (c.salutation?c.salutation+' ':'') + (c.name||'Unknown');
+    if(n.nextFollowUp){
+      addEvent(n.nextFollowUp, { type:'Follow-up', label:'☆ Follow-up: '+name, cls:'cal-chip-followup', action:'open-network', id:n.id });
+    }
+    // Network meeting follow-up dates
+    (n.meetings||[]).forEach(function(mt){
+      if(mt.followUpDate && !mt.done){
+        addEvent(mt.followUpDate, { type:'Follow-up', label:'☆ '+mt.followUpAction+' — '+name, cls:'cal-chip-followup', action:'open-network', id:n.id });
+      }
+      // Meeting date itself (only if it's a scheduled future meeting)
+      if(mt.date && mt.date >= todayStr()){
+        addEvent(mt.date, { type:'Network meeting', label:'☆ Meet: '+name, cls:'cal-chip-network', action:'open-network', id:n.id });
+      }
+    });
+  });
+
+  // 3. Client meetings and their follow-ups
+  state.clients.forEach(function(cl){
+    (cl.meetings||[]).forEach(function(mt){
+      // Meeting date
+      if(mt.date){
+        addEvent(mt.date, { type:'Client meeting', label:'👥 '+cl.name, cls:'cal-chip-client-meeting', action:'open-client', id:cl.id });
+      }
+      // Follow-up date
+      if(mt.followUpDate && !mt.done){
+        const note = mt.followUpAction || 'Follow up';
+        addEvent(mt.followUpDate, { type:'Follow-up', label:'👥 '+note+' — '+cl.name, cls:'cal-chip-followup', action:'open-client', id:cl.id });
+      }
+    });
+  });
 
   const cellsHtml = cells.map(function(d){
     if(d === null) return '<div class="cal-cell empty"></div>';
     const dateStr = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    const dayJobs = state.jobs.filter(function(j){ return j.projectDate === dateStr; });
+    const dayEvents = eventMap[dateStr] || [];
     const isToday = dateStr === todayStr();
-    const shown = dayJobs.slice(0, MAX_CHIPS);
-    const extra = dayJobs.length - shown.length;
-    const chipsHtml = shown.map(function(j){
-      return '<button class="cal-job-chip ' + STATUS_TEXT[j.status] + '" data-action="open-modal" data-type="job" data-id="' + j.id + '" title="' + esc(j.title) + '">' + esc(j.title) + '</button>';
-    }).join('') + (extra > 0 ? '<div class="cal-more">+' + extra + ' more</div>' : '');
-    return '<div class="cal-cell ' + (isToday ? 'today' : '') + '">' +
-      '<span class="cal-date">' + d + '</span>' +
+    const isSelected = state.calSelectedDate === dateStr;
+    const shown = dayEvents.slice(0, MAX_CHIPS);
+    const extra = dayEvents.length - shown.length;
+    const chipsHtml = shown.map(function(ev){
+      return '<button class="cal-job-chip ' + ev.cls + '" data-action="' + ev.action + '" data-id="' + esc(ev.id) + '" title="' + esc(ev.label) + '">' + esc(ev.label) + '</button>';
+    }).join('') +
+    (extra > 0
+      ? '<button class="cal-more" data-action="cal-select-date" data-date="' + dateStr + '" style="cursor:pointer;color:var(--accent-text);background:rgba(34,211,238,0.1);border-radius:4px;padding:2px 6px;border:none;font-size:10px;font-family:ui-monospace,monospace;width:100%;text-align:left;">+' + extra + ' more →</button>'
+      : (dayEvents.length > 0 ? '' : ''));
+    return '<div class="cal-cell ' + (isToday ? 'today' : '') + (isSelected ? ' cal-cell-selected' : '') + '">' +
+      '<span class="cal-date" ' + (dayEvents.length > 0 ? 'data-action="cal-select-date" data-date="' + dateStr + '" style="cursor:pointer;color:var(--accent-text);"' : '') + '>' + d + '</span>' +
       chipsHtml +
     '</div>';
   }).join('');
 
+  // Day detail panel — shown when a date is selected
+  const dayDetailHtml = (function(){
+    if(!state.calSelectedDate) return '';
+    const events = eventMap[state.calSelectedDate] || [];
+    if(!events.length) return '';
+    const [dy, dm, dd] = state.calSelectedDate.split('-');
+    const dateLabel = MONTH_NAMES[parseInt(dm,10)-1] + ' ' + parseInt(dd,10) + ', ' + dy;
+    return '<div style="margin-top:16px;background:var(--zinc-900);border:1px solid var(--accent-text);border-radius:12px;padding:16px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text-strong);">' + dateLabel + '</div>' +
+        '<button class="icon-btn" data-action="cal-select-date" data-date="" style="font-size:13px;padding:4px 10px;border-radius:6px;border:1px solid var(--zinc-700);color:var(--zinc-400);">✕ Close</button>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;">' +
+      events.map(function(ev){
+        return '<div class="task-row" style="padding:10px 14px;" data-action="' + ev.action + '" data-id="' + esc(ev.id) + '">' +
+          '<span class="cal-job-chip ' + ev.cls + '" style="flex-shrink:0;white-space:nowrap;max-width:90px;">' + esc(ev.type||'Event') + '</span>' +
+          '<span style="flex:1;font-size:13px;color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(ev.label) + '</span>' +
+          '<span style="font-size:12px;color:var(--accent-text);">→</span>' +
+        '</div>';
+      }).join('') +
+      '</div>' +
+    '</div>';
+  })();
+
+  // Legend
+  const legend = '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;font-family:ui-monospace,monospace;">' +
+    '<span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--zinc-800);display:inline-block;"></span>Job</span>' +
+    '<span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:rgba(34,211,238,0.25);display:inline-block;"></span>Network meeting</span>' +
+    '<span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:rgba(52,211,153,0.25);display:inline-block;"></span>Client meeting</span>' +
+    '<span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:3px;background:rgba(251,191,36,0.2);display:inline-block;"></span>Follow-up</span>' +
+  '</div>';
+
   return '' +
-  '<div class="view-header"><div><h2 class="view-title">Calendar</h2><p class="view-subtitle">Job dates at a glance</p></div></div>' +
+  '<div class="view-header"><div><h2 class="view-title">Calendar</h2><p class="view-subtitle">Jobs, meetings &amp; follow-ups at a glance</p></div></div>' +
   '<div class="cal-header">' +
     '<button class="cal-nav-btn" data-action="cal-prev">' + icon('chevronleft',20) + '</button>' +
     '<div class="cal-month-group">' +
@@ -2288,10 +2858,12 @@ function renderCalendar(){
     '</div>' +
     '<button class="cal-nav-btn" data-action="cal-next">' + icon('chevronright',20) + '</button>' +
   '</div>' +
+  legend +
   '<div class="cal-grid">' +
     ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(function(d){ return '<div class="cal-dow">' + d + '</div>'; }).join('') +
     cellsHtml +
-  '</div>';
+  '</div>' +
+  dayDetailHtml;
 }
 
 function commsListHtml(){
@@ -2424,6 +2996,10 @@ function contactOf(n){
 // Check if a contact is already in the network
 function inNetwork(contactId){
   return state.network.some(function(n){ return n.contactId === contactId; });
+}
+function inClient(contactId){
+  // A contact is "in clients" if a client was created linked to them
+  return state.clients.some(function(cl){ return cl.contactId === contactId; });
 }
 
 function prospectLastMeetingDate(p){
@@ -2561,7 +3137,7 @@ function renderNetworkDetail(p){
     const isConfirm = state.confirmDelete && state.confirmDelete.type === 'meeting' && state.confirmDelete.id === m.id;
     return '<div class="meeting-entry ' + fuClass + '">' +
       '<div class="me-top">' +
-        '<span class="me-date">' + fmtDate(m.date) + '</span>' +
+        '<span class="me-date">' + fmtDateTime(m.date, m.time) + '</span>' +
         '<span class="me-type">' + esc(m.type) + '</span>' +
         (m.reaction ? '<span class="me-reaction ' + reactionClass(m.reaction) + '">' + esc(m.reaction) + '</span>' : '') +
         '<span style="margin-left:auto;display:flex;gap:4px;align-items:center;">' +
@@ -2581,7 +3157,7 @@ function renderNetworkDetail(p){
         '</div>' : '') +
       (m.followUpAction ? '<div class="me-followup-strip ' + (m.done?'done':'') + '">' +
         (m.done ? '✓ Done — ' : '📅 Follow up: ') + esc(m.followUpAction) +
-        (m.followUpDate && !m.done ? ' by ' + fmtDate(m.followUpDate) : '') +
+        (m.followUpDate && !m.done ? ' by ' + fmtDate(m.followUpDate) + (m.followUpTime?' at '+fmtTime(m.followUpTime):'') : '') +
         (!m.done ? '&nbsp;&nbsp;<button style="font-size:10px;background:none;border:1px solid var(--amber-400);color:var(--amber-400);border-radius:4px;padding:1px 6px;cursor:pointer;" data-action="mark-followup-done" data-pid="' + p.id + '" data-mid="' + m.id + '">Mark done</button>' : '') +
       '</div>' : '') +
     '</div>';
@@ -2705,6 +3281,7 @@ function renderNetworkForm(){
 
     '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Relationship</div>' +
     '<div class="field-row-3">' + fieldSelect('Stage','stage',PROSPECT_STAGES,d.stage||'First Contact') + fieldSelect('Heat','heat',PROSPECT_HEAT,d.heat||'🌤 Warm') + fieldInput('Next follow-up date','nextFollowUp',d.nextFollowUp||'','date','min="' + todayStr() + '"') + '</div>' +
+    '<div class="field-row-2">' + fieldInput('Follow-up reminder time (optional)','nextFollowUpTime',d.nextFollowUpTime||'','time') + '<div></div>' + '</div>' +
     '<div class="field-row-2">' + fieldSelect('How you met','howMet',PROSPECT_HOW_MET,d.howMet||PROSPECT_HOW_MET[0]) + fieldInput('Referred by (if any)','referredBy',d.referredBy,'text','placeholder="Name of who introduced you"') + '</div>' +
 
     '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--accent-text);margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--zinc-800);">Their Work</div>' +
@@ -2717,6 +3294,38 @@ function renderNetworkForm(){
     '<div class="form-actions">' +
       '<button type="button" class="btn-secondary" data-action="network-back">Cancel</button>' +
       '<button type="submit" class="btn-primary">' + (editing?'Save Changes':'Add to Network') + '</button>' +
+    '</div>' +
+  '</form>';
+}
+
+function renderClientMeetingForm(){
+  const c = state.clients.find(function(x){ return x.id===state.selectedClientId; });
+  if(!c) return '<div class="empty-msg">Client not found.</div>';
+  const d = state.clientMeetingDraft || {};
+  const isEditing = state.clientView === 'edit-meeting' && !!state._editClientMeetingId;
+  return '' +
+  '<div class="view-header">' +
+    '<div><h2 class="view-title">' + (isEditing?'Edit Meeting Log':'Log Meeting') + '</h2>' +
+    '<p class="view-subtitle">' + esc(c.name) + (c.company?' · '+esc(c.company):'') + '</p></div>' +
+    '<button class="data-btn" data-action="client-meeting-back">← Cancel</button>' +
+  '</div>' +
+  '<form data-form="client-meeting" style="max-width:720px;">' +
+    '<div class="field-row-2">' + fieldInput('Date','date',d.date||todayStr(),'date') + fieldInput('Time (optional)','time',d.time||'','time') + '</div>' +
+    fieldSelect('Meeting type','type',MEETING_TYPES,d.type||'Office Visit') +
+    fieldTextarea('What was discussed','discussed',d.discussed,'placeholder="Key points from the meeting — what they asked for, concerns, decisions made"') +
+    fieldTextarea('Requirements / projects mentioned','projectsMentioned',d.projectsMentioned,'placeholder="Room size, type of system, budget mentioned, timeline"') +
+    '<div class="field-row-2">' +
+      fieldTextarea('What YOU promised','myCommitments',d.myCommitments,'placeholder="e.g. Send quote by Friday"') +
+      fieldTextarea('What CLIENT said they\'d do','theirCommitments',d.theirCommitments,'placeholder="e.g. Share floor plan next week"') +
+    '</div>' +
+    fieldInput('Follow-up action','followUpAction',d.followUpAction,'text','placeholder="e.g. Call to follow up on quote"') +
+    '<div class="field-row-2">' +
+      fieldInput('Follow-up date','followUpDate',d.followUpDate||'','date','min="'+todayStr()+'"') +
+      fieldInput('Reminder time (optional)','followUpTime',d.followUpTime||'','time') +
+    '</div>' +
+    '<div class="form-actions">' +
+      '<button type="button" class="data-btn" data-action="client-meeting-back">Cancel</button>' +
+      '<button type="submit" class="btn-primary">' + (isEditing?'Save Changes':'Save Meeting') + '</button>' +
     '</div>' +
   '</form>';
 }
@@ -2759,7 +3368,10 @@ function renderNetworkMeetingForm(){
     '</div>' +
     fieldInput('Follow-up action required','followUpAction',d.followUpAction,'text','placeholder="e.g. Call to confirm client introduction"') +
     '<div class="field-row-2">' +
+      '<div class="field-row-2">' +
       fieldInput('Follow-up by date','followUpDate',d.followUpDate||'','date','min="' + todayStr() + '"') +
+      fieldInput('Reminder time (optional)','followUpTime',d.followUpTime||'','time') +
+    '</div>' +
       (!isEditing ? fieldSelect('Update prospect stage to','newStage',['(no change)'].concat(PROSPECT_STAGES), d.newStage||'(no change)') : '') +
     '</div>' +
     (!isEditing ? fieldSelect('Update heat to','newHeat',['(no change)'].concat(PROSPECT_HEAT), d.newHeat||'(no change)') : '') +
@@ -2782,6 +3394,10 @@ function brandPills(brandsStr){
 
 function supplyInfoItem(label, val){
   return '<div class="supply-info-item"><div class="supply-info-label">' + esc(label) + '</div><div class="supply-info-val">' + esc(String(val||'—')) + '</div></div>';
+}
+function supplyInfoItemRaw(label, valHtml){
+  // Use when val is already-escaped HTML (e.g. a link built with esc() internally)
+  return '<div class="supply-info-item"><div class="supply-info-label">' + esc(label) + '</div><div class="supply-info-val">' + (valHtml||'—') + '</div></div>';
 }
 
 function reliabilityClass(r){
@@ -2874,6 +3490,28 @@ function scCardHtml(s){
 }
 
 /* ── Detail views ── */
+const SUPPLY_LOG_TYPES = ['Call', 'WhatsApp', 'Email', 'Meeting', 'Order', 'Payment', 'Issue', 'Note'];
+
+function supplyLogHtml(logs, entityType, entityId){
+  if(!logs || !logs.length) return '<div class="empty-msg" style="font-size:13px;">No entries yet. Log a call, order, or note.</div>';
+  return logs.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); })
+    .map(function(l){
+      const isConfirm = state.confirmDelete && state.confirmDelete.type === 'supply-log' && state.confirmDelete.id === l.id;
+      return '<div class="comm-row">' +
+        '<span class="comm-icon">' + icon(COMM_ICONS[l.type]||'message',16) + '</span>' +
+        '<div class="comm-body">' +
+          '<div class="comm-top"><span class="comm-client">' + esc(l.type) + '</span><span class="comm-date">' + fmtDateTime(l.date, l.time) + '</span></div>' +
+          '<p class="comm-note">' + esc(l.note) + '</p>' +
+        '</div>' +
+        '<div class="comm-actions">' +
+          (isConfirm
+            ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-supply-log" data-entity-type="' + esc(entityType) + '" data-entity-id="' + esc(entityId) + '" data-id="' + esc(l.id) + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+            : '<button class="icon-btn danger" data-action="delete-supply-log-request" data-entity-type="' + esc(entityType) + '" data-entity-id="' + esc(entityId) + '" data-id="' + esc(l.id) + '">' + icon('trash',13) + '</button>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+}
+
 function dealerDetailHtml(d){
   const reps = state.supply.reps.filter(function(r){ return r.dealerId===d.id; });
   const scs  = state.supply.serviceCentres.filter(function(s){ return s.dealerId===d.id; });
@@ -2885,7 +3523,8 @@ function dealerDetailHtml(d){
       '<p class="view-subtitle">' + esc(d.city) + ', ' + esc(d.state) + (d.website?' · '+esc(d.website):'') + '</p>' +
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-      '<button class="btn-primary" data-action="import-pricelist" data-id="' + d.id + '">↑ Import Price List</button>' +
+      '<button class="btn-primary" data-action="log-supply-entry" data-type="dealer" data-id="' + d.id + '">+ Log Entry</button>' +
+      '<button class="btn-secondary" data-action="import-pricelist" data-id="' + d.id + '">↑ Price List</button>' +
       '<button class="btn-secondary" data-action="download-template">↓ Template</button>' +
       '<button class="btn-secondary" data-action="edit-supply" data-type="dealer" data-id="' + d.id + '">Edit</button>' +
       '<button class="data-btn" data-action="supply-back">← Dealers</button>' +
@@ -2899,12 +3538,15 @@ function dealerDetailHtml(d){
     supplyInfoItem('Trade Discount', d.tradeDiscount ? d.tradeDiscount + '%' : '—') +
     supplyInfoItem('Lead Time', d.leadTimeDays ? d.leadTimeDays + ' days' : '—') +
     supplyInfoItem('GST Number', d.gst) +
-    supplyInfoItem('Phone', d.phone) +
-    supplyInfoItem('Email', d.email) +
+    supplyInfoItemRaw('Phone / WhatsApp', d.phone ? waLink(d.phone) : '—') +
+    supplyInfoItemRaw('Email', d.email ? emailLink(d.email) : '—') +
   '</div>' +
   (d.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(d.notes) + '</div>' : '') +
 
-  // Reps at this dealer
+  '<div class="section-head"><div class="section-head-title">Conversation Log</div>' +
+    '<button class="btn-primary" style="font-size:12px;padding:6px 12px;" data-action="log-supply-entry" data-type="dealer" data-id="' + d.id + '">+ Log Entry</button>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">' + supplyLogHtml(d.logs,'dealer',d.id) + '</div>' +
   (reps.length ? '<div class="section-head" style="margin-top:8px;"><div class="section-head-title">Sales Reps (' + reps.length + ')</div></div>' +
     '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">' +
     reps.map(function(r){
@@ -2914,7 +3556,7 @@ function dealerDetailHtml(d){
           '<div style="font-size:12px;color:var(--zinc-500);">' + esc(r.brands||'') + '</div>' +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:14px;">' +
-          (r.phone ? '<a href="tel:' + esc(r.phone) + '" style="font-family:ui-monospace,monospace;font-size:12px;color:var(--accent-text);">' + esc(r.phone) + '</a>' : '') +
+          (r.phone ? waLink(r.phone) : '') +
           '<span class="' + reliabilityClass(r.reliability) + '" style="font-size:11px;font-family:ui-monospace,monospace;">' + esc(r.reliability||'') + '</span>' +
         '</div>' +
       '</div>';
@@ -2997,7 +3639,8 @@ function repDetailHtml(r){
   '<div class="view-header">' +
     '<div><h2 class="view-title">' + esc(r.name) + '</h2>' +
     '<p class="view-subtitle">' + esc(dealer?dealer.company:'No dealer') + '</p></div>' +
-    '<div style="display:flex;gap:8px;">' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-primary" data-action="log-supply-entry" data-type="rep" data-id="' + r.id + '">+ Log Entry</button>' +
       '<button class="btn-secondary" data-action="edit-supply" data-type="rep" data-id="' + r.id + '">Edit</button>' +
       '<button class="data-btn" data-action="supply-back">← Reps</button>' +
     '</div>' +
@@ -3005,12 +3648,16 @@ function repDetailHtml(r){
   '<div class="supply-detail-grid">' +
     supplyInfoItem('Dealer / Employer', dealer?dealer.company:'—') +
     supplyInfoItem('Brands', r.brands||'—') +
-    supplyInfoItem('Phone (WhatsApp)', r.phone||'—') +
-    supplyInfoItem('Email', r.email||'—') +
+    supplyInfoItemRaw('Phone / WhatsApp', r.phone ? waLink(r.phone) : '—') +
+    supplyInfoItemRaw('Email', r.email ? emailLink(r.email) : '—') +
     supplyInfoItem('Reliability', r.reliability||'—') +
     supplyInfoItem('Last Contacted', r.lastContacted?fmtDate(r.lastContacted):'—') +
   '</div>' +
-  (r.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(r.notes) + '</div>' : '');
+  (r.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(r.notes) + '</div>' : '') +
+  '<div class="section-head"><div class="section-head-title">Conversation Log</div>' +
+    '<button class="btn-primary" style="font-size:12px;padding:6px 12px;" data-action="log-supply-entry" data-type="rep" data-id="' + r.id + '">+ Log Entry</button>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;gap:8px;">' + supplyLogHtml(r.logs,'rep',r.id) + '</div>';
 }
 
 function scDetailHtml(s){
@@ -3019,7 +3666,8 @@ function scDetailHtml(s){
   '<div class="view-header">' +
     '<div><h2 class="view-title">' + esc(s.name) + '</h2>' +
     '<p class="view-subtitle">' + esc(s.city) + (dealer?' · '+esc(dealer.company):' · Independent') + '</p></div>' +
-    '<div style="display:flex;gap:8px;">' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-primary" data-action="log-supply-entry" data-type="sc" data-id="' + s.id + '">+ Log Entry</button>' +
       '<button class="btn-secondary" data-action="edit-supply" data-type="sc" data-id="' + s.id + '">Edit</button>' +
       '<button class="data-btn" data-action="supply-back">← Service Centres</button>' +
     '</div>' +
@@ -3028,8 +3676,8 @@ function scDetailHtml(s){
     supplyInfoItem('Brands Serviced', s.brands||'—') +
     supplyInfoItem('City', s.city||'—') +
     supplyInfoItem('Address', s.address||'—') +
-    supplyInfoItem('Phone', s.phone||'—') +
-    supplyInfoItem('Email', s.email||'—') +
+    supplyInfoItemRaw('Phone / WhatsApp', s.phone ? waLink(s.phone) : '—') +
+    supplyInfoItemRaw('Email', s.email ? emailLink(s.email) : '—') +
     supplyInfoItem('Turnaround', s.turnaround||'—') +
     supplyInfoItem('Linked Dealer', dealer?dealer.company:'Independent / None') +
   '</div>' +
@@ -3037,7 +3685,11 @@ function scDetailHtml(s){
     '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);margin-bottom:6px;">Warranty Process</div>' +
     '<div style="font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(s.warrantyProcess) + '</div>' +
   '</div>' : '') +
-  (s.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(s.notes) + '</div>' : '');
+  (s.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(s.notes) + '</div>' : '') +
+  '<div class="section-head"><div class="section-head-title">Conversation Log</div>' +
+    '<button class="btn-primary" style="font-size:12px;padding:6px 12px;" data-action="log-supply-entry" data-type="sc" data-id="' + s.id + '">+ Log Entry</button>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;gap:8px;">' + supplyLogHtml(s.logs,'sc',s.id) + '</div>';
 }
 
 /* ── Add/Edit forms ── */
@@ -3341,7 +3993,6 @@ const VIEW_RENDERERS = {
   network:   renderNetwork,
   calendar:  renderCalendar,
   comms:     renderComms,
-  design:    renderDesignTools,
   supply:    renderSupply,
 };
 
@@ -3491,6 +4142,20 @@ function invFormHtml(kind, d){
   return '';
 }
 
+function supplyLogFormHtml(d){
+  return '' +
+    '<div class="field-row-2">' +
+      fieldInput('Date','date',d.date||todayStr(),'date') +
+      fieldInput('Time (optional)','time',d.time||'','time') +
+    '</div>' +
+    fieldSelect('Type','type',SUPPLY_LOG_TYPES,d.type||'Call') +
+    fieldTextarea('Note — what was discussed, agreed, or promised','note',d.note,'placeholder="e.g. Confirmed JBL CBT price is ₹42,000 per pair. Delivery 5 days. Order to be placed next week."') +
+    '<div class="form-actions">' +
+      '<button type="button" class="btn-secondary" data-action="close-modal">Cancel</button>' +
+      '<button type="submit" class="btn-primary">Save Entry</button>' +
+    '</div>';
+}
+
 function commFormHtml(d){
   if(state.clients.length === 0){
     return '<p class="empty-msg">Add a client first before logging activity.</p><div class="form-actions"><button type="button" class="btn-secondary" data-action="close-modal">Close</button></div>';
@@ -3504,7 +4169,7 @@ function commFormHtml(d){
     fieldSelect('Client','clientId',clientOptions,d.clientId) +
     '<label class="field"><span class="field-label">Related job (optional)</span><select class="field-select" id="field-jobId" data-field="jobId">' + jobOptionsHtml + '</select></label>' +
     fieldSelect('Type','type',COMM_TYPES,d.type) +
-    fieldInput('Date','date',d.date,'date') +
+    '<div class="field-row-2">' + fieldInput('Date','date',d.date,'date') + fieldInput('Time (optional)','time',d.time||'','time') + '</div>' +
     fieldTextarea('Note','note',d.note);
 }
 
@@ -3557,6 +4222,14 @@ function renderModal(){
     title = 'Log Activity';
     bodyHtml = commFormHtml(state.formDraft);
     if(state.clients.length === 0) showActions = false;
+  } else if(type === 'supply-log'){
+    const eType = state.modal.entityType;
+    const col = eType==='dealer' ? state.supply.dealers : eType==='rep' ? state.supply.reps : state.supply.serviceCentres;
+    const entry = col.find(function(x){ return x.id===state.modal.entityId; });
+    const eName = entry ? (entry.company||entry.name||'') : '';
+    title = 'Log Entry — ' + esc(eName);
+    bodyHtml = supplyLogFormHtml(state.formDraft);
+    showActions = false; // form has its own actions inside
   }
 
   const actionsHtml = showActions
@@ -3607,6 +4280,9 @@ function onBodyClick(e){
         if(fromView === 'clients'){
           state.clientView = 'list'; state.selectedClientId = null;
         }
+        if(fromView === 'jobs'){
+          state.jobView = 'board'; state.selectedJobId = null;
+        }
       }
       state.view = toView;
       state.confirmDelete = null;
@@ -3633,17 +4309,24 @@ function onBodyClick(e){
       state.modal = null;
       render();
       break;
+    case 'cal-select-date':
+      state.calSelectedDate = el.dataset.date || null;
+      render();
+      break;
     case 'cal-prev':
+      state.calSelectedDate = null;
       if(state.calMonth.m === 0) state.calMonth = { y: state.calMonth.y - 1, m: 11 };
       else state.calMonth.m -= 1;
       render();
       break;
     case 'cal-next':
+      state.calSelectedDate = null;
       if(state.calMonth.m === 11) state.calMonth = { y: state.calMonth.y + 1, m: 0 };
       else state.calMonth.m += 1;
       render();
       break;
     case 'cal-today':
+      state.calSelectedDate = null;
       state.calMonth = (function(){ const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })();
       render();
       break;
@@ -3665,6 +4348,7 @@ function onBodyClick(e){
       else if(t === 'dealer' || t === 'rep' || t === 'sc') deleteSupplyEntry(t, id);
       else if(t === 'comm') deleteCommEntry(id);
       else if(t === 'meeting') deleteMeeting(el.dataset.networkId, id);
+      else if(t === 'client-meeting') deleteClientMeeting(el.dataset.clientId, id);
       break;
     }
     case 'export-excel':
@@ -3697,6 +4381,24 @@ function onBodyClick(e){
       closeMobileMenu();
       showClearConfirmModal();
       break;
+    case 'log-supply-entry':
+      state.modal = { type:'supply-log', entityType: el.dataset.type, entityId: el.dataset.id };
+      state.formDraft = { date: todayStr(), type:'Call', note:'' };
+      render();
+      break;
+    case 'delete-supply-log-request':
+      state.confirmDelete = { type:'supply-log', id: el.dataset.id, entityType: el.dataset.entityType, entityId: el.dataset.entityId };
+      render();
+      break;
+    case 'delete-supply-log': {
+      const eType = el.dataset.entityType, eId = el.dataset.entityId, lId = el.dataset.id;
+      const col = eType==='dealer' ? state.supply.dealers : eType==='rep' ? state.supply.reps : state.supply.serviceCentres;
+      const entry = col.find(function(x){ return x.id===eId; });
+      if(entry && entry.logs) entry.logs = entry.logs.filter(function(l){ return l.id!==lId; });
+      state.confirmDelete = null;
+      persist(); render();
+      break;
+    }
     case 'log-activity-for-client':
       // Open the Activity/comm modal pre-filled with this client
       state.modal = { type:'comm', data:null };
@@ -3811,9 +4513,63 @@ function onBodyClick(e){
       state.view = 'contacts';
       render();
       break;
+    case 'open-job':
+      state.selectedJobId = el.dataset.id;
+      state.jobView = 'detail';
+      state.view = 'jobs';
+      render();
+      break;
+    case 'jobs-back':
+      state.jobView = 'board';
+      state.selectedJobId = null;
+      render();
+      break;
+    case 'toggle-step': {
+      const jobId = el.dataset.job, stepKey = el.dataset.step;
+      const job = state.jobs.find(function(j){ return j.id === jobId; });
+      if(job){
+        if(!job.steps || !job.steps.length) job.steps = defaultJobSteps();
+        const step = job.steps.find(function(s){ return s.key === stepKey; });
+        if(step){
+          step.done = !step.done;
+          persist();
+          render();
+        }
+      }
+      break;
+    }
+    case 'log-client-meeting':
+      state.selectedClientId = el.dataset.id;
+      state.clientView = 'meeting';
+      state.clientMeetingDraft = { date: todayStr(), time: nowTimeStr() };
+      state._editClientMeetingId = null;
+      state.view = 'clients';
+      render();
+      break;
+    case 'edit-client-meeting': {
+      const cid = el.dataset.clientId, mid = el.dataset.mid;
+      const cl = state.clients.find(function(x){ return x.id===cid; });
+      const mt = cl && (cl.meetings||[]).find(function(m){ return m.id===mid; });
+      if(mt){
+        state.selectedClientId = cid;
+        state.clientMeetingDraft = Object.assign({}, mt);
+        state._editClientMeetingId = mid;
+        state.clientView = 'edit-meeting';
+        state.view = 'clients';
+        render();
+      }
+      break;
+    }
+    case 'client-meeting-back':
+      state.clientView = 'detail';
+      state.clientMeetingDraft = null;
+      state._editClientMeetingId = null;
+      render();
+      break;
     case 'open-client':
       state.selectedClientId = el.dataset.id;
       state.clientView = 'detail';
+      state.view = 'clients';
       render();
       break;
     case 'clients-back':
@@ -3910,12 +4666,6 @@ function onBodyClick(e){
     }
     case 'open-job-from-prospect':
       state.view = 'jobs';
-      render();
-      break;
-    case 'open-design':
-      state.designJobId = el.dataset.id || null;
-      state.designTab = el.dataset.tab === 'audio' ? 'audio' : 'cinema';
-      state.view = 'design';
       render();
       break;
     case 'design-tab':
@@ -4039,20 +4789,20 @@ function prefillClientFromContact(contactId){
   if(!contactId) return;
   const c = state.contacts.find(function(x){ return x.id === contactId; });
   if(!c) return;
-  // Fill form fields
-  var nameField = document.querySelector('[data-field="name"]');
+  var nameField    = document.querySelector('[data-field="name"]');
   var companyField = document.querySelector('[data-field="company"]');
-  var phoneField = document.querySelector('[data-field="phone"]');
-  var emailField = document.querySelector('[data-field="email"]');
+  var phoneField   = document.querySelector('[data-field="phone"]');
+  var emailField   = document.querySelector('[data-field="email"]');
   if(nameField) nameField.value = (c.salutation ? c.salutation + ' ' : '') + c.name;
   if(companyField && c.company) companyField.value = c.company;
   if(phoneField && c.phone) phoneField.value = c.phone;
   if(emailField && c.email) emailField.value = c.email;
-  // Also update the formDraft so if they immediately submit it's captured
+  // Store in formDraft — including contactId so the link is preserved on save
   if(nameField) state.formDraft.name = nameField.value;
   if(companyField && c.company) state.formDraft.company = c.company;
   if(phoneField && c.phone) state.formDraft.phone = c.phone;
   if(emailField && c.email) state.formDraft.email = c.email;
+  state.formDraft.contactId = contactId; // the key link
 }
 
 /* ---------- form validation ---------- */
@@ -4170,6 +4920,7 @@ function onBodySubmit(e){
       if(!pr.meetings) pr.meetings = [];
       const meetingData = {
         date: data.date || todayStr(),
+        time: data.time || '',
         type: data.meetingType || 'Meeting',
         discussed: data.discussed || '',
         offered: data.offered || [],
@@ -4179,6 +4930,7 @@ function onBodySubmit(e){
         theirCommitments: data.theirCommitments || '',
         followUpAction: data.followUpAction || '',
         followUpDate: data.followUpDate || '',
+        followUpTime: data.followUpTime || '',
       };
       if(isEditing){
         // Update existing meeting — preserve id and done status
@@ -4195,10 +4947,69 @@ function onBodySubmit(e){
       }
       // Update next follow-up date whenever a new date is set
       if(data.followUpDate) pr.nextFollowUp = data.followUpDate;
+      if(data.followUpTime) pr.nextFollowUpTime = data.followUpTime;
     }
     state.networkView = 'detail';
     state.networkMeetingDraft = null;
     state._editMeetingId = null;
+    persist(); render();
+    return;
+  }
+
+  // Client meeting form
+  if(formEl.dataset.form === 'client-meeting'){
+    if(!validateRequired(formEl, [['date','Date']])) return;
+    const fields = formEl.querySelectorAll('[data-field]');
+    const data = {};
+    fields.forEach(function(f){ data[f.dataset.field] = f.value; });
+    const cl = state.clients.find(function(x){ return x.id===state.selectedClientId; });
+    const isEditing = state.clientView === 'edit-meeting' && state._editClientMeetingId;
+    if(cl){
+      if(!cl.meetings) cl.meetings = [];
+      const meetingData = {
+        date: data.date || todayStr(),
+        time: data.time || '',
+        type: data.type || 'Meeting',
+        discussed: data.discussed || '',
+        projectsMentioned: data.projectsMentioned || '',
+        myCommitments: data.myCommitments || '',
+        theirCommitments: data.theirCommitments || '',
+        followUpAction: data.followUpAction || '',
+        followUpDate: data.followUpDate || '',
+        followUpTime: data.followUpTime || '',
+      };
+      if(isEditing){
+        const idx = cl.meetings.findIndex(function(m){ return m.id===state._editClientMeetingId; });
+        if(idx >= 0) cl.meetings[idx] = Object.assign({}, cl.meetings[idx], meetingData);
+      } else {
+        cl.meetings.push(Object.assign({ id:uid(), done:false }, meetingData));
+      }
+    }
+    state.clientView = 'detail';
+    state.clientMeetingDraft = null;
+    state._editClientMeetingId = null;
+    persist(); render();
+    return;
+  }
+
+  // Supply log entry
+  if(formEl.id === 'entity-form' && state.modal && state.modal.type === 'supply-log'){
+    if(!validateRequired(formEl, [['note','Note']])) return;
+    const eType = state.modal.entityType, eId = state.modal.entityId;
+    const col = eType==='dealer' ? state.supply.dealers : eType==='rep' ? state.supply.reps : state.supply.serviceCentres;
+    const entry = col.find(function(x){ return x.id===eId; });
+    if(entry){
+      if(!entry.logs) entry.logs = [];
+      entry.logs.push({
+        id: uid(),
+        date: state.formDraft.date || todayStr(),
+        type: state.formDraft.type || 'Call',
+        note: state.formDraft.note || ''
+      });
+      // Also update lastContacted for reps
+      if(eType === 'rep') entry.lastContacted = state.formDraft.date || todayStr();
+    }
+    state.modal = null;
     persist(); render();
     return;
   }
@@ -4323,6 +5134,8 @@ function init(){
     }
   });
   render();
+  startClock();
+  startReminderEngine();
 }
 
 init();
@@ -4432,5 +5245,6 @@ window.addEventListener('appinstalled', function(){
   console.log('[PWA] App installed');
 });
 </script>
+<div id="reminder-root"></div>
 </body>
 </html>
