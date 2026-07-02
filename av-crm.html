@@ -38,6 +38,8 @@
     --emerald-400:#34d399;
     --red-400:#f87171;
     --blue-400:#60a5fa;
+    --rose-400:#fb7185;
+    --indigo-400:#818cf8;
     --overlay:rgba(0,0,0,0.6);
     --btn-primary-hover:#67e8f9;
     --btn-secondary-hover:#e4e4e7;
@@ -219,12 +221,15 @@
   .text-emerald{color:var(--emerald-400);}
   .text-red{color:var(--red-400);}
 
-  .view-header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px;}
+  .view-header{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:20px;
+    position:sticky; top:0; z-index:30; background:var(--bg-0);
+    padding:14px 0; margin-top:-14px; border-bottom:1px solid var(--zinc-800);}
   .view-title{font-size:20px; font-weight:700; letter-spacing:-0.02em; color:var(--text-strong);}
-  .view-subtitle{font-size:14px; color:var(--zinc-500); margin-top:4px;}
+  .view-subtitle{font-size:13px; color:var(--zinc-500); margin-top:2px;}
   @media (max-width:767px){
-    .view-header .view-title{display:none;}
-    .view-header{flex-wrap:wrap; gap:8px;}
+    .view-header{top:63px; gap:8px; padding:10px 0; margin-top:-10px; margin-bottom:14px;}
+    .view-header .view-subtitle{display:none;}
+    .view-title{font-size:17px;}
   }
   .muted-italic{font-size:14px; color:var(--zinc-600); font-style:italic;}
 
@@ -275,6 +280,85 @@
   .task-action{font-size:11px;font-family:ui-monospace,monospace;color:var(--accent-text);flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;}
   @media(max-width:480px){.task-action{display:none;}.task-stage{letter-spacing:0;font-size:9px;}.task-title{font-size:13px;}}
   .dash-section-head{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--zinc-500);font-family:ui-monospace,monospace;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--zinc-800);display:flex;align-items:center;justify-content:space-between;}
+
+  /* ============ FINANCE MODULE ============ */
+  .fin-hero{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:28px 4px 24px;}
+  .fin-hero-label{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--zinc-500);}
+  .fin-hero-value{font-size:46px;font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--text-strong);font-variant-numeric:tabular-nums;}
+  .fin-hero-value .fin-rupee{font-size:0.55em;font-weight:600;color:var(--zinc-500);margin-right:2px;}
+  .fin-hero-sub{font-size:13px;color:var(--zinc-500);margin-top:6px;display:flex;align-items:center;gap:6px;}
+  .fin-hero-sub.up{color:var(--emerald-400);}
+  .fin-hero-sub.down{color:var(--rose-400);}
+
+  .fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  @media(min-width:768px){.fin-grid{grid-template-columns:repeat(4,1fr);gap:14px;}}
+
+  .fin-card{position:relative;border-radius:16px;padding:18px;overflow:hidden;border:1px solid var(--zinc-800);
+    background:var(--zinc-900);cursor:pointer;transition:transform .15s ease,border-color .15s ease;}
+  .fin-card:active{transform:scale(0.98);}
+  .fin-card::before{content:'';position:absolute;inset:0;opacity:0.07;pointer-events:none;}
+  .fin-card.fin-income::before{background:radial-gradient(circle at 20% 20%, var(--emerald-400), transparent 70%);}
+  .fin-card.fin-expense::before{background:radial-gradient(circle at 20% 20%, var(--rose-400), transparent 70%);}
+  .fin-card.fin-outstanding::before{background:radial-gradient(circle at 20% 20%, var(--amber-400), transparent 70%);}
+  .fin-card.fin-fixed::before{background:radial-gradient(circle at 20% 20%, var(--indigo-400), transparent 70%);}
+  .fin-card-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .fin-income .fin-card-icon{background:rgba(52,211,153,0.14);color:var(--emerald-400);}
+  .fin-expense .fin-card-icon{background:rgba(251,113,133,0.14);color:var(--rose-400);}
+  .fin-outstanding .fin-card-icon{background:rgba(251,191,36,0.14);color:var(--amber-400);}
+  .fin-fixed .fin-card-icon{background:rgba(129,140,248,0.14);color:var(--indigo-400);}
+  .fin-card-label{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--zinc-500);margin-bottom:4px;}
+  .fin-card-value{font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--text-strong);font-variant-numeric:tabular-nums;}
+  .fin-card-sub{font-size:11px;color:var(--zinc-600);margin-top:3px;font-family:ui-monospace,monospace;}
+
+  /* Signature element: money-flow bar */
+  .fin-flow-wrap{margin-bottom:24px;}
+  .fin-flow-bar{display:flex;height:14px;border-radius:8px;overflow:hidden;background:var(--zinc-800);}
+  .fin-flow-seg{height:100%;transition:width .4s ease;}
+  .fin-flow-seg.income{background:var(--emerald-400);}
+  .fin-flow-seg.expense{background:var(--rose-400);}
+  .fin-flow-seg.outstanding{background:var(--amber-400);}
+  .fin-flow-legend{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap;}
+  .fin-flow-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--zinc-400);font-family:ui-monospace,monospace;}
+  .fin-flow-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .fin-flow-dot.income{background:var(--emerald-400);}
+  .fin-flow-dot.expense{background:var(--rose-400);}
+  .fin-flow-dot.outstanding{background:var(--amber-400);}
+
+  .fin-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:12px;background:var(--zinc-900);
+    border:1px solid var(--zinc-800);margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+  .fin-row:hover{border-color:var(--zinc-700);}
+  .fin-row-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .fin-row-icon.income{background:rgba(52,211,153,0.12);color:var(--emerald-400);}
+  .fin-row-icon.expense{background:rgba(251,113,133,0.12);color:var(--rose-400);}
+  .fin-row-info{flex:1;min-width:0;}
+  .fin-row-title{font-size:13.5px;font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fin-row-sub{font-size:11.5px;color:var(--zinc-500);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .fin-row-amt{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .fin-row-amt.income{color:var(--emerald-400);}
+  .fin-row-amt.expense{color:var(--rose-400);}
+
+  .fin-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;}
+  .fin-tab{font-family:ui-monospace,monospace;font-size:12px;padding:8px 16px;border-radius:10px;border:1px solid var(--zinc-800);
+    background:var(--zinc-900);color:var(--zinc-400);white-space:nowrap;cursor:pointer;transition:all .15s;}
+  .fin-tab.active{background:var(--accent-text);color:var(--bg-0);border-color:var(--accent-text);font-weight:700;}
+
+  /* ============ SETTINGS ============ */
+  .settings-section{background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:14px;padding:18px;margin-bottom:16px;}
+  .settings-section-title{font-size:14px;font-weight:700;color:var(--text-strong);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+  .settings-section-sub{font-size:12px;color:var(--zinc-500);margin-bottom:14px;}
+  .settings-fixed-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--zinc-800);border-radius:9px;margin-bottom:8px;}
+  .settings-fixed-row input{flex:1;background:transparent;border:none;color:var(--text-strong);font-size:13px;font-family:ui-monospace,monospace;}
+  .settings-fixed-row input:focus{outline:none;}
+  .settings-danger{border-color:rgba(251,113,133,0.3);}
+  .settings-save-bar{background:var(--bg-0);padding:16px 0 4px;border-top:1px solid var(--zinc-800);margin-top:8px;display:flex;justify-content:flex-end;gap:8px;}
+  .fin-btn-in{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;
+    background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:var(--emerald-400);
+    font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .fin-btn-in:hover{background:rgba(52,211,153,0.25);}
+  .fin-btn-out{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;
+    background:rgba(251,113,133,0.15);border:1px solid rgba(251,113,133,0.3);color:var(--rose-400);
+    font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .fin-btn-out:hover{background:rgba(251,113,133,0.25);}
   .dash-empty{text-align:center;padding:28px 16px;color:var(--zinc-600);font-size:13px;background:var(--zinc-900);border:1px dashed var(--zinc-800);border-radius:10px;}
   .network-overdue-strip{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--red-400);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .stat-top{display:flex; align-items:center; justify-content:space-between;}
@@ -329,7 +413,7 @@
   .badge-type{display:inline-block; font-size:12px; font-family:ui-monospace,monospace; color:var(--accent-text);
     border:1px solid var(--cyan-900); border-radius:4px; padding:2px 8px; align-self:flex-start;}
   .contact-list{display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--zinc-400); margin-top:4px;}
-  .contact-row{display:flex; align-items:center; gap:8px;}
+  .contact-row{display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden;}
   .contact-link{display:flex; align-items:center; gap:8px; color:var(--zinc-400); text-decoration:none;}
   .contact-link:hover{color:var(--accent-text);}
   .lead-badge{display:inline-flex; align-items:center; gap:4px; font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
@@ -632,9 +716,7 @@
       <div class="sidebar-footer">
         <div id="sidebar-stats"></div>
         <div class="data-actions">
-          <button class="data-btn" data-action="export-data">Export data</button>
-          <button class="data-btn" data-action="import-data">Import data</button>
-          <button class="data-btn" data-action="clear-all-data" title="Delete all data and start fresh">Clear all</button>
+          <button class="data-btn" data-action="open-settings" style="width:100%;">⚙️ Settings</button>
           <input type="file" id="import-file-input" accept="application/json" style="display:none" />
         </div>
       </div>
@@ -669,10 +751,8 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <button class="mobile-menu-item" data-action="export-data">📤 Export data (backup)</button>
-      <button class="mobile-menu-item" data-action="import-data">📥 Import data (restore)</button>
+      <button class="mobile-menu-item" data-action="open-settings">⚙️ Settings</button>
       <button class="mobile-menu-item" data-action="toggle-theme">🌓 Toggle day / night</button>
-      <button class="mobile-menu-item" data-action="clear-all-data" style="color:var(--accent-text);">🗑 Clear all data (start fresh)</button>
       <div class="mobile-menu-stats" id="mobile-menu-stats"></div>
     </div>
   </div>
@@ -687,10 +767,9 @@ const NAV = [
   { id:'network',      label:'Network',       icon:'star',       num:'03' },
   { id:'clients',      label:'Clients',       icon:'users',      num:'04' },
   { id:'jobs',         label:'Jobs',          icon:'briefcase',  num:'05' },
-  { id:'catalog',      label:'Catalog',       icon:'package',    num:'06' },
+  { id:'finance',      label:'Finance',       icon:'wallet',     num:'06' },
   { id:'supply',       label:'Supply Chain',  icon:'truck',      num:'07' },
   { id:'calendar',     label:'Calendar',      icon:'calendar',   num:'08' },
-  { id:'comms',        label:'Activity',      icon:'message',    num:'09' },
 ];
 
 const JOB_STATUSES = ['Lead','Site Visit','Quoted','Booked','Work in Progress','Completed','Paid'];
@@ -862,7 +941,7 @@ const CLIENT_TYPES = [
   'Other',
 ];
 
-const CONTACT_CATEGORIES = ['Electrician','Carpenter','POP / False Ceiling','Painter','Civil / Labour','Plumber','Architect','Interior Designer','Client','Other'];
+const CONTACT_CATEGORIES = ['Electrician','Carpenter','POP / False Ceiling','Painter','Civil / Labour','Plumber','Architect','Interior Designer','Other'];
 const CONTACT_CATEGORY_ICONS = {
   Electrician:'bolt', Carpenter:'hammer', 'POP / False Ceiling':'layers', Painter:'paintroller',
   'Civil / Labour':'hardhat', Plumber:'droplet', Architect:'ruler', 'Interior Designer':'bulb',
@@ -1004,6 +1083,11 @@ const ICONS = {
   speaker: '<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r="1"/><path d="M12 6h.01"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
   'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  wallet: '<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+  coins: '<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
+  'trending-up': '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  'trending-down': '<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>',
+  receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/>',
 };
 function icon(name, size){
   size = size || 16;
@@ -1053,7 +1137,10 @@ function waLink(phone, label){
 }
 function emailLink(email){
   if(!email) return '—';
-  return '<a href="mailto:' + esc(email) + '" style="color:var(--accent-text);text-decoration:none;">' + icon('mail',12) + ' ' + esc(email) + '</a>';
+  return '<a href="mailto:' + esc(email) + '" style="color:var(--accent-text);text-decoration:none;display:inline-flex;align-items:center;gap:4px;max-width:100%;overflow:hidden;">' +
+    icon('mail',12) +
+    '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(email) + '</span>' +
+  '</a>';
 }
 
 function nowTimeStr(){
@@ -1082,10 +1169,11 @@ function startClock(){
     const el = document.getElementById('live-clock');
     if(!el) return;
     const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
+    let h = now.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
     const m = String(now.getMinutes()).padStart(2,'0');
-    const s = String(now.getSeconds()).padStart(2,'0');
-    el.textContent = h + ':' + m + ':' + s;
+    el.textContent = h + ':' + m + ' ' + ampm;
   }
   tick();
   setInterval(tick, 1000);
@@ -1197,23 +1285,7 @@ const SEED_SUPPLY = {
       lastContacted:'2026-06-02',
       notes:'Recently moved from another distributor. Still building the relationship. Good product knowledge.' },
   ],
-  serviceCentres: [
-    { id:'sc1', name:'Harman Authorized Service — Pune', city:'Pune', address:'Viman Nagar, Pune 411014',
-      phone:'+91 20 4567 1234', email:'service.pune@harman.example',
-      dealerId:'d1', brands:'JBL, Crown, AMX',
-      warrantyProcess:'Carry-in or doorstep pickup for products under warranty. Online job card at harmanservice.in. Photo proof of damage required for claims.',
-      turnaround:'3–7 days', notes:'For in-ceiling speakers, they visit site. For amps/processors, carry-in only.' },
-    { id:'sc2', name:'Epson Express Service', city:'Pune', address:'Shivajinagar, Pune 411005',
-      phone:'+91 20 2567 8800', email:'service@epsonpune.example',
-      dealerId:'d2', brands:'Epson',
-      warrantyProcess:'Call helpline 1800-XXX-XXXX to register complaint. Engineer visits within 48 hours for on-site warranty units.',
-      turnaround:'1–3 days', notes:'On-site warranty for all LS series laser projectors. Bulb lamps not covered.' },
-    { id:'sc3', name:'Digital AV Care', city:'Pimpri', address:'Bhosari MIDC, Pimpri 411026',
-      phone:'+91 98761 00234', email:'service@digitalavcare.example',
-      dealerId:'', brands:'Sonos, Denon, Marantz, Yamaha',
-      warrantyProcess:'Carry-in only. Job card issued. Customer notified by SMS on completion.',
-      turnaround:'1–2 weeks', notes:'Independent local centre. Not brand-authorised but reliable for out-of-warranty repairs.' },
-  ]
+  serviceCentres: []
 };
 
 /* ================================ seed data ================================ */
@@ -1296,7 +1368,7 @@ let state = {
   clients: [], contacts: [], jobs: [], products: [], services: [], comms: [],
   supply: { dealers:[], reps:[], serviceCentres:[] },
   supplyTab: 'dealers',
-  supplyView: 'list',   // 'list' | 'detail' | 'add' | 'edit' | 'pricelist'
+  supplyView: 'list',   // 'list' | 'detail' | 'add' | 'edit'
   selectedSupplyId: null,
   selectedSupplyType: null, // 'dealer' | 'rep' | 'sc'
   modal: null,        // { type, data }
@@ -1326,6 +1398,20 @@ let state = {
   contactFilter: { category:'all', search:'', leadOnly:false },
   calMonth: (function(){ const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() }; })(),
   calSelectedDate: null,
+  finPeriod: 'month', // 'month' | 'lastmonth' | 'year' | 'all'
+  finTx: [], // { id, type:'in'|'out', amount, date, who, what, how, note }
+  settings: {
+    companyName: 'Alekh Niranjan',
+    ownerName: '',
+    phone: '',
+    email: '',
+    address: '',
+    gstNumber: '',
+    defaultPaymentMode: 'UPI',
+    fixedCosts: [] // { id, label, amount }
+  },
+  lastBackupAt: null,
+  csvImport: null, // { rows: [...], errors: [...] } — set when a CSV is parsed and awaiting confirm // ISO timestamp of last backup (manual or auto)
 };
 
 function applyTheme(){
@@ -1356,6 +1442,9 @@ function persist(){
       comms: state.comms,
       network: state.network,
       supply: state.supply,
+      finTx: state.finTx,
+      settings: state.settings,
+      lastBackupAt: state.lastBackupAt,
       theme: state.theme,
       savedAt: new Date().toISOString()
     };
@@ -1383,6 +1472,12 @@ function loadData(){
     state.comms    = saved.comms    || [];
     state.network= saved.network || saved.prospects || [];
     state.supply = saved.supply  || { dealers:[], reps:[], serviceCentres:[] };
+    state.finTx  = saved.finTx  || [];
+    state.settings = Object.assign({
+      companyName:'Alekh Niranjan', ownerName:'', phone:'', email:'', address:'', gstNumber:'',
+      defaultPaymentMode:'UPI', fixedCosts:[]
+    }, saved.settings || {});
+    state.lastBackupAt = saved.lastBackupAt || null;
     // Migration — give any job without a checklist the default steps
     state.jobs.forEach(function(j){
       if(!j.steps || !j.steps.length){ j.steps = defaultJobSteps(); migrateStepsFromStatus(j); }
@@ -1417,7 +1512,7 @@ function resetToSeedData(){
 function clearAllData(){
   state.clients = []; state.contacts = []; state.jobs = [];
   state.products = []; state.services = []; state.comms = [];
-  state.network = [];
+  state.network = []; state.finTx = [];
   state.supply = { dealers:[], reps:[], serviceCentres:[] };
   persist();
   render();
@@ -1429,11 +1524,10 @@ function showClearConfirmModal(){
     clients: state.clients,
     contacts: state.contacts,
     jobs: state.jobs,
-    products: state.products,
-    services: state.services,
     comms: state.comms,
     network: state.network,
     supply: state.supply,
+    finTx: state.finTx,
     exportedAt: new Date().toISOString(),
     note: 'Auto-backup created before Clear All'
   };
@@ -1456,16 +1550,15 @@ function showClearConfirmModal(){
   // Step 2 — populate and show the styled confirmation modal
   var counts = document.getElementById('clear-modal-counts');
   if(counts){
-    var supplyTotal = state.supply.dealers.length + state.supply.reps.length + state.supply.serviceCentres.length;
+    var supplyTotal = state.supply.dealers.length + state.supply.reps.length;
     counts.innerHTML = [
       ['Clients',   state.clients.length],
       ['Contacts',  state.contacts.length],
-      ['Jobs',      state.jobs.length],
-      ['Products',  state.products.length],
-      ['Services',  state.services.length],
-      ['Activities',state.comms.length],
       ['Network',   state.network.length],
-      ['Supply Chain', supplyTotal],
+      ['Jobs',      state.jobs.length],
+      ['Finance entries', (state.finTx||[]).length],
+      ['Activities',state.comms.length],
+      ['Dealers + Reps', supplyTotal],
     ].map(function(r){
       return '<div class="clear-modal-count"><strong>' + r[1] + '</strong>' + r[0] + '</div>';
     }).join('');
@@ -1473,16 +1566,185 @@ function showClearConfirmModal(){
   document.getElementById('clear-modal').style.display = 'flex';
 }
 
-function exportData(){
+// ── Contact CSV Bulk Import ──────────────────────────────────────────────
+const CSV_TEMPLATE_HEADERS = ['Salutation','Full Name','Trade / Category','Company','Phone','Email','Area','Notes'];
+
+function downloadContactCsvTemplate(){
+  const sampleRows = [
+    ['Ar.','Priya Deshmukh','Architect','Deshmukh Design Studio','+91 98225 67890','priya@example.com','Baner, Pune','Refers home theatre projects'],
+    ['Er.','Vikram Joshi','Interior Designer','Joshi & Associates','+91 98101 44321','vjoshi@example.com','Hinjawadi, Pune','']
+  ];
+  let csv = CSV_TEMPLATE_HEADERS.join(',') + '\n';
+  sampleRows.forEach(function(r){
+    csv += r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Contacts_Import_Template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+// Simple CSV line parser — handles quoted fields with commas inside
+function parseCsvLine(line){
+  const out = [];
+  let cur = '', inQuotes = false;
+  for(let i=0;i<line.length;i++){
+    const c = line[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(line[i+1] === '"'){ cur += '"'; i++; }
+        else inQuotes = false;
+      } else cur += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ out.push(cur); cur = ''; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out.map(function(s){ return s.trim(); });
+}
+
+function parseContactsCsv(text){
+  const lines = text.split(/\r?\n/).filter(function(l){ return l.trim().length > 0; });
+  if(lines.length === 0) return { rows:[], errors:['File is empty.'] };
+
+  const headerLine = parseCsvLine(lines[0]).map(function(h){ return h.trim().toLowerCase(); });
+  // Flexible header matching — find columns by fuzzy name
+  function findCol(names){
+    for(let i=0;i<headerLine.length;i++){
+      for(const n of names){ if(headerLine[i].includes(n)) return i; }
+    }
+    return -1;
+  }
+  const colSalutation = findCol(['salutation']);
+  const colName       = findCol(['full name','name']);
+  const colCategory   = findCol(['trade','category']);
+  const colCompany    = findCol(['company','firm']);
+  const colPhone      = findCol(['phone','mobile','contact no']);
+  const colEmail      = findCol(['email']);
+  const colArea       = findCol(['area','location','city']);
+  const colNotes      = findCol(['notes','note','remarks']);
+
+  if(colName === -1){
+    return { rows:[], errors:['Could not find a "Name" column. Please use the template.'] };
+  }
+
+  const rows = [];
+  const errors = [];
+  for(let i=1;i<lines.length;i++){
+    const cells = parseCsvLine(lines[i]);
+    const name = (cells[colName]||'').trim();
+    if(!name){ errors.push('Row ' + (i+1) + ': missing name — skipped.'); continue; }
+    let category = (colCategory>=0 ? cells[colCategory] : '') || 'Architect';
+    // Match against known categories loosely
+    const matched = CONTACT_CATEGORIES.find(function(c){ return c.toLowerCase() === category.toLowerCase(); });
+    category = matched || (CONTACT_CATEGORIES.includes('Architect') ? 'Architect' : CONTACT_CATEGORIES[0]);
+    rows.push({
+      salutation: colSalutation>=0 ? (cells[colSalutation]||'') : '',
+      name: name,
+      category: category,
+      company: colCompany>=0 ? (cells[colCompany]||'') : '',
+      phone: colPhone>=0 ? (cells[colPhone]||'') : '',
+      email: colEmail>=0 ? (cells[colEmail]||'') : '',
+      area: colArea>=0 ? (cells[colArea]||'') : '',
+      notes: colNotes>=0 ? (cells[colNotes]||'') : '',
+      dob: '', leadSource: false
+    });
+  }
+  return { rows: rows, errors: errors };
+}
+
+function confirmCsvImport(){
+  const imp = state.csvImport;
+  if(!imp || !imp.rows.length) return;
+  let added = 0, skipped = 0;
+  imp.rows.forEach(function(r){
+    // Skip if a contact with same name + phone already exists (avoid duplicates)
+    const dup = state.contacts.some(function(c){
+      return c.name.toLowerCase() === r.name.toLowerCase() &&
+             (r.phone ? c.phone === r.phone : true);
+    });
+    if(dup){ skipped++; return; }
+    state.contacts.push(Object.assign({}, r, { id: uid() }));
+    added++;
+  });
+  state.csvImport = null;
+  state.modal = null;
+  persist();
+  render();
+  showBackupToast('Imported ' + added + ' contact' + (added!==1?'s':'') + (skipped ? ' — ' + skipped + ' duplicate' + (skipped!==1?'s':'') + ' skipped' : '') + '.');
+}
+
+function csvImportModalHtml(){
+  // Step 1 — no file chosen yet
+  if(!state.csvImport){
+    return '' +
+      '<div style="text-align:center;padding:8px 0 20px;">' +
+        '<div style="font-size:40px;margin-bottom:10px;">📇</div>' +
+        '<div style="font-size:14px;color:var(--zinc-400);line-height:1.6;max-width:340px;margin:0 auto;">' +
+          'Upload architect / contact details from a CSV file. Download the template first if you need the right column format.' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px;">' +
+        '<button type="button" class="btn-secondary" data-action="download-csv-template" style="justify-content:center;">' +
+          icon('receipt',15) + ' Download CSV Template' +
+        '</button>' +
+        '<label class="btn-primary" style="justify-content:center;cursor:pointer;display:flex;align-items:center;gap:8px;">' +
+          icon('truck',15) + ' Choose CSV File' +
+          '<input type="file" accept=".csv,text/csv" id="csv-import-input" style="display:none;"/>' +
+        '</label>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--zinc-600);margin-top:16px;line-height:1.6;">' +
+        'Columns supported: Salutation, Full Name (required), Trade/Category, Company, Phone, Email, Area, Notes. ' +
+        'Column order doesn\'t matter as long as headers are named similarly.' +
+      '</div>' +
+      '<div class="form-actions">' +
+        '<button type="button" class="btn-secondary" data-action="close-modal">Cancel</button>' +
+      '</div>';
+  }
+
+  // Step 2 — preview and confirm
+  const imp = state.csvImport;
+  const previewRows = imp.rows.slice(0, 50);
+  return '' +
+    '<div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;">' +
+      '<div style="font-size:14px;font-weight:600;color:var(--emerald-400);">✓ ' + imp.rows.length + ' contact' + (imp.rows.length!==1?'s':'') + ' ready to import</div>' +
+      (imp.errors.length ? '<div style="font-size:12px;color:var(--amber-400);margin-top:4px;">' + imp.errors.length + ' row' + (imp.errors.length!==1?'s':'') + ' skipped (missing name)</div>' : '') +
+    '</div>' +
+    '<div style="max-height:320px;overflow-y:auto;border:1px solid var(--zinc-800);border-radius:10px;">' +
+      previewRows.map(function(r, i){
+        return '<div style="padding:10px 14px;' + (i>0?'border-top:1px solid var(--zinc-800);':'') + '">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text-strong);">' + esc((r.salutation?r.salutation+' ':'')+r.name) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--zinc-500);margin-top:2px;">' +
+            esc(r.category) + (r.company?' · '+esc(r.company):'') + (r.phone?' · '+esc(r.phone):'') +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      (imp.rows.length > 50 ? '<div style="padding:10px 14px;text-align:center;font-size:12px;color:var(--zinc-600);">+ ' + (imp.rows.length-50) + ' more not shown</div>' : '') +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--zinc-600);margin-top:10px;">Duplicate names with matching phone numbers will be automatically skipped.</div>' +
+    '<div class="form-actions">' +
+      '<button type="button" class="btn-secondary" data-action="cancel-csv-import">Cancel</button>' +
+      '<button type="button" class="btn-primary" data-action="confirm-csv-import">Import ' + imp.rows.length + ' Contact' + (imp.rows.length!==1?'s':'') + '</button>' +
+    '</div>';
+}
+
+function exportData(isAuto){
   const payload = {
     clients: state.clients,
     contacts: state.contacts,
     jobs: state.jobs,
-    products: state.products,
-    services: state.services,
     comms: state.comms,
     network: state.network,
     supply: state.supply,
+    finTx: state.finTx,
+    settings: state.settings,
     exportedAt: new Date().toISOString()
   };
   const exportNow = new Date();
@@ -1495,11 +1757,40 @@ function exportData(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'AV-CRM_Export_' + exportTs + '.json';
+  a.download = (isAuto ? 'AV-CRM_AutoBackup_' : 'AV-CRM_Export_') + exportTs + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  state.lastBackupAt = new Date().toISOString();
+  persist();
+}
+
+// ── Auto-backup engine — checks once on load, then every hour, if 24h have passed ──
+function showBackupToast(msg){
+  var root = document.getElementById('reminder-root');
+  if(!root) return;
+  var t = document.createElement('div');
+  t.className = 'reminder-strip';
+  t.style.background = 'var(--emerald-400)';
+  t.style.color = '#052e16';
+  t.innerHTML = '<span>💾 ' + msg + '</span><button onclick="this.closest(\'.reminder-strip\').remove();">Dismiss</button>';
+  root.appendChild(t);
+  setTimeout(function(){ if(t && t.parentNode) t.remove(); }, 8000);
+}
+function checkAutoBackup(){
+  var now = new Date();
+  var last = state.lastBackupAt ? new Date(state.lastBackupAt) : null;
+  var hoursSince = last ? (now - last) / 3600000 : Infinity;
+  if(hoursSince >= 24){
+    exportData(true);
+    showBackupToast('Auto-backup saved to your Downloads folder. Move it to Google Drive when you get a chance.');
+  }
+}
+function startAutoBackupEngine(){
+  // Check shortly after load (let the UI settle first), then every hour
+  setTimeout(checkAutoBackup, 3000);
+  setInterval(checkAutoBackup, 3600000);
 }
 
 function importDataFromFile(file){
@@ -1508,7 +1799,7 @@ function importDataFromFile(file){
     try{
       const data = JSON.parse(reader.result);
       // Validate shape — each field must be an array if present, to avoid corrupting state
-      const arrayFields = ['clients','contacts','jobs','products','services','comms','equipment','network'];
+      const arrayFields = ['clients','contacts','jobs','products','services','comms','equipment','network','finTx'];
       for(var i=0;i<arrayFields.length;i++){
         var f = arrayFields[i];
         if(data[f] !== undefined && !Array.isArray(data[f])){
@@ -1528,6 +1819,8 @@ function importDataFromFile(file){
       if(data.services) state.services = data.services;
       if(data.comms) state.comms = data.comms;
       if(data.network) state.network = data.network;
+      if(data.finTx) state.finTx = data.finTx;
+      if(data.settings) state.settings = Object.assign({}, state.settings, data.settings);
       if(data.supply) state.supply = Object.assign({ dealers:[], reps:[], serviceCentres:[] }, data.supply);
       state.modal = null;
       state.confirmDelete = null;
@@ -1554,9 +1847,60 @@ function deleteClient(id){
 }
 
 function saveContact(data){
-  if(data.id){ state.contacts = state.contacts.map(c => c.id === data.id ? Object.assign({}, data) : c); }
-  else { state.contacts.push(Object.assign({}, data, { id: uid() })); }
-  state.modal = null; render();
+  var isNew = !data.id;
+  var alsoNetwork = isNew && data._alsoNetwork;
+  var alsoClient  = isNew && data._alsoClient;
+
+  // Strip internal flags before storing
+  var clean = Object.assign({}, data);
+  delete clean._alsoNetwork;
+  delete clean._alsoClient;
+
+  var savedId;
+  if(clean.id){
+    state.contacts = state.contacts.map(function(c){ return c.id === clean.id ? Object.assign({}, clean) : c; });
+    savedId = clean.id;
+  } else {
+    savedId = uid();
+    state.contacts.push(Object.assign({}, clean, { id: savedId }));
+  }
+
+  // Auto-add to Network
+  if(alsoNetwork && !inNetwork(savedId)){
+    state.network.push({
+      id: uid(),
+      contactId: savedId,
+      stage: 'First Contact',
+      heat: '🌤 Warm',
+      speciality: '',
+      budgetRange: '',
+      nextFollowUp: '',
+      nextFollowUpTime: '',
+      notes: '',
+      meetings: []
+    });
+  }
+
+  // Auto-add as Client
+  if(alsoClient && !inClient(savedId)){
+    state.clients.push({
+      id: uid(),
+      contactId: savedId,
+      name: (clean.salutation ? clean.salutation + ' ' : '') + clean.name,
+      company: clean.company || '',
+      type: 'Residential — Villa / Bungalow',
+      phone: clean.phone || '',
+      email: clean.email || '',
+      address: clean.area || '',
+      referredByNetworkId: '',
+      tags: [],
+      notes: clean.notes || '',
+      meetings: []
+    });
+  }
+
+  state.modal = null;
+  persist(); render();
 }
 function deleteContact(id){
   state.contacts = state.contacts.filter(c => c.id !== id);
@@ -2231,7 +2575,7 @@ function contactCardHtml(c){
     (c.company ? '<div class="inv-card-ref" style="word-break:break-word;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(c.company) + '</div>' : '') +
     '<div class="contact-list">' +
       (c.phone ? '<div class="contact-row">' + waLink(c.phone) + '</div>' : '') +
-      (c.email ? '<div class="contact-row" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + emailLink(c.email) + '</div>' : '') +
+      (c.email ? '<div class="contact-row" style="min-width:0;overflow:hidden;">' + emailLink(c.email) + '</div>' : '') +
       (c.area ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.area) + '</div>' : '') +
     '</div>' +
     (c.notes ? '<div class="inv-card-notes" style="word-break:break-word;">' + esc(c.notes) + '</div>' : '') +
@@ -2302,7 +2646,10 @@ function renderContacts(){
   return '' +
   '<div class="view-header">' +
     '<div><h2 class="view-title">Contacts</h2><p class="view-subtitle">' + all.length + ' trade contact' + (all.length !== 1 ? 's' : '') + ' \u2014 electricians, carpenters, civil work, architects &amp; more</p></div>' +
-    '<button class="btn-primary" data-action="open-modal" data-type="contact" data-id="">' + icon('plus',16) + 'Add Contact</button>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="btn-secondary" data-action="open-csv-import">' + icon('truck',15) + ' Bulk Import</button>' +
+      '<button class="btn-primary" data-action="open-modal" data-type="contact" data-id="">' + icon('plus',16) + 'Add Contact</button>' +
+    '</div>' +
   '</div>' +
   statChips +
   '<div class="search-box">' +
@@ -2631,91 +2978,6 @@ function exportExcel(kind){
   XLSX.writeFile(wb, 'AV-CRM_' + meta.label + '_' + ts + '.xlsx');
 }
 
-function importExcel(kind, file){
-  const meta = INVENTORY_META[kind];
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type:'array' });
-      // Read first sheet (the data sheet)
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'' });
-
-      if(rows.length < 2){
-        alert('The Excel file appears empty. Make sure you have data rows below the header.');
-        return;
-      }
-
-      // Validate header
-      const header = rows[0].map(function(h){ return String(h).trim(); });
-      const expectedCols = kind === 'product' ? PRODUCT_EXCEL_COLS : SERVICE_EXCEL_COLS;
-      const missing = expectedCols.filter(function(col){ return header.indexOf(col) === -1; });
-      if(missing.length > 0){
-        alert('Column(s) not found: ' + missing.join(', ') + '\n\nMake sure you are importing the correct template and have not renamed any column headers.');
-        return;
-      }
-
-      const nameIdx = header.indexOf(expectedCols[0]);
-      const catIdx  = header.indexOf(expectedCols[1]);
-
-      var imported = 0, skipped = 0;
-      rows.slice(1).forEach(function(row){
-        const name = String(row[nameIdx] || '').trim();
-        if(!name){ skipped++; return; }
-        const cat = meta.categories.indexOf(String(row[catIdx]||'').trim()) !== -1
-                    ? String(row[catIdx]).trim() : meta.categories[0];
-
-        if(kind === 'product'){
-          const brandIdx  = header.indexOf('Brand');
-          const modelIdx  = header.indexOf('Model No.');
-          const unitIdx   = header.indexOf('Unit');
-          const buyIdx    = header.indexOf('Purchase Price (₹)');
-          const sellIdx   = header.indexOf('Selling Price (₹)');
-          const gstIdx    = header.indexOf('GST %');
-          const specIdx   = header.indexOf('Key Specs');
-          const suppIdx   = header.indexOf('Supplier');
-          const noteIdx   = header.indexOf('Notes');
-          state[meta.stateKey].push({
-            id: uid(), name, category: cat,
-            brand:    String(row[brandIdx]  || '').trim(),
-            modelNo:  String(row[modelIdx]  || '').trim(),
-            unit:     String(row[unitIdx]   || 'Nos').trim(),
-            purchasePrice: String(row[buyIdx]  || '').trim(),
-            sellingPrice:  String(row[sellIdx] || '').trim(),
-            gst:      String(row[gstIdx]    || '18%').trim(),
-            keySpecs: String(row[specIdx]   || '').trim(),
-            supplier: String(row[suppIdx]   || '').trim(),
-            notes:    String(row[noteIdx]   || '').trim(),
-          });
-        } else {
-          const unitIdx  = header.indexOf('Unit');
-          const sellIdx  = header.indexOf('Selling Price (₹)');
-          const gstIdx   = header.indexOf('GST %');
-          const specIdx  = header.indexOf('Scope / Included');
-          const noteIdx  = header.indexOf('Notes');
-          state[meta.stateKey].push({
-            id: uid(), name, category: cat,
-            unit:         String(row[unitIdx]  || 'Lump Sum').trim(),
-            sellingPrice: String(row[sellIdx]  || '').trim(),
-            gst:          String(row[gstIdx]   || '18%').trim(),
-            keySpecs:     String(row[specIdx]  || '').trim(),
-            notes:        String(row[noteIdx]  || '').trim(),
-          });
-        }
-        imported++;
-      });
-
-      persist();
-      render();
-      alert('Imported ' + imported + ' ' + meta.countNoun + (imported !== 1 ? 's' : '') +
-        (skipped ? ' (' + skipped + ' blank rows skipped).' : '.'));
-    }catch(err){
-      alert('Could not read the Excel file. Make sure it is a valid .xlsx file exported from this app.\n\nError: ' + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
 
 function renderInventory(kind){
   const meta = INVENTORY_META[kind];
@@ -2737,6 +2999,217 @@ function renderInventory(kind){
   '<div id="inv-grid-wrap-' + kind + '">' + invGridHtml(kind) + '</div>';
 }
 
+
+function renderFinance(){
+  // Period filter
+  var now = new Date();
+  var thisY = now.getFullYear(), thisM = now.getMonth();
+
+  function inPeriod(tx){
+    var d = new Date(tx.date);
+    if(state.finPeriod === 'month')     return d.getFullYear()===thisY && d.getMonth()===thisM;
+    if(state.finPeriod === 'lastmonth'){
+      var ly = thisM===0 ? thisY-1 : thisY, lm = thisM===0 ? 11 : thisM-1;
+      return d.getFullYear()===ly && d.getMonth()===lm;
+    }
+    if(state.finPeriod === 'year') return d.getFullYear()===thisY;
+    return true;
+  }
+
+  var periodLabels = { month:'This Month', lastmonth:'Last Month', year:'This Year', all:'All Time' };
+  var filtered = (state.finTx||[]).filter(inPeriod)
+    .slice().sort(function(a,b){ return (b.date+b.id).localeCompare(a.date+a.id); });
+
+  var totalIn  = filtered.filter(function(t){ return t.type==='in';  }).reduce(function(s,t){ return s+Number(t.amount||0); },0);
+  var totalOut = filtered.filter(function(t){ return t.type==='out'; }).reduce(function(s,t){ return s+Number(t.amount||0); },0);
+  var net = totalIn - totalOut;
+  var flowTotal = totalIn + totalOut || 1;
+  var inPct  = Math.round(totalIn/flowTotal*100);
+  var outPct = 100 - inPct;
+  var profitPct = totalIn > 0 ? Math.round(net/totalIn*100) : 0;
+  var periodName = periodLabels[state.finPeriod] || 'All Time';
+
+  function txRow(tx){
+    var isIn = tx.type === 'in';
+    var isConfirm = state.confirmDelete && state.confirmDelete.type === 'fin-tx' && state.confirmDelete.id === tx.id;
+    return '<div class="fin-row">' +
+      '<span class="fin-row-icon ' + (isIn?'income':'expense') + '">' + icon(isIn?'trending-up':'trending-down', 15) + '</span>' +
+      '<div class="fin-row-info">' +
+        '<div class="fin-row-title">' + esc(tx.what||'—') + '</div>' +
+        '<div class="fin-row-sub">' + esc(tx.who||'—') + ' · ' + fmtDate(tx.date) + (tx.how ? ' · ' + esc(tx.how) : '') + '</div>' +
+        (tx.note ? '<div class="fin-row-sub" style="color:var(--zinc-600);font-style:italic;">' + esc(tx.note) + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">' +
+        '<div class="fin-row-amt ' + (isIn?'income':'expense') + '">' + (isIn?'+':'−') + fmtINR(tx.amount) + '</div>' +
+        (isConfirm
+          ? '<span class="delete-confirm"><button class="confirm-btn" data-action="delete-confirm" data-type="fin-tx" data-id="' + tx.id + '">Confirm</button><button class="cancel-btn" data-action="delete-cancel">Cancel</button></span>'
+          : '<button class="icon-btn danger" style="opacity:0.5;" data-action="delete-request" data-type="fin-tx" data-id="' + tx.id + '">' + icon('trash',12) + '</button>') +
+      '</div>' +
+    '</div>';
+  }
+
+  return '' +
+  '<div class="view-header"><div><h2 class="view-title">Finance</h2>' +
+    '<p class="view-subtitle">' + esc(periodName) + ' — your money in and out</p></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button class="fin-btn-out" data-action="fin-add" data-txtype="out">' + icon('trending-down',14) + ' Money Out</button>' +
+      '<button class="fin-btn-in"  data-action="fin-add" data-txtype="in" >' + icon('trending-up',14)   + ' Money In</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="fin-tabs">' +
+    [['month','This Month'],['lastmonth','Last Month'],['year','This Year'],['all','All Time']].map(function(t){
+      return '<button class="fin-tab' + (state.finPeriod===t[0]?' active':'') + '" data-action="fin-period" data-value="' + t[0] + '">' + t[1] + '</button>';
+    }).join('') +
+  '</div>' +
+
+  '<div class="fin-hero">' +
+    '<span class="fin-hero-label">Net — ' + esc(periodName) + '</span>' +
+    '<span class="fin-hero-value" style="color:' + (net>=0?'var(--emerald-400)':'var(--rose-400)') + ';">' +
+      '<span class="fin-rupee">₹</span>' + Math.abs(net).toLocaleString('en-IN') +
+    '</span>' +
+    (totalIn > 0
+      ? '<span class="fin-hero-sub ' + (net>=0?'up':'down') + '">' +
+          icon(net>=0?'trending-up':'trending-down',14) + ' ' +
+          (net>=0 ? profitPct + '% margin' : 'spending exceeds income') +
+        '</span>'
+      : '<span class="fin-hero-sub">Tap Money In to add your first entry</span>') +
+  '</div>' +
+
+  (totalIn > 0 || totalOut > 0
+    ? '<div class="fin-flow-wrap">' +
+        '<div class="fin-flow-bar">' +
+          '<div class="fin-flow-seg income"  style="width:' + inPct  + '%"></div>' +
+          '<div class="fin-flow-seg expense" style="width:' + outPct + '%"></div>' +
+        '</div>' +
+        '<div class="fin-flow-legend">' +
+          '<span class="fin-flow-legend-item"><span class="fin-flow-dot income"></span>In ' + fmtINR(totalIn) + '</span>' +
+          '<span class="fin-flow-legend-item"><span class="fin-flow-dot expense"></span>Out ' + fmtINR(totalOut) + '</span>' +
+        '</div>' +
+      '</div>'
+    : '') +
+
+  '<div class="fin-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px;">' +
+    '<div class="fin-card fin-income" data-action="fin-add" data-txtype="in">' +
+      '<div class="fin-card-icon">' + icon('trending-up',17) + '</div>' +
+      '<div class="fin-card-label">Total In</div>' +
+      '<div class="fin-card-value">' + fmtINR(totalIn) + '</div>' +
+      '<div class="fin-card-sub">tap to add</div>' +
+    '</div>' +
+    '<div class="fin-card fin-expense" data-action="fin-add" data-txtype="out">' +
+      '<div class="fin-card-icon">' + icon('trending-down',17) + '</div>' +
+      '<div class="fin-card-label">Total Out</div>' +
+      '<div class="fin-card-value">' + fmtINR(totalOut) + '</div>' +
+      '<div class="fin-card-sub">tap to add</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="dash-section-head"><span>Entries — ' + filtered.length + ' record' + (filtered.length!==1?'s':'') + '</span></div>' +
+  (filtered.length === 0
+    ? '<div class="dash-empty" style="text-align:center;padding:40px 16px;">' +
+        '<div style="font-size:36px;margin-bottom:12px;">💰</div>' +
+        '<div style="font-size:15px;font-weight:600;color:var(--zinc-400);margin-bottom:6px;">' +
+          (state.finTx.length===0 ? 'No entries yet' : 'No entries in ' + periodName) +
+        '</div>' +
+        '<div style="font-size:13px;color:var(--zinc-600);">Tap <b>Money In</b> or <b>Money Out</b> above to get started</div>' +
+      '</div>'
+    : '<div style="display:flex;flex-direction:column;gap:8px;">' + filtered.map(txRow).join('') + '</div>');
+}
+
+
+function renderSettings(){
+  const s = state.settings;
+  const fixedTotal = (s.fixedCosts||[]).reduce(function(sum,f){ return sum+Number(f.amount||0); },0);
+
+  const backupStatus = (function(){
+    if(!state.lastBackupAt) return { ok:false, label:'No backup yet — tap Backup Now below' };
+    const hrsSince = (new Date() - new Date(state.lastBackupAt)) / 3600000;
+    if(hrsSince < 1)  return { ok:true,  label:'Backed up just now' };
+    if(hrsSince < 24) return { ok:true,  label:'Last backup ' + Math.floor(hrsSince) + 'h ago' };
+    const days = Math.floor(hrsSince/24);
+    return { ok:false, label:'Last backup ' + days + ' day' + (days!==1?'s':'') + ' ago — overdue' };
+  })();
+
+  function fixedRow(f){
+    return '<div class="settings-fixed-row">' +
+      '<input type="text" value="' + esc(f.label) + '" data-fixed-id="' + f.id + '" data-fixed-field="label" placeholder="e.g. Phone bill"/>' +
+      '<span style="color:var(--zinc-600);">₹</span>' +
+      '<input type="number" value="' + esc(f.amount) + '" data-fixed-id="' + f.id + '" data-fixed-field="amount" style="max-width:90px;" placeholder="0"/>' +
+      '<button class="icon-btn danger" data-action="settings-remove-fixed" data-id="' + f.id + '">' + icon('trash',13) + '</button>' +
+    '</div>';
+  }
+
+  return '' +
+  '<div class="view-header"><div><h2 class="view-title">Settings</h2>' +
+    '<p class="view-subtitle">Business profile, defaults, and your data</p></div>' +
+    '<button class="data-btn" data-action="set-view" data-view="dashboard">← Dashboard</button>' +
+  '</div>' +
+
+  // Business Profile
+  '<div class="settings-section">' +
+    '<div class="settings-section-title">' + icon('idcard',16) + ' Business Profile</div>' +
+    '<div class="settings-section-sub">Shown across the app — used for your own reference</div>' +
+    '<div class="field-row-2">' +
+      fieldInput('Company name','st_companyName',s.companyName) +
+      fieldInput('Owner name','st_ownerName',s.ownerName) +
+    '</div>' +
+    '<div class="field-row-2">' +
+      fieldInput('Phone','st_phone',s.phone) +
+      fieldInput('Email','st_email',s.email,'email') +
+    '</div>' +
+    fieldInput('Address','st_address',s.address) +
+    fieldInput('GST Number (optional)','st_gstNumber',s.gstNumber) +
+  '</div>' +
+
+  // Finance Defaults
+  '<div class="settings-section">' +
+    '<div class="settings-section-title">' + icon('wallet',16) + ' Finance Defaults</div>' +
+    '<div class="settings-section-sub">Speeds up entering Money In / Money Out</div>' +
+    fieldSelect('Default payment mode','st_defaultPaymentMode',FIN_HOW,s.defaultPaymentMode||'UPI') +
+    '<div style="margin-top:14px;">' +
+      '<div style="font-size:11px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.1em;color:var(--zinc-500);margin-bottom:8px;">' +
+        'Fixed Monthly Costs' + (fixedTotal>0 ? ' — ' + fmtINR(fixedTotal) + '/mo' : '') +
+      '</div>' +
+      (s.fixedCosts && s.fixedCosts.length
+        ? s.fixedCosts.map(fixedRow).join('')
+        : '<div style="font-size:12px;color:var(--zinc-600);margin-bottom:8px;">No fixed costs added — phone bill, EMI, Mother Dairy restock etc.</div>') +
+      '<button type="button" class="data-btn" data-action="settings-add-fixed" style="font-size:12px;margin-top:4px;">+ Add Fixed Cost</button>' +
+    '</div>' +
+  '</div>' +
+
+  // Data
+  '<div class="settings-section">' +
+    '<div class="settings-section-title">' + icon('truck',16) + ' Your Data</div>' +
+    '<div class="settings-section-sub">Everything lives on this device only</div>' +
+
+    '<div style="background:var(--zinc-800);border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">' +
+      '<span style="font-size:20px;">' + (backupStatus.ok ? '✅' : '⚠️') + '</span>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--text-strong);">' + backupStatus.label + '</div>' +
+        '<div style="font-size:11px;color:var(--zinc-500);margin-top:1px;">Auto-backup runs every 24h while the app is open — downloads a file to your device</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<button type="button" class="btn-secondary" data-action="export-data">📤 Backup Now</button>' +
+      '<button type="button" class="btn-secondary" data-action="import-data">📥 Import (restore)</button>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--zinc-600);margin-top:10px;line-height:1.5;">' +
+      'Move backup files from Downloads to Google Drive (or WhatsApp them to yourself) every so often so they survive even if this device is lost.' +
+    '</div>' +
+  '</div>' +
+
+  // Danger zone
+  '<div class="settings-section settings-danger">' +
+    '<div class="settings-section-title" style="color:var(--rose-400);">' + icon('trash',16) + ' Danger Zone</div>' +
+    '<div class="settings-section-sub">Downloads a backup automatically before deleting anything</div>' +
+    '<button type="button" class="data-btn" data-action="clear-all-data" style="color:var(--rose-400);border-color:rgba(251,113,133,0.3);">Clear All Data</button>' +
+  '</div>' +
+
+  '<div class="settings-save-bar">' +
+    '<button class="btn-primary" data-action="settings-save">Save Settings</button>' +
+  '</div>';
+}
 
 function renderCalendar(){
   const y = state.calMonth.y, m = state.calMonth.m;
@@ -3410,7 +3883,6 @@ function reliabilityClass(r){
 /* ── Dealer card ── */
 function dealerCardHtml(d){
   const repCount = state.supply.reps.filter(function(r){ return r.dealerId===d.id; }).length;
-  const scCount  = state.supply.serviceCentres.filter(function(s){ return s.dealerId===d.id; }).length;
   const plCount  = (d.priceLists||[]).length;
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'dealer' && state.confirmDelete.id === d.id;
   return '<div class="supply-card" data-action="open-supply" data-type="dealer" data-id="' + d.id + '">' +
@@ -3514,8 +3986,6 @@ function supplyLogHtml(logs, entityType, entityId){
 
 function dealerDetailHtml(d){
   const reps = state.supply.reps.filter(function(r){ return r.dealerId===d.id; });
-  const scs  = state.supply.serviceCentres.filter(function(s){ return s.dealerId===d.id; });
-  const pls  = d.priceLists || [];
   return '' +
   '<div class="view-header">' +
     '<div>' +
@@ -3524,8 +3994,7 @@ function dealerDetailHtml(d){
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
       '<button class="btn-primary" data-action="log-supply-entry" data-type="dealer" data-id="' + d.id + '">+ Log Entry</button>' +
-      '<button class="btn-secondary" data-action="import-pricelist" data-id="' + d.id + '">↑ Price List</button>' +
-      '<button class="btn-secondary" data-action="download-template">↓ Template</button>' +
+
       '<button class="btn-secondary" data-action="edit-supply" data-type="dealer" data-id="' + d.id + '">Edit</button>' +
       '<button class="data-btn" data-action="supply-back">← Dealers</button>' +
     '</div>' +
@@ -3560,79 +4029,11 @@ function dealerDetailHtml(d){
           '<span class="' + reliabilityClass(r.reliability) + '" style="font-size:11px;font-family:ui-monospace,monospace;">' + esc(r.reliability||'') + '</span>' +
         '</div>' +
       '</div>';
-    }).join('') + '</div>' : '') +
-
-  // Service centres
-  (scs.length ? '<div class="section-head"><div class="section-head-title">Service Centres (' + scs.length + ')</div></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">' +
-    scs.map(function(s){
-      return '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:12px 14px;">' +
-        '<div style="font-weight:600;color:var(--text-strong);">' + esc(s.name) + ' <span style="font-size:11px;color:var(--zinc-500);">— ' + esc(s.city) + '</span></div>' +
-        '<div style="font-size:12px;color:var(--zinc-500);margin-top:2px;">' + esc(s.phone||'') + ' · Turnaround: ' + esc(s.turnaround||'—') + '</div>' +
-      '</div>';
-    }).join('') + '</div>' : '') +
-
-  // Price list history
-  '<div class="section-head">' +
-    '<div class="section-head-title">Price List History (' + pls.length + ')</div>' +
-    '<button class="btn-primary" data-action="import-pricelist" data-id="' + d.id + '" style="font-size:12px;padding:7px 14px;">↑ Import Price List</button>' +
-  '</div>' +
-  (pls.length === 0
-    ? '<div class="empty-msg">No price lists imported yet. Use "Import Price List" to bulk-update your Catalog from this dealer\'s Excel.</div>'
-    : pls.slice().sort(function(a,b){ return b.date.localeCompare(a.date); }).map(function(pl){
-        return '<div class="pricelist-entry">' +
-          '<div class="pricelist-date">' + fmtDate(pl.date) + ' · ' + esc(pl.format||'Excel') + '</div>' +
-          '<div class="pricelist-summary">' + esc(pl.summary||'') + '</div>' +
-        '</div>';
-      }).join('')
-  );
+    }).join('') + '</div>' : '');
 }
 
 /* ── Price list import UI ── */
-function importPriceListHtml(dealerId){
-  const d = state.supply.dealers.find(function(x){ return x.id===dealerId; });
-  if(!d) return '<div class="empty-msg">Dealer not found.</div>';
-  return '' +
-  '<div class="view-header">' +
-    '<div><h2 class="view-title">Import Price List</h2>' +
-    '<p class="view-subtitle">From: <strong>' + esc(d.company) + '</strong> · Updates your Catalog</p></div>' +
-    '<div style="display:flex;gap:8px;">' +
-      '<button class="btn-secondary" data-action="download-template">↓ Download Template</button>' +
-      '<button class="data-btn" data-action="back-to-dealer" data-id="' + dealerId + '">← Cancel</button>' +
-    '</div>' +
-  '</div>' +
 
-  '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:10px;padding:18px;margin-bottom:16px;">' +
-    '<div style="font-family:ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-text);margin-bottom:10px;">How it works</div>' +
-    '<ol style="font-size:13px;color:var(--zinc-400);line-height:2;padding-left:18px;">' +
-      '<li>Download the template using the button above</li>' +
-      '<li>Paste the dealer\'s products into the template columns</li>' +
-      '<li>Upload the filled template here</li>' +
-      '<li>Products matched by <strong style="color:var(--text-strong);">Model No.</strong> — existing products updated, new ones added</li>' +
-      '<li>Dealer is auto-stamped as <strong style="color:var(--text-strong);">Supplier</strong> on all imported rows</li>' +
-    '</ol>' +
-  '</div>' +
-
-  '<form data-form="pricelist-import" data-dealer-id="' + dealerId + '">' +
-    '<div class="field" style="margin-bottom:14px;">' +
-      '<span class="field-label">What changed in this price list (optional note)</span>' +
-      '<input class="field-input" data-field="summary" placeholder="e.g. JBL CBT series revised +5%. New Epson LS500W added." type="text">' +
-    '</div>' +
-    '<div class="import-zone" id="import-drop-zone">' +
-      '<div class="import-zone-icon">📊</div>' +
-      '<div class="import-zone-text">Drop your Excel file here or click to browse</div>' +
-      '<div class="import-zone-sub">Must match the template format — .xlsx or .xls</div>' +
-      '<input type="file" id="import-file-input" accept=".xlsx,.xls" style="display:none;" onchange="handlePriceListFile(this)">' +
-    '</div>' +
-    '<div id="import-preview"></div>' +
-    '<div class="form-actions">' +
-      '<button type="button" class="btn-secondary" data-action="back-to-dealer" data-id="' + dealerId + '">Cancel</button>' +
-      '<button type="submit" class="btn-primary" id="import-confirm-btn" style="display:none;">Confirm Import</button>' +
-    '</div>' +
-  '</form>';
-}
-
-/* ── Rep / SC detail (simple — just full info card) ── */
 function repDetailHtml(r){
   const dealer = state.supply.dealers.find(function(d){ return d.id===r.dealerId; });
   return '' +
@@ -3766,19 +4167,14 @@ function renderSupply(){
     }
     state.supplyView = 'list';
   }
-
-  if(view === 'pricelist' && state.selectedSupplyId){
-    return importPriceListHtml(state.selectedSupplyId);
-  }
-
-  if(view === 'add' || view === 'edit'){
+if(view === 'add' || view === 'edit'){
     const type = state.selectedSupplyType;
     const isEdit = view === 'edit';
     let data = null;
     if(isEdit){
       if(type==='dealer') data = state.supply.dealers.find(function(x){ return x.id===state.selectedSupplyId; });
       if(type==='rep')    data = state.supply.reps.find(function(x){ return x.id===state.selectedSupplyId; });
-      if(type==='sc')     data = state.supply.serviceCentres.find(function(x){ return x.id===state.selectedSupplyId; });
+
     }
     const titles = { dealer:'Dealer / Distributor', rep:'Sales Rep', sc:'Service Centre' };
     const action = isEdit ? 'Edit' : 'Add';
@@ -3793,21 +4189,19 @@ function renderSupply(){
   // ── List view ──
   const dealers = state.supply.dealers;
   const reps = state.supply.reps;
-  const scs = state.supply.serviceCentres;
   const tabLabels = [
     { id:'dealers', label:'Dealers (' + dealers.length + ')' },
     { id:'reps',    label:'Sales Reps (' + reps.length + ')' },
-    { id:'sc',      label:'Service Centres (' + scs.length + ')' },
   ];
   const addLabels = { dealers:'+ Add Dealer', reps:'+ Add Rep', sc:'+ Add Service Centre' };
-  const addTypes  = { dealers:'dealer', reps:'rep', sc:'sc' };
+  const addTypes  = { dealers:'dealer', reps:'rep' };
 
   return '' +
   '<div class="view-header">' +
     '<div><h2 class="view-title">Supply Chain</h2>' +
     '<p class="view-subtitle">Dealers, sales reps and service centres — your procurement network</p></div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-      '<button class="btn-secondary" data-action="download-template">↓ Price List Template</button>' +
+      
       '<button class="btn-primary" data-action="new-supply" data-type="' + addTypes[tab] + '">' + addLabels[tab] + '</button>' +
     '</div>' +
   '</div>' +
@@ -3816,8 +4210,6 @@ function renderSupply(){
   '<div class="prospects-dash" style="margin-bottom:16px;">' +
     '<div class="prospects-kpi"><div class="prospects-kpi-val">' + dealers.length + '</div><div class="prospects-kpi-label">Dealers</div></div>' +
     '<div class="prospects-kpi"><div class="prospects-kpi-val">' + reps.length + '</div><div class="prospects-kpi-label">Sales Reps</div></div>' +
-    '<div class="prospects-kpi"><div class="prospects-kpi-val">' + scs.length + '</div><div class="prospects-kpi-label">Service Centres</div></div>' +
-    '<div class="prospects-kpi"><div class="prospects-kpi-val" style="color:var(--emerald-400);">' + dealers.reduce(function(n,d){ return n+(d.priceLists||[]).length; },0) + '</div><div class="prospects-kpi-label">Price Lists</div></div>' +
   '</div>' +
 
   // Tabs
@@ -3832,49 +4224,12 @@ function renderSupply(){
     (dealers.length === 0
       ? '<div class="empty-msg">No dealers added yet. Add your first dealer to start tracking your supply chain.</div>'
       : '<div class="supply-grid">' + dealers.map(dealerCardHtml).join('') + '</div>') :
-  tab === 'reps' ?
     (reps.length === 0
       ? '<div class="empty-msg">No reps added yet.</div>'
-      : '<div class="supply-grid">' + reps.map(repCardHtml).join('') + '</div>') :
-    (scs.length === 0
-      ? '<div class="empty-msg">No service centres added yet.</div>'
-      : '<div class="supply-grid">' + scs.map(scCardHtml).join('') + '</div>')
-  );
+      : '<div class="supply-grid">' + reps.map(repCardHtml).join('') + '</div>'));
 }
 
 /* ── Price list Excel template download ── */
-function downloadPriceListTemplate(){
-  if(!window.XLSX){ showToast('Excel library not loaded.'); return; }
-  const wb = XLSX.utils.book_new();
-
-  // Main data sheet — matches Catalog import format exactly
-  const headers = ['Product Name','Category','Brand','Model No.','Unit','Purchase Price (₹)','Selling Price (₹)','GST %','Key Specs','Notes'];
-  const example = ['Epson EH-LS300W','Projector & Display','Epson','EH-LS300W','Nos','95000','135000','18%','4K UST Laser, 3600lm, HDMI 2.0','2yr on-site warranty'];
-  const ws = XLSX.utils.aoa_to_sheet([headers, example]);
-  // Column widths
-  ws['!cols'] = [30,25,15,18,8,18,18,8,35,30].map(function(w){ return { wch:w }; });
-  XLSX.utils.book_append_sheet(wb, ws, 'Price List');
-
-  // Reference sheet — valid categories
-  const ref = [
-    ['VALID CATEGORY VALUES — copy exactly'],[''],
-    ...PRODUCT_CATEGORIES.map(function(c){ return [c]; }),
-    [''],['VALID UNIT VALUES'],[''],
-    ...PRODUCT_UNITS.map(function(u){ return [u]; }),
-    [''],['VALID GST VALUES'],[''],
-    ['5%'],['12%'],['18%'],['28%']
-  ];
-  const wsRef = XLSX.utils.aoa_to_sheet(ref);
-  wsRef['!cols'] = [{ wch:40 }];
-  XLSX.utils.book_append_sheet(wb, wsRef, 'Reference');
-
-  XLSX.writeFile(wb, 'Alekh_Niranjan_PriceList_Template.xlsx');
-  showToast('Template downloaded ✓');
-}
-
-/* ── Price list file handler ── */
-var _importData = null;
-var _importDealerId = null;
 
 function handlePriceListFile(input){
   const file = input.files[0];
@@ -3948,56 +4303,6 @@ function handlePriceListFile(input){
   reader.readAsBinaryString(file);
 }
 
-function confirmPriceListImport(dealerId, summary){
-  if(!_importData) return;
-  const { toAdd, toUpdate } = _importData;
-  // Add new products
-  toAdd.forEach(function(item){
-    state.products.push(Object.assign({ id:uid() }, item));
-  });
-  // Update existing — purchase price + supplier only (preserve your selling price)
-  toUpdate.forEach(function(pair){
-    const p = state.products.find(function(x){ return x.id===pair.existing.id; });
-    if(p){
-      p.purchasePrice = pair.item.purchasePrice;
-      p.supplier = pair.item.supplier;
-      if(pair.item.keySpecs) p.keySpecs = pair.item.keySpecs;
-    }
-  });
-  // Log price list entry on dealer
-  const dealer = state.supply.dealers.find(function(x){ return x.id===dealerId; });
-  if(dealer){
-    if(!dealer.priceLists) dealer.priceLists = [];
-    dealer.priceLists.push({
-      id: uid(),
-      date: todayStr(),
-      format: 'Excel',
-      summary: summary || (toAdd.length + ' new, ' + toUpdate.length + ' updated')
-    });
-  }
-  persist();
-  _importData = null;
-  state.supplyView = 'detail';
-  state.selectedSupplyId = dealerId;
-  state.selectedSupplyType = 'dealer';
-  render();
-  showToast(toAdd.length + ' added, ' + toUpdate.length + ' updated in Catalog ✓');
-}
-
-const VIEW_RENDERERS = {
-  dashboard: renderDashboard,
-  clients:   renderClients,
-  contacts:  renderContacts,
-  jobs:      renderJobs,
-  catalog:   renderCatalog,
-  network:   renderNetwork,
-  calendar:  renderCalendar,
-  comms:     renderComms,
-  supply:    renderSupply,
-};
-
-
-/* ================================ forms ================================ */
 
 function fieldInput(label, field, value, type, extra){
   return '<label class="field"><span class="field-label">' + esc(label) + '</span>' +
@@ -4060,6 +4365,32 @@ function clientFormHtml(d){
 }
 
 function contactFormHtml(d){
+  const isNew = !d.id;
+  const alsoNetwork = d._alsoNetwork || false;
+  const alsoClient  = d._alsoClient  || false;
+
+  const shortcutHtml = isNew
+    ? '<div style="margin-top:4px;margin-bottom:2px;">' +
+        '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.12em;color:var(--zinc-500);margin-bottom:8px;">Also add to (optional)</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<button type="button" data-action="contact-form-toggle" data-key="_alsoNetwork" ' +
+            'style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid ' + (alsoNetwork?'var(--accent-text)':'var(--zinc-700)') + ';' +
+            'background:' + (alsoNetwork?'rgba(34,211,238,0.12)':'transparent') + ';' +
+            'color:' + (alsoNetwork?'var(--accent-text)':'var(--zinc-500)') + ';font-size:13px;font-weight:600;cursor:pointer;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' +
+            (alsoNetwork ? '✓ Network' : '+ Network') +
+          '</button>' +
+          '<button type="button" data-action="contact-form-toggle" data-key="_alsoClient" ' +
+            'style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;border:1px solid ' + (alsoClient?'var(--emerald-400)':'var(--zinc-700)') + ';' +
+            'background:' + (alsoClient?'rgba(52,211,153,0.12)':'transparent') + ';' +
+            'color:' + (alsoClient?'var(--emerald-400)':'var(--zinc-500)') + ';font-size:13px;font-weight:600;cursor:pointer;">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' +
+            (alsoClient ? '✓ Client' : '+ Client') +
+          '</button>' +
+        '</div>' +
+      '</div>'
+    : '';
+
   return '' +
     '<div class="field-row-2">' +
       fieldSelect('Salutation','salutation',SALUTATION,d.salutation||'') +
@@ -4074,6 +4405,7 @@ function contactFormHtml(d){
     fieldInput('Email (optional)','email',d.email,'email') +
     fieldInput('Area / location','area',d.area,'text','placeholder="e.g. Wakad, Pune"') +
     fieldCheckbox('This contact can refer/send me leads','leadSource',d.leadSource) +
+    shortcutHtml +
     fieldTextarea('Notes','notes',d.notes);
 }
 
@@ -4142,6 +4474,32 @@ function invFormHtml(kind, d){
   return '';
 }
 
+const FIN_HOW = ['UPI','Cash','Bank Transfer','Cheque','Other'];
+
+function finEntryFormHtml(d){
+  var isIn = d.type === 'in';
+  var color = isIn ? 'var(--emerald-400)' : 'var(--rose-400)';
+  return '' +
+    '<div style="display:flex;gap:10px;margin-bottom:16px;">' +
+      '<button class="fin-btn-in" style="flex:1;justify-content:center;' + (isIn?'':'opacity:0.4;') + '" data-action="fin-switch-type" data-txtype="in">' + icon('trending-up',14) + ' Money In</button>' +
+      '<button class="fin-btn-out" style="flex:1;justify-content:center;' + (!isIn?'':'opacity:0.4;') + '" data-action="fin-switch-type" data-txtype="out">' + icon('trending-down',14) + ' Money Out</button>' +
+    '</div>' +
+    '<label class="field"><span class="field-label" style="color:' + color + ';">Amount (₹)</span>' +
+      '<input class="field-input" type="number" data-field="amount" value="' + esc(d.amount||'') + '" placeholder="0" style="font-size:24px;font-weight:700;letter-spacing:-0.02em;" inputmode="numeric"/>' +
+    '</label>' +
+    '<div class="field-row-2">' +
+      fieldInput('Date','date',d.date||todayStr(),'date') +
+      fieldSelect('How paid','how',FIN_HOW,d.how||'UPI') +
+    '</div>' +
+    fieldInput(isIn?'Who paid you':'Who you paid','who',d.who||'','text','placeholder="' + (isIn?'e.g. Ananya Sharma, Mother Dairy':'e.g. Harman dealer, Suresh electrician') + '"') +
+    fieldInput('What for','what',d.what||'','text','placeholder="' + (isIn?'e.g. Advance Q3 Town Hall, June dairy income':'e.g. JBL speakers, Labour 3 days, Phone bill') + '"') +
+    fieldInput('Note (optional)','note',d.note||'') +
+    '<div class="form-actions">' +
+      '<button type="button" class="btn-secondary" data-action="close-modal">Cancel</button>' +
+      '<button type="submit" class="btn-primary" style="background:' + color + ';border-color:' + color + ';color:' + (isIn?'#052e16':'#4c0519') + ';">Save ' + (isIn?'Money In':'Money Out') + '</button>' +
+    '</div>';
+}
+
 function supplyLogFormHtml(d){
   return '' +
     '<div class="field-row-2">' +
@@ -4190,7 +4548,7 @@ function buildDraft(type, data){
   }
   if(type === 'contact'){
     return data ? Object.assign({}, data, { leadSource: !!data.leadSource })
-      : { salutation:'', name:'', category:CONTACT_CATEGORIES[0], company:'', phone:'', dob:'', email:'', area:'', leadSource:false, notes:'', id:null };
+      : { salutation:'', name:'', category:CONTACT_CATEGORIES[0], company:'', phone:'', dob:'', email:'', area:'', leadSource:false, notes:'', _alsoNetwork:false, _alsoClient:false, id:null };
   }
   if(type === 'comm'){
     return data ? Object.assign({}, data)
@@ -4222,6 +4580,15 @@ function renderModal(){
     title = 'Log Activity';
     bodyHtml = commFormHtml(state.formDraft);
     if(state.clients.length === 0) showActions = false;
+  } else if(type === 'csv-import'){
+    title = 'Bulk Import Contacts';
+    bodyHtml = csvImportModalHtml();
+    showActions = false;
+  } else if(type === 'fin-entry'){
+    var isIn = state.modal.txType === 'in';
+    title = isIn ? 'Money In' : 'Money Out';
+    bodyHtml = finEntryFormHtml(Object.assign({ type: state.modal.txType }, state.formDraft));
+    showActions = false;
   } else if(type === 'supply-log'){
     const eType = state.modal.entityType;
     const col = eType==='dealer' ? state.supply.dealers : eType==='rep' ? state.supply.reps : state.supply.serviceCentres;
@@ -4289,6 +4656,18 @@ function onBodyClick(e){
       render();
       break;
     }
+    case 'contact-form-toggle': {
+      // Capture current field values before re-render
+      var flds = document.querySelectorAll('[data-field]');
+      flds.forEach(function(f){
+        if(f.type==='checkbox') state.formDraft[f.dataset.field] = f.checked;
+        else state.formDraft[f.dataset.field] = f.value;
+      });
+      var key = el.dataset.key;
+      state.formDraft[key] = !state.formDraft[key];
+      render();
+      break;
+    }
     case 'open-modal': {
       const type = el.dataset.type;
       const id = el.dataset.id;
@@ -4307,6 +4686,71 @@ function onBodyClick(e){
     }
     case 'close-modal':
       state.modal = null;
+      render();
+      break;
+    case 'open-csv-import':
+      state.csvImport = null;
+      state.modal = { type:'csv-import' };
+      render();
+      break;
+    case 'download-csv-template':
+      downloadContactCsvTemplate();
+      break;
+    case 'cancel-csv-import':
+      state.csvImport = null;
+      render();
+      break;
+    case 'confirm-csv-import':
+      confirmCsvImport();
+      break;
+    case 'open-settings':
+      state.view = 'settings';
+      closeMobileMenu();
+      render();
+      break;
+    case 'settings-add-fixed':
+      if(!state.settings.fixedCosts) state.settings.fixedCosts = [];
+      state.settings.fixedCosts.push({ id: uid(), label:'', amount:'' });
+      render();
+      break;
+    case 'settings-remove-fixed':
+      state.settings.fixedCosts = (state.settings.fixedCosts||[]).filter(function(f){ return f.id !== el.dataset.id; });
+      persist(); render();
+      break;
+    case 'settings-save': {
+      var sfields = document.querySelectorAll('[data-field^="st_"]');
+      sfields.forEach(function(f){
+        var key = f.dataset.field.replace('st_','');
+        state.settings[key] = f.value;
+      });
+      // Capture fixed cost inputs
+      document.querySelectorAll('[data-fixed-id]').forEach(function(inp){
+        var fc = state.settings.fixedCosts.find(function(x){ return x.id === inp.dataset.fixedId; });
+        if(fc) fc[inp.dataset.fixedField] = inp.value;
+      });
+      persist();
+      var btn = el;
+      var origText = btn.textContent;
+      btn.textContent = '✓ Saved';
+      setTimeout(function(){ btn.textContent = origText; }, 1500);
+      break;
+    }
+    case 'fin-add':
+      state.modal = { type:'fin-entry', txType: el.dataset.txtype || 'in' };
+      state.formDraft = { date: todayStr(), how:'UPI' };
+      render();
+      break;
+    case 'fin-switch-type':
+      if(state.modal && state.modal.type === 'fin-entry'){
+        // Capture current field values before re-render
+        var fields = document.querySelectorAll('[data-field]');
+        fields.forEach(function(f){ state.formDraft[f.dataset.field] = f.value; });
+        state.modal.txType = el.dataset.txtype;
+        render();
+      }
+      break;
+    case 'fin-period':
+      state.finPeriod = el.dataset.value || 'month';
       render();
       break;
     case 'cal-select-date':
@@ -4349,6 +4793,7 @@ function onBodyClick(e){
       else if(t === 'comm') deleteCommEntry(id);
       else if(t === 'meeting') deleteMeeting(el.dataset.networkId, id);
       else if(t === 'client-meeting') deleteClientMeeting(el.dataset.clientId, id);
+      else if(t === 'fin-tx'){ state.finTx = (state.finTx||[]).filter(function(x){ return x.id!==id; }); state.confirmDelete=null; persist(); render(); return; }
       break;
     }
     case 'export-excel':
@@ -4361,6 +4806,7 @@ function onBodyClick(e){
     case 'export-data':
       exportData();
       closeMobileMenu();
+      if(state.view === 'settings') render();
       break;
     case 'import-data':
       document.getElementById('import-file-input').click();
@@ -4461,7 +4907,7 @@ function onBodyClick(e){
       render();
       break;
     case 'supply-back':
-      if(state.supplyView === 'detail' || state.supplyView === 'pricelist'){
+      if(state.supplyView === 'detail'){
         state.supplyView = 'list';
         state.selectedSupplyId = null;
       } else if(state.supplyView === 'add' || state.supplyView === 'edit'){
@@ -4470,37 +4916,6 @@ function onBodyClick(e){
         state.supplyView = 'list';
       }
       render();
-      break;
-    case 'back-to-dealer':
-      state.selectedSupplyId = el.dataset.id;
-      state.selectedSupplyType = 'dealer';
-      state.supplyView = 'detail';
-      render();
-      break;
-    case 'import-pricelist':
-      _importData = null;
-      _importDealerId = el.dataset.id;
-      state.selectedSupplyId = el.dataset.id;
-      state.supplyView = 'pricelist';
-      state.view = 'supply';
-      render();
-      // Wire up drop zone click after render
-      setTimeout(function(){
-        var zone = document.getElementById('import-drop-zone');
-        var input = document.getElementById('import-file-input');
-        if(zone && input){
-          zone.onclick = function(){ input.click(); };
-          zone.ondragover = function(e){ e.preventDefault(); zone.classList.add('drag'); };
-          zone.ondragleave = function(){ zone.classList.remove('drag'); };
-          zone.ondrop = function(e){
-            e.preventDefault(); zone.classList.remove('drag');
-            if(e.dataTransfer.files[0]){ input.files = e.dataTransfer.files; handlePriceListFile(input); }
-          };
-        }
-      }, 100);
-      break;
-    case 'download-template':
-      downloadPriceListTemplate();
       break;
     case 'goto-contacts-from-network':
       // Navigate to Contacts without resetting Network's in-progress add/edit state
@@ -4719,6 +5134,27 @@ function onBodyChange(e){
     t.value = '';
     return;
   }
+  if(t.id === 'csv-import-input'){
+    if(t.files && t.files[0]){
+      const file = t.files[0];
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        const result = parseContactsCsv(ev.target.result);
+        if(result.rows.length === 0){
+          alert(result.errors.join(' ') || 'No valid rows found in this file.');
+          return;
+        }
+        state.csvImport = result;
+        render();
+      };
+      reader.onerror = function(){
+        alert('Could not read that file. Please make sure it\'s a valid CSV.');
+      };
+      reader.readAsText(file);
+    }
+    t.value = '';
+    return;
+  }
   // Excel import file input (label wrapping input with data-action)
   if(t.dataset && t.dataset.action === 'import-excel'){
     if(t.files && t.files[0]){
@@ -4848,7 +5284,7 @@ function onBodySubmit(e){
   }
 
   // Supply Chain forms
-  if(formEl.dataset.form === 'supply-dealer' || formEl.dataset.form === 'supply-rep' || formEl.dataset.form === 'supply-sc'){
+  if(formEl.dataset.form === 'supply-dealer' || formEl.dataset.form === 'supply-rep'){
     const formType = formEl.dataset.form;
     const requiredChecks = formType === 'supply-dealer' ? [['company','Company name']]
                           : formType === 'supply-rep'    ? [['name','Name']]
@@ -4992,6 +5428,31 @@ function onBodySubmit(e){
     return;
   }
 
+  // Finance entry form
+  if(state.modal && state.modal.type === 'fin-entry'){
+    var fields2 = formEl.querySelectorAll('[data-field]');
+    var fd = {};
+    fields2.forEach(function(f){ fd[f.dataset.field] = f.value; });
+    if(!fd.amount || Number(fd.amount) <= 0){
+      showFormError(formEl, 'Please enter an amount greater than zero.');
+      return;
+    }
+    if(!state.finTx) state.finTx = [];
+    state.finTx.push({
+      id: uid(),
+      type: state.modal.txType || 'in',
+      amount: Math.abs(Number(fd.amount)),
+      date: fd.date || todayStr(),
+      how:  fd.how  || 'UPI',
+      who:  fd.who  || '',
+      what: fd.what || '',
+      note: fd.note || ''
+    });
+    state.modal = null;
+    persist(); render();
+    return;
+  }
+
   // Supply log entry
   if(formEl.id === 'entity-form' && state.modal && state.modal.type === 'supply-log'){
     if(!validateRequired(formEl, [['note','Note']])) return;
@@ -5085,14 +5546,26 @@ function updateNavActive(){
 }
 
 function updateSidebarFooter(){
-  const txt = state.clients.length + ' clients \u00B7 ' + state.contacts.length + ' contacts \u00B7 ' + state.jobs.length + ' jobs \u00B7 ' + state.products.length + ' products \u00B7 ' + state.services.length + ' services';
+  const txt = state.clients.length + ' clients \u00B7 ' + state.contacts.length + ' contacts \u00B7 ' + state.jobs.length + ' jobs \u00B7 ' + state.network.length + ' network';
   document.getElementById('sidebar-stats').textContent = txt;
   const menuStats = document.getElementById('mobile-menu-stats');
   if(menuStats){
     menuStats.innerHTML = state.clients.length + ' clients<br>' + state.contacts.length + ' contacts<br>' +
-      state.jobs.length + ' jobs<br>' + state.products.length + ' products<br>' + state.services.length + ' services';
+      state.jobs.length + ' jobs<br>' + state.network.length + ' network contacts';
   }
 }
+
+const VIEW_RENDERERS = {
+  dashboard: renderDashboard,
+  contacts:  renderContacts,
+  network:   renderNetwork,
+  clients:   renderClients,
+  jobs:      renderJobs,
+  finance:   renderFinance,
+  supply:    renderSupply,
+  calendar:  renderCalendar,
+  settings:  renderSettings,
+};
 
 function render(){
   document.getElementById('view').innerHTML = VIEW_RENDERERS[state.view]();
@@ -5136,6 +5609,7 @@ function init(){
   render();
   startClock();
   startReminderEngine();
+  startAutoBackupEngine();
 }
 
 init();
