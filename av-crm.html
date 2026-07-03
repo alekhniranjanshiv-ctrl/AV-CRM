@@ -1419,7 +1419,8 @@ let state = {
     fixedCosts: [] // { id, label, amount }
   },
   lastBackupAt: null,
-  csvImport: null, // { rows: [...], errors: [...] } — set when a CSV is parsed and awaiting confirm // ISO timestamp of last backup (manual or auto)
+  csvImport: null, // { rows: [...], errors: [...] } — set when a CSV is parsed and awaiting confirm
+  dealerCsvImport: null, // same shape, for Supply Chain dealer bulk import // ISO timestamp of last backup (manual or auto)
 };
 
 function applyTheme(){
@@ -1687,6 +1688,144 @@ function confirmCsvImport(){
   persist();
   render();
   showBackupToast('Imported ' + added + ' contact' + (added!==1?'s':'') + (skipped ? ' — ' + skipped + ' duplicate' + (skipped!==1?'s':'') + ' skipped' : '') + '.');
+}
+
+// ── Dealer CSV Bulk Import (Supply Chain) ──────────────────────────────────
+const DEALER_CSV_TEMPLATE_HEADERS = ['Company','Brands','Address','Contact Number','Contact Person'];
+
+function downloadDealerCsvTemplate(){
+  const sampleRows = [
+    ['Harman Professional India','JBL, Crown, AMX, BSS','Andheri East, Mumbai','+91 22 6789 0011',''],
+    ['Rashi Peripherals','Sonos, Bose, Klipsch','Lower Parel, Mumbai','+91 22 4001 2233','']
+  ];
+  let csv = DEALER_CSV_TEMPLATE_HEADERS.join(',') + '\n';
+  sampleRows.forEach(function(r){
+    csv += r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Dealers_Import_Template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+function parseDealersCsv(text){
+  const lines = text.split(/\r?\n/).filter(function(l){ return l.trim().length > 0; });
+  if(lines.length === 0) return { rows:[], errors:['File is empty.'] };
+
+  const headerLine = parseCsvLine(lines[0]).map(function(h){ return h.trim().toLowerCase(); });
+  function findCol(names){
+    for(let i=0;i<headerLine.length;i++){
+      for(const n of names){ if(headerLine[i].includes(n)) return i; }
+    }
+    return -1;
+  }
+  const colCompany = findCol(['company','distributor','dealer','firm']);
+  const colBrands  = findCol(['brand']);
+  const colAddress = findCol(['address']);
+  const colPhone   = findCol(['contact number','phone','mobile','contact no']);
+  const colPerson  = findCol(['contact person','owner','name']);
+
+  if(colCompany === -1){
+    return { rows:[], errors:['Could not find a "Company" column. Please use the template.'] };
+  }
+
+  const rows = [];
+  const errors = [];
+  for(let i=1;i<lines.length;i++){
+    const cells = parseCsvLine(lines[i]);
+    const company = (cells[colCompany]||'').trim();
+    if(!company){ errors.push('Row ' + (i+1) + ': missing company name — skipped.'); continue; }
+    rows.push({
+      company: company,
+      brands: colBrands>=0 ? (cells[colBrands]||'') : '',
+      address: colAddress>=0 ? (cells[colAddress]||'') : '',
+      phone: colPhone>=0 ? (cells[colPhone]||'') : '',
+      contactPerson: colPerson>=0 ? (cells[colPerson]||'') : '',
+      city:'', state:'', accountCode:'', paymentTerms:'', creditLimit:'', tradeDiscount:'',
+      leadTimeDays:'', gst:'', email:'', website:'', notes:'', priceLists:[]
+    });
+  }
+  return { rows: rows, errors: errors };
+}
+
+function confirmDealerCsvImport(){
+  const imp = state.dealerCsvImport;
+  if(!imp || !imp.rows.length) return;
+  let added = 0, skipped = 0;
+  imp.rows.forEach(function(r){
+    // Skip if a dealer with the same company name already exists (avoid duplicates)
+    const dup = state.supply.dealers.some(function(d){
+      return d.company.toLowerCase().trim() === r.company.toLowerCase().trim();
+    });
+    if(dup){ skipped++; return; }
+    state.supply.dealers.push(Object.assign({}, r, { id: uid() }));
+    added++;
+  });
+  state.dealerCsvImport = null;
+  state.modal = null;
+  persist();
+  render();
+  showBackupToast('Imported ' + added + ' dealer' + (added!==1?'s':'') + (skipped ? ' — ' + skipped + ' duplicate' + (skipped!==1?'s':'') + ' skipped' : '') + '.');
+}
+
+function dealerCsvImportModalHtml(){
+  // Step 1 — no file chosen yet
+  if(!state.dealerCsvImport){
+    return '' +
+      '<div style="text-align:center;padding:8px 0 20px;">' +
+        '<div style="font-size:40px;margin-bottom:10px;">🏢</div>' +
+        '<div style="font-size:14px;color:var(--zinc-400);line-height:1.6;max-width:340px;margin:0 auto;">' +
+          'Upload distributor / dealer details from a CSV or Excel-exported CSV file. Download the template first if you need the right column format.' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px;">' +
+        '<button type="button" class="btn-secondary" data-action="download-dealer-csv-template" style="justify-content:center;">' +
+          icon('receipt',15) + ' Download CSV Template' +
+        '</button>' +
+        '<label class="btn-primary" style="justify-content:center;cursor:pointer;display:flex;align-items:center;gap:8px;">' +
+          icon('truck',15) + ' Choose CSV File' +
+          '<input type="file" accept=".csv,text/csv" id="dealer-csv-import-input" style="display:none;"/>' +
+        '</label>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--zinc-600);margin-top:16px;line-height:1.6;">' +
+        'Columns supported: Company (required), Brands, Address, Contact Number, Contact Person. ' +
+        'Missing fields — like Contact Person if you don\'t have owner names yet — are simply left blank and can be filled in anytime by editing the dealer later.' +
+      '</div>' +
+      '<div class="form-actions">' +
+        '<button type="button" class="btn-secondary" data-action="close-modal">Cancel</button>' +
+      '</div>';
+  }
+
+  // Step 2 — preview and confirm
+  const imp = state.dealerCsvImport;
+  const previewRows = imp.rows.slice(0, 50);
+  return '' +
+    '<div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:10px;padding:12px 14px;margin-bottom:14px;">' +
+      '<div style="font-size:14px;font-weight:600;color:var(--emerald-400);">✓ ' + imp.rows.length + ' dealer' + (imp.rows.length!==1?'s':'') + ' ready to import</div>' +
+      (imp.errors.length ? '<div style="font-size:12px;color:var(--amber-400);margin-top:4px;">' + imp.errors.length + ' row' + (imp.errors.length!==1?'s':'') + ' skipped (missing company name)</div>' : '') +
+    '</div>' +
+    '<div style="max-height:320px;overflow-y:auto;border:1px solid var(--zinc-800);border-radius:10px;">' +
+      previewRows.map(function(r, i){
+        return '<div style="padding:10px 14px;' + (i>0?'border-top:1px solid var(--zinc-800);':'') + '">' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text-strong);">' + esc(r.company) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--zinc-500);margin-top:2px;">' +
+            (r.brands?esc(r.brands):'<span style="color:var(--zinc-700);">no brands listed</span>') +
+            (r.address?' · '+esc(r.address):'') + (r.phone?' · '+esc(r.phone):'') +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      (imp.rows.length > 50 ? '<div style="padding:10px 14px;text-align:center;font-size:12px;color:var(--zinc-600);">+ ' + (imp.rows.length-50) + ' more not shown</div>' : '') +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--zinc-600);margin-top:10px;">Duplicate company names will be automatically skipped.</div>' +
+    '<div class="form-actions">' +
+      '<button type="button" class="btn-secondary" data-action="cancel-dealer-csv-import">Cancel</button>' +
+      '<button type="button" class="btn-primary" data-action="confirm-dealer-csv-import">Import ' + imp.rows.length + ' Dealer' + (imp.rows.length!==1?'s':'') + '</button>' +
+    '</div>';
 }
 
 function csvImportModalHtml(){
@@ -3908,15 +4047,25 @@ function reliabilityClass(r){
 }
 
 /* ── Dealer card ── */
+// Builds a clean subtitle line for a dealer — prefers city/state, falls back to raw address, never shows dangling commas
+function dealerSubtitle(d){
+  if(d.city && d.state) return d.city + ', ' + d.state;
+  if(d.city) return d.city;
+  if(d.state) return d.state;
+  if(d.address) return d.address;
+  return '';
+}
+
 function dealerCardHtml(d){
   const repCount = state.supply.reps.filter(function(r){ return r.dealerId===d.id; }).length;
   const plCount  = (d.priceLists||[]).length;
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'dealer' && state.confirmDelete.id === d.id;
+  const subtitle = dealerSubtitle(d);
   return '<div class="supply-card" data-action="open-supply" data-type="dealer" data-id="' + d.id + '">' +
     '<div class="supply-card-top">' +
       '<div>' +
         '<div class="supply-card-name">' + esc(d.company) + '</div>' +
-        '<div class="supply-card-sub">' + esc(d.city) + ', ' + esc(d.state) + '</div>' +
+        (subtitle ? '<div class="supply-card-sub">' + esc(subtitle) + '</div>' : '') +
       '</div>' +
       (d.tradeDiscount ? '<span style="font-family:ui-monospace,monospace;font-size:12px;color:var(--emerald-400);">' + esc(d.tradeDiscount) + '% disc</span>' : '') +
     '</div>' +
@@ -4013,11 +4162,12 @@ function supplyLogHtml(logs, entityType, entityId){
 
 function dealerDetailHtml(d){
   const reps = state.supply.reps.filter(function(r){ return r.dealerId===d.id; });
+  const subtitle = dealerSubtitle(d);
   return '' +
   '<div class="view-header">' +
     '<div>' +
       '<h2 class="view-title">' + esc(d.company) + '</h2>' +
-      '<p class="view-subtitle">' + esc(d.city) + ', ' + esc(d.state) + (d.website?' · '+esc(d.website):'') + '</p>' +
+      '<p class="view-subtitle">' + (subtitle ? esc(subtitle) : '<span style="color:var(--zinc-600);font-style:italic;">No address yet</span>') + (d.website?' · '+esc(d.website):'') + '</p>' +
     '</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
       '<button class="btn-primary" data-action="log-supply-entry" data-type="dealer" data-id="' + d.id + '">+ Log Entry</button>' +
@@ -4028,6 +4178,8 @@ function dealerDetailHtml(d){
   '</div>' +
   '<div class="supply-card-brands" style="margin-bottom:16px;">' + brandPills(d.brands) + '</div>' +
   '<div class="supply-detail-grid">' +
+    supplyInfoItem('Address', d.address || dealerSubtitle(d) || '—') +
+    supplyInfoItem('Contact Person', d.contactPerson || '—') +
     supplyInfoItem('Account / Customer Code', d.accountCode) +
     supplyInfoItem('Payment Terms', d.paymentTerms) +
     supplyInfoItem('Credit Limit', d.creditLimit ? fmtINR(d.creditLimit) : '—') +
@@ -4125,7 +4277,7 @@ function supplyFormHtml(type, data){
   const d = data || {};
   const isEdit = !!d.id;
   const dealerOptions = [{ value:'', label:'— Not linked to a dealer —' }]
-    .concat(state.supply.dealers.map(function(dl){ return { value:dl.id, label:dl.company + ' (' + dl.city + ')' }; }));
+    .concat(state.supply.dealers.map(function(dl){ return { value:dl.id, label:dl.company + (dealerSubtitle(dl) ? ' (' + dealerSubtitle(dl) + ')' : '') }; }));
 
   if(type === 'dealer'){
     return '<form data-form="supply-dealer" style="max-width:760px;">' +
@@ -4133,12 +4285,13 @@ function supplyFormHtml(type, data){
       '<div class="field-row-2">' + fieldInput('Company name','company',d.company,'text','placeholder="e.g. Harman Professional India"') + fieldInput('City','city',d.city,'text','placeholder="Mumbai"') + '</div>' +
       '<div class="field-row-2">' + fieldSelect('State','state',DEALER_STATES,d.state||'Maharashtra') + fieldInput('GST number','gst',d.gst,'text','placeholder="27AABCH1234F1Z5"') + '</div>' +
       fieldInput('Brands carried (comma separated)','brands',d.brands,'text','placeholder="JBL, Crown, BSS, AMX"') +
+      fieldInput('Full address (optional, if city/state not enough)','address',d.address,'text','placeholder="Street, Area, PIN"') +
       fieldInput('Website','website',d.website,'text','placeholder="harmanpro.com"') +
       '<div class="form-section-label" style="margin-top:14px;">Your Account</div>' +
       '<div class="field-row-2">' + fieldInput('Your account / customer code','accountCode',d.accountCode,'text','placeholder="HPL-MH-2891"') + fieldInput('Trade discount %','tradeDiscount',d.tradeDiscount,'number','placeholder="28" min="0" max="100"') + '</div>' +
       '<div class="field-row-2">' + fieldSelect('Payment terms','paymentTerms',PAYMENT_TERMS,d.paymentTerms||PAYMENT_TERMS[0]) + fieldInput('Credit limit (₹)','creditLimit',d.creditLimit,'number','placeholder="200000" min="0"') + '</div>' +
       '<div class="field-row-2">' + fieldInput('Typical lead time (days)','leadTimeDays',d.leadTimeDays,'number','placeholder="5" min="1"') + fieldInput('Phone','phone',d.phone,'text','placeholder="+91 22 ..."') + '</div>' +
-      fieldInput('Email','email',d.email,'email','placeholder="trade@dealer.com"') +
+      '<div class="field-row-2">' + fieldInput('Email','email',d.email,'email','placeholder="trade@dealer.com"') + fieldInput('Contact person / owner (optional)','contactPerson',d.contactPerson,'text','placeholder="Fill in later if unknown"') + '</div>' +
       fieldTextarea('Notes','notes',d.notes,'placeholder="Key contacts, reliability, special terms, payment notes..."') +
       '<div class="form-actions"><button type="button" class="btn-secondary" data-action="supply-back">Cancel</button><button type="submit" class="btn-primary">' + (isEdit?'Save Changes':'Add Dealer') + '</button></div>' +
     '</form>';
@@ -4228,7 +4381,7 @@ if(view === 'add' || view === 'edit'){
     '<div><h2 class="view-title">Supply Chain</h2>' +
     '<p class="view-subtitle">Dealers, sales reps and service centres — your procurement network</p></div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-      
+      (tab === 'dealers' ? '<button class="btn-secondary" data-action="open-dealer-csv-import">' + icon('truck',15) + ' Bulk Import</button>' : '') +
       '<button class="btn-primary" data-action="new-supply" data-type="' + addTypes[tab] + '">' + addLabels[tab] + '</button>' +
     '</div>' +
   '</div>' +
@@ -4611,6 +4764,10 @@ function renderModal(){
     title = 'Bulk Import Contacts';
     bodyHtml = csvImportModalHtml();
     showActions = false;
+  } else if(type === 'dealer-csv-import'){
+    title = 'Bulk Import Dealers';
+    bodyHtml = dealerCsvImportModalHtml();
+    showActions = false;
   } else if(type === 'fin-entry'){
     var isIn = state.modal.txType === 'in';
     title = isIn ? 'Money In' : 'Money Out';
@@ -4729,6 +4886,21 @@ function onBodyClick(e){
       break;
     case 'confirm-csv-import':
       confirmCsvImport();
+      break;
+    case 'open-dealer-csv-import':
+      state.dealerCsvImport = null;
+      state.modal = { type:'dealer-csv-import' };
+      render();
+      break;
+    case 'download-dealer-csv-template':
+      downloadDealerCsvTemplate();
+      break;
+    case 'cancel-dealer-csv-import':
+      state.dealerCsvImport = null;
+      render();
+      break;
+    case 'confirm-dealer-csv-import':
+      confirmDealerCsvImport();
       break;
     case 'open-settings':
       state.view = 'settings';
@@ -5172,6 +5344,27 @@ function onBodyChange(e){
           return;
         }
         state.csvImport = result;
+        render();
+      };
+      reader.onerror = function(){
+        alert('Could not read that file. Please make sure it\'s a valid CSV.');
+      };
+      reader.readAsText(file);
+    }
+    t.value = '';
+    return;
+  }
+  if(t.id === 'dealer-csv-import-input'){
+    if(t.files && t.files[0]){
+      const file = t.files[0];
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        const result = parseDealersCsv(ev.target.result);
+        if(result.rows.length === 0){
+          alert(result.errors.join(' ') || 'No valid rows found in this file.');
+          return;
+        }
+        state.dealerCsvImport = result;
         render();
       };
       reader.onerror = function(){
