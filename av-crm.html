@@ -706,8 +706,8 @@
       <div class="sidebar-header">
         <div class="sidebar-header-top">
           <div>
-            <div class="brand-sub">SIGNAL FLOW</div>
-            <div class="brand">AV<span class="accent">/</span>CRM</div>
+            <div class="brand-sub" id="sidebar-brand-sub">AV / CRM</div>
+            <div class="brand" id="sidebar-brand-main">My Company</div>
           </div>
           <button class="theme-toggle" id="theme-toggle" data-action="toggle-theme" title="Toggle day / night mode"></button>
         </div>
@@ -724,7 +724,7 @@
     <main class="main">
       <div class="mobile-topbar">
         <div>
-          <div class="mobile-topbar-brand">Signal Flow</div>
+          <div class="mobile-topbar-brand" id="mobile-brand">My Company</div>
           <div class="mobile-topbar-title" id="mobile-page-title">Dashboard</div>
         </div>
         <span id="live-clock">--:--</span>
@@ -3276,6 +3276,20 @@ function renderFinance(){
 }
 
 
+// Reads every live Settings field currently on screen into state — must be called
+// before any action that triggers a re-render of the Settings page, or unsaved
+// text the person just typed gets wiped when the DOM rebuilds.
+function captureSettingsFieldsIntoState(){
+  document.querySelectorAll('[data-field^="st_"]').forEach(function(f){
+    var key = f.dataset.field.replace('st_','');
+    state.settings[key] = f.value;
+  });
+  document.querySelectorAll('[data-fixed-id]').forEach(function(inp){
+    var fc = (state.settings.fixedCosts||[]).find(function(x){ return x.id === inp.dataset.fixedId; });
+    if(fc) fc[inp.dataset.fixedField] = inp.value;
+  });
+}
+
 function renderSettings(){
   const s = state.settings;
   const fixedTotal = (s.fixedCosts||[]).reduce(function(sum,f){ return sum+Number(f.amount||0); },0);
@@ -4908,30 +4922,22 @@ function onBodyClick(e){
       render();
       break;
     case 'settings-add-fixed':
+      captureSettingsFieldsIntoState();
       if(!state.settings.fixedCosts) state.settings.fixedCosts = [];
       state.settings.fixedCosts.push({ id: uid(), label:'', amount:'' });
+      persist();
       render();
       break;
     case 'settings-remove-fixed':
+      captureSettingsFieldsIntoState();
       state.settings.fixedCosts = (state.settings.fixedCosts||[]).filter(function(f){ return f.id !== el.dataset.id; });
       persist(); render();
       break;
     case 'settings-save': {
-      var sfields = document.querySelectorAll('[data-field^="st_"]');
-      sfields.forEach(function(f){
-        var key = f.dataset.field.replace('st_','');
-        state.settings[key] = f.value;
-      });
-      // Capture fixed cost inputs
-      document.querySelectorAll('[data-fixed-id]').forEach(function(inp){
-        var fc = state.settings.fixedCosts.find(function(x){ return x.id === inp.dataset.fixedId; });
-        if(fc) fc[inp.dataset.fixedField] = inp.value;
-      });
+      captureSettingsFieldsIntoState();
       persist();
-      var btn = el;
-      var origText = btn.textContent;
-      btn.textContent = '✓ Saved';
-      setTimeout(function(){ btn.textContent = origText; }, 1500);
+      render();
+      showBackupToast('Settings saved.');
       break;
     }
     case 'fin-add':
@@ -5769,6 +5775,17 @@ function updateNavActive(){
   if(titleEl && navItem) titleEl.textContent = navItem.label;
 }
 
+function updateBrandDisplay(){
+  const name = (state.settings && state.settings.companyName && state.settings.companyName.trim())
+    ? state.settings.companyName.trim()
+    : 'My Company';
+  const sidebarMain = document.getElementById('sidebar-brand-main');
+  const mobileBrand = document.getElementById('mobile-brand');
+  if(sidebarMain) sidebarMain.textContent = name;
+  if(mobileBrand) mobileBrand.textContent = name;
+  document.title = name + ' — AV / CRM';
+}
+
 function updateSidebarFooter(){
   const txt = state.clients.length + ' clients \u00B7 ' + state.contacts.length + ' contacts \u00B7 ' + state.jobs.length + ' jobs \u00B7 ' + state.network.length + ' network';
   document.getElementById('sidebar-stats').textContent = txt;
@@ -5795,6 +5812,7 @@ function render(){
   document.getElementById('view').innerHTML = VIEW_RENDERERS[state.view]();
   updateNavActive();
   updateSidebarFooter();
+  updateBrandDisplay();
   renderModal();
   persist();
 }
