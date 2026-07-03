@@ -1122,6 +1122,14 @@ function fmtDate(d){
   if(isNaN(dt.getTime())) return '\u2014';
   return dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
 }
+function debounce(fn, delay){
+  let timer = null;
+  return function(...args){
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(null, args), delay);
+  };
+}
+
 function todayStr(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -2556,12 +2564,12 @@ function renderClientDetail(c){
 
 /* ---------- contacts (trades, vendors, lead sources) ---------- */
 
-function contactCardHtml(c){
+function contactCardHtml(c, networkSet, clientSet){
   const isConfirm = state.confirmDelete && state.confirmDelete.type === 'contact' && state.confirmDelete.id === c.id;
   const catIcon = CONTACT_CATEGORY_ICONS[c.category] || 'users';
   const displayName = (c.salutation ? c.salutation + ' ' : '') + c.name;
-  const isInNetwork = inNetwork(c.id);
-  const isInClient  = inClient(c.id);
+  const isInNetwork = networkSet ? networkSet.has(c.id) : inNetwork(c.id);
+  const isInClient  = clientSet  ? clientSet.has(c.id)  : inClient(c.id);
   return '<div class="inv-card">' +
     '<div class="inv-card-top">' +
       '<span class="inv-cat-badge">' + icon(catIcon,13) + esc(c.category) + '</span>' +
@@ -2611,6 +2619,8 @@ function contactFilteredItems(){
   });
 }
 
+const CONTACT_RENDER_CAP = 150;
+
 function contactGridHtml(){
   const items = contactFilteredItems();
   if(items.length === 0){
@@ -2619,7 +2629,17 @@ function contactGridHtml(){
       (state.contacts.length !== 0 ? '<button class="data-btn" data-action="contact-clear-filters">Clear filters</button>' : '') +
     '</div>';
   }
-  return '<div class="inv-grid">' + items.map(contactCardHtml).join('') + '</div>';
+  const networkSet = buildNetworkIdSet();
+  const clientSet  = buildClientIdSet();
+  const capped = items.length > CONTACT_RENDER_CAP;
+  const shown = capped ? items.slice(0, CONTACT_RENDER_CAP) : items;
+  const cards = shown.map(function(c){ return contactCardHtml(c, networkSet, clientSet); }).join('');
+  return '<div class="inv-grid">' + cards + '</div>' +
+    (capped
+      ? '<div style="text-align:center;padding:16px;font-size:13px;color:var(--zinc-500);">' +
+          'Showing ' + CONTACT_RENDER_CAP + ' of ' + items.length + ' matches — keep typing to narrow it down' +
+        '</div>'
+      : '');
 }
 function renderContactGridOnly(){
   const wrap = document.getElementById('contact-grid-wrap');
@@ -3473,6 +3493,13 @@ function inNetwork(contactId){
 function inClient(contactId){
   // A contact is "in clients" if a client was created linked to them
   return state.clients.some(function(cl){ return cl.contactId === contactId; });
+}
+// Fast O(1) lookup versions — build once per grid render instead of scanning per card
+function buildNetworkIdSet(){
+  return new Set(state.network.map(function(n){ return n.contactId; }));
+}
+function buildClientIdSet(){
+  return new Set(state.clients.map(function(cl){ return cl.contactId; }));
 }
 
 function prospectLastMeetingDate(p){
@@ -5193,26 +5220,30 @@ function onBodyChange(e){
   }
 }
 
+const debouncedRenderClientGrid   = debounce(function(){ renderClientsListOnly(); }, 180);
+const debouncedRenderInvGrid      = debounce(function(kind){ renderInvGridOnly(kind); }, 180);
+const debouncedRenderContactGrid  = debounce(function(){ renderContactGridOnly(); }, 180);
+
 function onBodyInput(e){
   const t = e.target;
   if(t.id === 'client-search'){
     state.clientSearch = t.value;
-    renderClientsListOnly();
+    debouncedRenderClientGrid();
     return;
   }
   if(t.id === 'inv-search-product'){
     state.invFilter.product.search = t.value;
-    renderInvGridOnly('product');
+    debouncedRenderInvGrid('product');
     return;
   }
   if(t.id === 'inv-search-service'){
     state.invFilter.service.search = t.value;
-    renderInvGridOnly('service');
+    debouncedRenderInvGrid('service');
     return;
   }
   if(t.id === 'contact-search'){
     state.contactFilter.search = t.value;
-    renderContactGridOnly();
+    debouncedRenderContactGrid();
     return;
   }
   const field = t.dataset.field;
