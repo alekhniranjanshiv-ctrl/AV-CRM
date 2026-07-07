@@ -1421,10 +1421,8 @@ let state = {
     gstNumber: '',
     defaultPaymentMode: 'UPI',
     fixedCosts: [], // { id, label, amount }
-    architectProfilePdf: null,   // { name, size, data (base64 data URL), uploadedAt }
-    distributorProfilePdf: null, // same shape
-    architectMessage: 'Alekh Niranjan is a Nagpur-based AV systems integration practice specializing in home cinema, pro audio, conference room AV and building automation — SAE, THX & KNX certified. Sharing our profile in case it\'s useful for any upcoming residential or commercial projects — always open to collaborating.',
-    distributorMessage: 'Alekh Niranjan is an SAE, THX & KNX certified AV systems integrator based in Nagpur, working across home cinema, pro audio, conference AV and building automation. Sharing our company profile — keen to explore a trade partnership.'
+    architectMessage: 'Alekh Niranjan is a Nagpur-based AV systems integration practice specializing in home cinema, pro audio, conference room AV and building automation — SAE, THX & KNX certified. Wanted to introduce ourselves in case it\'s useful for any upcoming residential or commercial projects — always open to collaborating.',
+    distributorMessage: 'Alekh Niranjan is an SAE, THX & KNX certified AV systems integrator based in Nagpur, working across home cinema, pro audio, conference AV and building automation. Reaching out to explore a trade partnership.'
   },
   lastBackupAt: null,
   csvImport: null, // { rows: [...], errors: [...] } — set when a CSV is parsed and awaiting confirm
@@ -1494,9 +1492,9 @@ function loadData(){
     state.finTx  = saved.finTx  || [];
     state.settings = Object.assign({
       companyName:'Alekh Niranjan', ownerName:'', phone:'', email:'', address:'', gstNumber:'',
-      defaultPaymentMode:'UPI', fixedCosts:[], architectProfilePdf:null, distributorProfilePdf:null,
-      architectMessage: 'Alekh Niranjan is a Nagpur-based AV systems integration practice specializing in home cinema, pro audio, conference room AV and building automation — SAE, THX & KNX certified. Sharing our profile in case it\'s useful for any upcoming residential or commercial projects — always open to collaborating.',
-      distributorMessage: 'Alekh Niranjan is an SAE, THX & KNX certified AV systems integrator based in Nagpur, working across home cinema, pro audio, conference AV and building automation. Sharing our company profile — keen to explore a trade partnership.'
+      defaultPaymentMode:'UPI', fixedCosts:[],
+      architectMessage: 'Alekh Niranjan is a Nagpur-based AV systems integration practice specializing in home cinema, pro audio, conference room AV and building automation — SAE, THX & KNX certified. Wanted to introduce ourselves in case it\'s useful for any upcoming residential or commercial projects — always open to collaborating.',
+      distributorMessage: 'Alekh Niranjan is an SAE, THX & KNX certified AV systems integrator based in Nagpur, working across home cinema, pro audio, conference AV and building automation. Reaching out to explore a trade partnership.'
     }, saved.settings || {});
     state.lastBackupAt = saved.lastBackupAt || null;
     // Migration — give any job without a checklist the default steps
@@ -2739,9 +2737,7 @@ function contactCardHtml(c, networkSet, clientSet){
       (c.area ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.area) + '</div>' : '') +
     '</div>' +
     (c.notes ? '<div class="inv-card-notes" style="word-break:break-word;">' + esc(c.notes) + '</div>' : '') +
-    ((c.category === 'Architect' || c.category === 'Interior Designer') && state.settings.architectProfilePdf
-      ? profileSendButtonsHtml('architectProfilePdf', c.name, c.phone, c.email, true)
-      : '') +
+    profileSendButtonsHtml('architect', c.name, c.phone, c.email, true) +
     '<div class="inv-card-footer" style="border-top:1px solid var(--zinc-800);padding-top:8px;justify-content:space-between;align-items:center;">' +
       '<div style="display:flex;gap:6px;align-items:center;">' +
         // Star = Network — glows cyan when in network, dim when not
@@ -3295,169 +3291,41 @@ function renderFinance(){
 // Reads every live Settings field currently on screen into state — must be called
 // before any action that triggers a re-render of the Settings page, or unsaved
 // text the person just typed gets wiped when the DOM rebuilds.
-// ── Company Profile PDF (Architect + Distributor versions) ─────────────────
-const PROFILE_PDF_MAX_BYTES = 4 * 1024 * 1024; // 4MB source file cap — base64 inflates ~33%, and this shares localStorage with all CRM data
+// ── Send Company Introduction (WhatsApp + Email, text-only) ────────────────
+// WhatsApp and email links can never carry a file attachment from a website —
+// that's a hard browser/platform restriction, not something any code can work
+// around. So this sends a proper introduction message instead: jumps straight
+// to the right person, no contact-picker, no manual step left over at all.
 
-function humanFileSize(bytes){
-  if(!bytes) return '0 KB';
-  if(bytes < 1024*1024) return Math.round(bytes/1024) + ' KB';
-  return (bytes/(1024*1024)).toFixed(1) + ' MB';
-}
-
-function handleProfilePdfUpload(file, kind){
-  // kind: 'architectProfilePdf' | 'distributorProfilePdf'
-  if(!file) return;
-  if(file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){
-    alert('Please choose a PDF file.');
+function sendWhatsAppIntro(kind, recipientLabel, recipientPhone){
+  if(!recipientPhone){
+    alert('No phone number on file for this contact. Add one by editing the contact.');
     return;
   }
-  if(file.size > PROFILE_PDF_MAX_BYTES){
-    alert('That PDF is ' + humanFileSize(file.size) + ' — please use one under ' + humanFileSize(PROFILE_PDF_MAX_BYTES) + '. Large files can fail to save on some phones.');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    const prevValue = state.settings[kind]; // in case we need to roll back
-    state.settings[kind] = {
-      name: file.name,
-      size: file.size,
-      data: ev.target.result, // base64 data URL
-      uploadedAt: new Date().toISOString()
-    };
-    const ok = persist();
-    if(!ok){
-      // Roll back — storage was full / unavailable, don't leave state and storage out of sync
-      state.settings[kind] = prevValue;
-      alert('Could not save this PDF — your device storage may be full. Try a smaller file, or free up space and try again.');
-      render();
-      return;
-    }
-    render();
-    showBackupToast((kind==='architectProfilePdf'?'Architect':'Distributor') + ' profile saved — ' + humanFileSize(file.size) + '.');
-  };
-  reader.onerror = function(){
-    alert('Could not read that file. Please try again.');
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeProfilePdf(kind){
-  state.settings[kind] = null;
-  persist();
-  render();
-}
-
-// Converts the stored base64 data URL back into a real File object for sharing/downloading
-function profilePdfToFile(profilePdf){
-  const arr = profilePdf.data.split(',');
-  const byteString = atob(arr[1]);
-  const bytes = new Uint8Array(byteString.length);
-  for(let i=0;i<byteString.length;i++){ bytes[i] = byteString.charCodeAt(i); }
-  return new File([bytes], profilePdf.name, { type: 'application/pdf' });
-}
-
-async function shareProfilePdf(kind, recipientLabel, recipientPhone){
-  const profilePdf = state.settings[kind];
-  if(!profilePdf){
-    alert('No profile PDF uploaded yet. Add one in Settings → Company Profile PDFs.');
-    return;
-  }
-  const file = profilePdfToFile(profilePdf);
-  const summary = (kind==='architectProfilePdf' ? state.settings.architectMessage : state.settings.distributorMessage) || '';
+  const summary = (kind==='architect' ? state.settings.architectMessage : state.settings.distributorMessage) || '';
   const greeting = 'Hi' + (recipientLabel ? ' ' + recipientLabel : '') + ',';
+  const msg = greeting + '\n\n' + summary;
+  const cleanNum = recipientPhone.replace(/[^+\d]/g,'');
 
-  // When we know the contact's number, skip the OS share sheet's contact picker
-  // entirely — download the PDF, then jump straight into that person's WhatsApp
-  // chat (same proven wa.me pattern used elsewhere in the app). One attach tap
-  // inside the right chat, instead of hunting for the contact.
-  if(recipientPhone){
-    const cleanNum = recipientPhone.replace(/[^+\d]/g,'');
-    const msg = greeting + '\n\n' + summary + '\n\nAttaching our company profile below 👇';
-
-    // Trigger the download first — synchronously, in the same click, so mobile
-    // browsers don't block it as an unrelated pop-up
-    const dlUrl = URL.createObjectURL(file);
-    const dl = document.createElement('a');
-    dl.href = dlUrl;
-    dl.download = profilePdf.name;
-    document.body.appendChild(dl);
-    dl.click();
-    document.body.removeChild(dl);
-    setTimeout(function(){ URL.revokeObjectURL(dlUrl); }, 2000);
-
-    // Open WhatsApp directly to that contact's chat, pre-filled message ready
-    const wa = document.createElement('a');
-    wa.href = 'https://wa.me/' + cleanNum + '?text=' + encodeURIComponent(msg);
-    wa.target = '_blank';
-    document.body.appendChild(wa);
-    wa.click();
-    document.body.removeChild(wa);
-
-    showBackupToast('Opening ' + (recipientLabel||'their') + ' WhatsApp chat — tap 📎 and choose "' + profilePdf.name + '" from Downloads to attach it.');
-    return;
-  }
-
-  // No phone number on file — fall back to the OS share sheet so there's still a way to send it
-  try{
-    if(navigator.canShare && navigator.canShare({ files: [file] })){
-      await navigator.share({
-        files: [file],
-        title: state.settings.companyName + ' — Company Profile',
-        text: greeting + ' ' + summary
-      });
-    } else {
-      const url = URL.createObjectURL(file);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = profilePdf.name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-      alert('Direct sharing isn\'t available here — the PDF has been downloaded instead. Attach it manually in WhatsApp or email.\n\n(Tip: direct one-tap sharing works when you open the app from its live web link on your phone.)');
-    }
-  }catch(err){
-    // AbortError fires when the person just cancels the share sheet — not a real error
-    if(err && err.name !== 'AbortError'){
-      console.warn('[CRM] Share failed:', err);
-      alert('Could not open the share sheet. Please try again.');
-    }
-  }
+  const wa = document.createElement('a');
+  wa.href = 'https://wa.me/' + cleanNum + '?text=' + encodeURIComponent(msg);
+  wa.target = '_blank';
+  document.body.appendChild(wa);
+  wa.click();
+  document.body.removeChild(wa);
 }
 
-// Same idea as the WhatsApp fast-path — pre-fill the recipient so there's no
-// hunting for them, download the PDF, open their email app ready to go.
-// mailto: links can never carry an attachment (same browser restriction as
-// wa.me links) — one manual attach step is unavoidable here too.
-function emailProfilePdf(kind, recipientLabel, recipientEmail){
-  const profilePdf = state.settings[kind];
-  if(!profilePdf){
-    alert('No profile PDF uploaded yet. Add one in Settings → Company Profile PDFs.');
-    return;
-  }
+function sendEmailIntro(kind, recipientLabel, recipientEmail){
   if(!recipientEmail){
     alert('No email address on file for this contact. Add one by editing the contact.');
     return;
   }
-  const file = profilePdfToFile(profilePdf);
-  const summary = (kind==='architectProfilePdf' ? state.settings.architectMessage : state.settings.distributorMessage) || '';
-  const subject = state.settings.companyName + ' — Company Profile';
+  const summary = (kind==='architect' ? state.settings.architectMessage : state.settings.distributorMessage) || '';
+  const subject = state.settings.companyName + ' — Introduction';
   const body = 'Hi' + (recipientLabel ? ' ' + recipientLabel : '') + ',\n\n' +
     summary + '\n\n' +
-    'Please find our company profile attached.\n\n' +
     'Regards,\n' + state.settings.companyName;
 
-  // Trigger the download first, synchronously, so it's ready in Downloads to attach
-  const dlUrl = URL.createObjectURL(file);
-  const dl = document.createElement('a');
-  dl.href = dlUrl;
-  dl.download = profilePdf.name;
-  document.body.appendChild(dl);
-  dl.click();
-  document.body.removeChild(dl);
-  setTimeout(function(){ URL.revokeObjectURL(dlUrl); }, 2000);
-
-  // Open the email app with To/Subject/Body pre-filled — skips typing the address
   const mail = document.createElement('a');
   mail.href = 'mailto:' + encodeURIComponent(recipientEmail) +
     '?subject=' + encodeURIComponent(subject) +
@@ -3465,8 +3333,6 @@ function emailProfilePdf(kind, recipientLabel, recipientEmail){
   document.body.appendChild(mail);
   mail.click();
   document.body.removeChild(mail);
-
-  showBackupToast('Opening email to ' + (recipientLabel||recipientEmail) + ' — attach "' + profilePdf.name + '" from Downloads before sending.');
 }
 
 function captureSettingsFieldsIntoState(){
@@ -3480,55 +3346,26 @@ function captureSettingsFieldsIntoState(){
   });
 }
 
-// Renders WhatsApp / Email send buttons for a profile PDF — each only shows
-// if that contact detail actually exists, so there's never a dead button.
+// Renders WhatsApp / Email introduction buttons — each only shows if that
+// contact detail actually exists, so there's never a dead button.
 function profileSendButtonsHtml(kind, name, phone, email, fullWidth){
   const btns = [];
   if(phone){
-    btns.push('<button class="profile-send-btn" data-action="' + (kind==='architectProfilePdf'?'send-architect-profile-wa':'send-distributor-profile-wa') +
+    btns.push('<button class="profile-send-btn" data-action="' + (kind==='architect'?'send-architect-intro-wa':'send-distributor-intro-wa') +
       '" data-name="' + esc(name) + '" data-phone="' + esc(phone) + '" style="flex:1;">' +
       icon('message',13) + ' WhatsApp</button>');
   }
   if(email){
-    btns.push('<button class="profile-send-btn" data-action="' + (kind==='architectProfilePdf'?'send-architect-profile-email':'send-distributor-profile-email') +
+    btns.push('<button class="profile-send-btn" data-action="' + (kind==='architect'?'send-architect-intro-email':'send-distributor-intro-email') +
       '" data-name="' + esc(name) + '" data-email="' + esc(email) + '" style="flex:1;">' +
       icon('mail',13) + ' Email</button>');
   }
   if(btns.length === 0) return '';
   return '<div style="' + (fullWidth?'width:100%;margin-top:8px;':'') + 'background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.18);border-radius:10px;padding:8px;">' +
     '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber-400);margin-bottom:6px;display:flex;align-items:center;gap:5px;">' +
-      icon('receipt',11) + ' Send Company Profile' +
+      icon('message',11) + ' Send Introduction' +
     '</div>' +
     '<div style="display:flex;gap:6px;">' + btns.join('') + '</div>' +
-  '</div>';
-}
-
-function profilePdfSlotHtml(kind, label, profilePdf){
-  if(profilePdf){
-    return '<div style="background:var(--zinc-800);border-radius:10px;padding:12px 14px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;">' +
-        '<span style="font-size:20px;">📄</span>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-size:11px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--zinc-500);">' + esc(label) + '</div>' +
-          '<div style="font-size:13px;font-weight:600;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(profilePdf.name) + '</div>' +
-          '<div style="font-size:11px;color:var(--zinc-600);">' + humanFileSize(profilePdf.size) + ' · uploaded ' + fmtDate(profilePdf.uploadedAt.slice(0,10)) + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:8px;margin-top:10px;">' +
-        '<label class="data-btn" style="font-size:12px;cursor:pointer;flex:1;text-align:center;">' +
-          'Replace' +
-          '<input type="file" accept="application/pdf,.pdf" data-profile-pdf-kind="' + kind + '" style="display:none;"/>' +
-        '</label>' +
-        '<button type="button" class="icon-btn danger" data-action="remove-profile-pdf" data-kind="' + kind + '" title="Remove" style="flex-shrink:0;">' + icon('trash',14) + '</button>' +
-      '</div>' +
-    '</div>';
-  }
-  return '<div style="background:var(--zinc-800);border-radius:10px;padding:14px;">' +
-    '<div style="font-size:11px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--zinc-500);margin-bottom:8px;">' + esc(label) + '</div>' +
-    '<label class="data-btn" style="font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">' +
-      icon('receipt',14) + ' Upload PDF' +
-      '<input type="file" accept="application/pdf,.pdf" data-profile-pdf-kind="' + kind + '" style="display:none;"/>' +
-    '</label>' +
   '</div>';
 }
 
@@ -3592,15 +3429,13 @@ function renderSettings(){
     '</div>' +
   '</div>' +
 
-  // Company Profile PDFs
+  // Introduction Messages
   '<div class="settings-section">' +
-    '<div class="settings-section-title">' + icon('receipt',16) + ' Company Profile PDFs</div>' +
-    '<div class="settings-section-sub">Upload once, share with one tap from Contacts and Supply Chain. Upload a new file anytime to replace the old one.</div>' +
-    profilePdfSlotHtml('architectProfilePdf', 'Architect / Interior Designer version', s.architectProfilePdf) +
-    fieldTextarea('Message sent with this profile (Architects / Designers)', 'st_architectMessage', s.architectMessage, 4) +
-    '<div style="height:16px;"></div>' +
-    profilePdfSlotHtml('distributorProfilePdf', 'Distributor version', s.distributorProfilePdf) +
-    fieldTextarea('Message sent with this profile (Distributors)', 'st_distributorMessage', s.distributorMessage, 4) +
+    '<div class="settings-section-title">' + icon('message',16) + ' Introduction Messages</div>' +
+    '<div class="settings-section-sub">One tap from Contacts and Supply Chain jumps straight to that person\'s WhatsApp or email with this message ready to send.</div>' +
+    fieldTextarea('Message to Contacts (all trades — architects, electricians, carpenters, everyone)', 'st_architectMessage', s.architectMessage, 4) +
+    '<div style="height:12px;"></div>' +
+    fieldTextarea('Message to Distributors', 'st_distributorMessage', s.distributorMessage, 4) +
   '</div>' +
 
   // Data
@@ -4456,9 +4291,7 @@ function dealerDetailHtml(d){
     supplyInfoItemRaw('Email', d.email ? emailLink(d.email) : '—') +
   '</div>' +
   (d.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(d.notes) + '</div>' : '') +
-  (state.settings.distributorProfilePdf
-    ? '<div style="margin-bottom:16px;">' + profileSendButtonsHtml('distributorProfilePdf', d.contactPerson||d.company, d.phone, d.email) + '</div>'
-    : '') +
+  '<div style="margin-bottom:16px;">' + profileSendButtonsHtml('distributor', d.contactPerson||d.company, d.phone, d.email) + '</div>' +
 
   '<div class="section-head"><div class="section-head-title">Conversation Log</div>' +
     '<button class="btn-primary" style="font-size:12px;padding:6px 12px;" data-action="log-supply-entry" data-type="dealer" data-id="' + d.id + '">+ Log Entry</button>' +
@@ -5188,22 +5021,17 @@ function onBodyClick(e){
       state.settings.fixedCosts = (state.settings.fixedCosts||[]).filter(function(f){ return f.id !== el.dataset.id; });
       persist(); render();
       break;
-    case 'remove-profile-pdf':
-      if(confirm('Remove this profile PDF? You can upload a new one anytime.')){
-        removeProfilePdf(el.dataset.kind);
-      }
+    case 'send-architect-intro-wa':
+      sendWhatsAppIntro('architect', el.dataset.name || '', el.dataset.phone || '');
       break;
-    case 'send-architect-profile-wa':
-      shareProfilePdf('architectProfilePdf', el.dataset.name || '', el.dataset.phone || '');
+    case 'send-architect-intro-email':
+      sendEmailIntro('architect', el.dataset.name || '', el.dataset.email || '');
       break;
-    case 'send-architect-profile-email':
-      emailProfilePdf('architectProfilePdf', el.dataset.name || '', el.dataset.email || '');
+    case 'send-distributor-intro-wa':
+      sendWhatsAppIntro('distributor', el.dataset.name || '', el.dataset.phone || '');
       break;
-    case 'send-distributor-profile-wa':
-      shareProfilePdf('distributorProfilePdf', el.dataset.name || '', el.dataset.phone || '');
-      break;
-    case 'send-distributor-profile-email':
-      emailProfilePdf('distributorProfilePdf', el.dataset.name || '', el.dataset.email || '');
+    case 'send-distributor-intro-email':
+      sendEmailIntro('distributor', el.dataset.name || '', el.dataset.email || '');
       break;
     case 'settings-save': {
       captureSettingsFieldsIntoState();
@@ -5649,13 +5477,6 @@ function onBodyChange(e){
         alert('Could not read that file. Please make sure it\'s a valid CSV.');
       };
       reader.readAsText(file);
-    }
-    t.value = '';
-    return;
-  }
-  if(t.dataset && t.dataset.profilePdfKind){
-    if(t.files && t.files[0]){
-      handleProfilePdfUpload(t.files[0], t.dataset.profilePdfKind);
     }
     t.value = '';
     return;
