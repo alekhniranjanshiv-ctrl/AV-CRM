@@ -239,8 +239,12 @@
   .btn-secondary{background:none; border:none; color:var(--zinc-400); font-size:14px; padding:8px 16px; cursor:pointer;}
   .profile-send-btn{display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:600;
     padding:7px 10px; border-radius:7px; border:1px solid rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);
-    color:var(--amber-400); cursor:pointer; transition:background .15s;}
+    color:var(--amber-400); cursor:pointer; transition:background .15s, box-shadow .3s, transform .1s;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
   .profile-send-btn:hover{background:rgba(245,158,11,0.2);}
+  .profile-send-btn.sent{border-color:rgba(52,211,153,0.4); background:rgba(52,211,153,0.14); color:var(--emerald-400);
+    box-shadow:0 0 10px rgba(52,211,153,0.35);}
+  .profile-send-btn.longpressing{transform:scale(0.94); opacity:0.75;}
   .btn-secondary:hover{color:var(--btn-secondary-hover);}
 
   .icon-btn{background:none; border:none; color:var(--zinc-500); cursor:pointer; display:flex; padding:0;}
@@ -1425,6 +1429,7 @@ let state = {
     distributorMessage: 'Alekh Niranjan is an SAE, THX & KNX certified AV systems integrator based in Nagpur, working across home cinema, pro audio, conference AV and building automation. Reaching out to explore a trade partnership.'
   },
   lastBackupAt: null,
+  introSent: {}, // { 'contactId_wa': isoTimestamp, 'contactId_email': isoTimestamp } — manual confirmation only, never automatic
   csvImport: null, // { rows: [...], errors: [...] } — set when a CSV is parsed and awaiting confirm
   dealerCsvImport: null, // same shape, for Supply Chain dealer bulk import // ISO timestamp of last backup (manual or auto)
 };
@@ -1460,6 +1465,7 @@ function persist(){
       finTx: state.finTx,
       settings: state.settings,
       lastBackupAt: state.lastBackupAt,
+      introSent: state.introSent,
       theme: state.theme,
       savedAt: new Date().toISOString()
     };
@@ -1497,6 +1503,7 @@ function loadData(){
       distributorMessage: 'Alekh Niranjan is an SAE, THX & KNX certified AV systems integrator based in Nagpur, working across home cinema, pro audio, conference AV and building automation. Reaching out to explore a trade partnership.'
     }, saved.settings || {});
     state.lastBackupAt = saved.lastBackupAt || null;
+    state.introSent = saved.introSent || {};
     // Migration — give any job without a checklist the default steps
     state.jobs.forEach(function(j){
       if(!j.steps || !j.steps.length){ j.steps = defaultJobSteps(); migrateStepsFromStatus(j); }
@@ -1531,7 +1538,7 @@ function resetToSeedData(){
 function clearAllData(){
   state.clients = []; state.contacts = []; state.jobs = [];
   state.products = []; state.services = []; state.comms = [];
-  state.network = []; state.finTx = [];
+  state.network = []; state.finTx = []; state.introSent = {};
   state.supply = { dealers:[], reps:[], serviceCentres:[] };
   persist();
   render();
@@ -1548,6 +1555,7 @@ function showClearConfirmModal(){
     supply: state.supply,
     finTx: state.finTx,
     settings: state.settings,
+    introSent: state.introSent,
     exportedAt: new Date().toISOString(),
     note: 'Auto-backup created before Clear All'
   };
@@ -1903,6 +1911,7 @@ function exportData(isAuto){
     supply: state.supply,
     finTx: state.finTx,
     settings: state.settings,
+    introSent: state.introSent,
     exportedAt: new Date().toISOString()
   };
   const exportNow = new Date();
@@ -1979,6 +1988,7 @@ function importDataFromFile(file){
       if(data.network) state.network = data.network;
       if(data.finTx) state.finTx = data.finTx;
       if(data.settings) state.settings = Object.assign({}, state.settings, data.settings);
+      if(data.introSent) state.introSent = Object.assign({}, state.introSent, data.introSent);
       if(data.supply) state.supply = Object.assign({ dealers:[], reps:[], serviceCentres:[] }, data.supply);
       state.modal = null;
       state.confirmDelete = null;
@@ -2737,7 +2747,7 @@ function contactCardHtml(c, networkSet, clientSet){
       (c.area ? '<div class="contact-row">' + icon('mappin',12) + ' ' + esc(c.area) + '</div>' : '') +
     '</div>' +
     (c.notes ? '<div class="inv-card-notes" style="word-break:break-word;">' + esc(c.notes) + '</div>' : '') +
-    profileSendButtonsHtml('architect', c.name, c.phone, c.email, true) +
+    profileSendButtonsHtml('architect', c.id, c.name, c.phone, c.email, true) +
     '<div class="inv-card-footer" style="border-top:1px solid var(--zinc-800);padding-top:8px;justify-content:space-between;align-items:center;">' +
       '<div style="display:flex;gap:6px;align-items:center;">' +
         // Star = Network — glows cyan when in network, dim when not
@@ -3335,6 +3345,43 @@ function sendEmailIntro(kind, recipientLabel, recipientEmail){
   document.body.removeChild(mail);
 }
 
+// ── Long-press to confirm "Send Introduction" was manually sent ────────────
+// A normal tap on WhatsApp/Email opens the chat/email exactly as before.
+// Holding for 2 seconds toggles a manual "sent" confirmation — self-reported
+// only. No website can ever detect whether a message was actually delivered
+// or read, so this simply remembers that you confirmed it yourself.
+let _longPressTimer = null;
+let _longPressTarget = null;
+let _longPressFired = false; // true right after a long-press completes, to suppress the click that follows on release
+
+function toggleIntroSent(id, channel){
+  const key = id + '_' + channel;
+  if(state.introSent[key]) delete state.introSent[key];
+  else state.introSent[key] = new Date().toISOString();
+  persist();
+  render();
+  if(navigator.vibrate) navigator.vibrate(40);
+}
+
+function startLongPress(el){
+  const id = el.dataset.longpressId;
+  const channel = el.dataset.longpressChannel;
+  if(!id || !channel) return;
+  cancelLongPress();
+  _longPressTarget = el;
+  el.classList.add('longpressing');
+  _longPressTimer = setTimeout(function(){
+    _longPressFired = true;
+    if(_longPressTarget) _longPressTarget.classList.remove('longpressing');
+    toggleIntroSent(id, channel);
+  }, 2000);
+}
+
+function cancelLongPress(){
+  if(_longPressTimer){ clearTimeout(_longPressTimer); _longPressTimer = null; }
+  if(_longPressTarget){ _longPressTarget.classList.remove('longpressing'); _longPressTarget = null; }
+}
+
 function captureSettingsFieldsIntoState(){
   document.querySelectorAll('[data-field^="st_"]').forEach(function(f){
     var key = f.dataset.field.replace('st_','');
@@ -3348,22 +3395,29 @@ function captureSettingsFieldsIntoState(){
 
 // Renders WhatsApp / Email introduction buttons — each only shows if that
 // contact detail actually exists, so there's never a dead button.
-function profileSendButtonsHtml(kind, name, phone, email, fullWidth){
+// Long-press (2s) on a button marks it as manually sent — glows green.
+// This is a self-reported log only: no website can ever know whether a
+// WhatsApp message or email was actually delivered or read.
+function profileSendButtonsHtml(kind, id, name, phone, email, fullWidth){
   const btns = [];
   if(phone){
-    btns.push('<button class="profile-send-btn" data-action="' + (kind==='architect'?'send-architect-intro-wa':'send-distributor-intro-wa') +
-      '" data-name="' + esc(name) + '" data-phone="' + esc(phone) + '" style="flex:1;">' +
-      icon('message',13) + ' WhatsApp</button>');
+    const waSent = !!state.introSent[id + '_wa'];
+    btns.push('<button class="profile-send-btn' + (waSent?' sent':'') + '" data-action="' + (kind==='architect'?'send-architect-intro-wa':'send-distributor-intro-wa') +
+      '" data-name="' + esc(name) + '" data-phone="' + esc(phone) + '" ' +
+      'data-longpress-id="' + esc(id) + '" data-longpress-channel="wa" style="flex:1;">' +
+      icon(waSent?'check':'message',13) + ' ' + (waSent?'Sent':'WhatsApp') + '</button>');
   }
   if(email){
-    btns.push('<button class="profile-send-btn" data-action="' + (kind==='architect'?'send-architect-intro-email':'send-distributor-intro-email') +
-      '" data-name="' + esc(name) + '" data-email="' + esc(email) + '" style="flex:1;">' +
-      icon('mail',13) + ' Email</button>');
+    const emailSent = !!state.introSent[id + '_email'];
+    btns.push('<button class="profile-send-btn' + (emailSent?' sent':'') + '" data-action="' + (kind==='architect'?'send-architect-intro-email':'send-distributor-intro-email') +
+      '" data-name="' + esc(name) + '" data-email="' + esc(email) + '" ' +
+      'data-longpress-id="' + esc(id) + '" data-longpress-channel="email" style="flex:1;">' +
+      icon(emailSent?'check':'mail',13) + ' ' + (emailSent?'Sent':'Email') + '</button>');
   }
   if(btns.length === 0) return '';
   return '<div style="' + (fullWidth?'width:100%;margin-top:8px;':'') + 'background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.18);border-radius:10px;padding:8px;">' +
     '<div style="font-size:10px;font-family:ui-monospace,monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--amber-400);margin-bottom:6px;display:flex;align-items:center;gap:5px;">' +
-      icon('message',11) + ' Send Introduction' +
+      icon('message',11) + ' Send Introduction <span style="opacity:0.6;font-weight:normal;text-transform:none;letter-spacing:normal;">— hold 2s after sending to mark done</span>' +
     '</div>' +
     '<div style="display:flex;gap:6px;">' + btns.join('') + '</div>' +
   '</div>';
@@ -3731,6 +3785,26 @@ function contactOf(n){
 function inNetwork(contactId){
   return state.network.some(function(n){ return n.contactId === contactId; });
 }
+// The Dashboard/overdue badges read pr.nextFollowUp — a single "what's next"
+// date on the Network record itself, separate from each meeting's own
+// followUpDate/done fields. Whenever a meeting's follow-up is completed or
+// a meeting is saved, this recalculates nextFollowUp from whatever pending
+// (not-done) follow-ups remain, so a completed follow-up actually clears
+// the overdue flag instead of leaving a stale date behind forever.
+function recomputeNetworkFollowUp(pr){
+  if(!pr) return;
+  const pending = (pr.meetings||[])
+    .filter(function(m){ return m.followUpDate && !m.done; })
+    .sort(function(a,b){ return (a.followUpDate+(a.followUpTime||'')).localeCompare(b.followUpDate+(b.followUpTime||'')); });
+  if(pending.length > 0){
+    pr.nextFollowUp = pending[0].followUpDate;
+    pr.nextFollowUpTime = pending[0].followUpTime || '';
+  } else {
+    pr.nextFollowUp = '';
+    pr.nextFollowUpTime = '';
+  }
+}
+
 function inClient(contactId){
   // A contact is "in clients" if a client was created linked to them
   return state.clients.some(function(cl){ return cl.contactId === contactId; });
@@ -4291,7 +4365,7 @@ function dealerDetailHtml(d){
     supplyInfoItemRaw('Email', d.email ? emailLink(d.email) : '—') +
   '</div>' +
   (d.notes ? '<div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-left:3px solid var(--amber-400);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--text-strong);line-height:1.6;">' + esc(d.notes) + '</div>' : '') +
-  '<div style="margin-bottom:16px;">' + profileSendButtonsHtml('distributor', d.contactPerson||d.company, d.phone, d.email) + '</div>' +
+  '<div style="margin-bottom:16px;">' + profileSendButtonsHtml('distributor', d.id, d.contactPerson||d.company, d.phone, d.email) + '</div>' +
 
   '<div class="section-head"><div class="section-head-title">Conversation Log</div>' +
     '<button class="btn-primary" style="font-size:12px;padding:6px 12px;" data-action="log-supply-entry" data-type="dealer" data-id="' + d.id + '">+ Log Entry</button>' +
@@ -4906,6 +4980,7 @@ function closeMobileMenu(){
 }
 
 function onBodyClick(e){
+  if(_longPressFired){ _longPressFired = false; return; }
   if(e.target.classList && e.target.classList.contains('modal-overlay')){
     state.modal = null; render(); return;
   }
@@ -5380,7 +5455,11 @@ function onBodyClick(e){
     case 'mark-followup-done': {
       const pid = el.dataset.pid, mid = el.dataset.mid;
       const pr = state.network.find(x=>x.id===pid);
-      if(pr){ const mt = (pr.meetings||[]).find(m=>m.id===mid); if(mt) mt.done=true; }
+      if(pr){
+        const mt = (pr.meetings||[]).find(m=>m.id===mid);
+        if(mt) mt.done=true;
+        recomputeNetworkFollowUp(pr);
+      }
       persist(); render();
       break;
     }
@@ -5711,9 +5790,10 @@ function onBodySubmit(e){
         if(data.newStage && data.newStage !== '(no change)') pr.stage = data.newStage;
         if(data.newHeat && data.newHeat !== '(no change)') pr.heat = data.newHeat;
       }
-      // Update next follow-up date whenever a new date is set
-      if(data.followUpDate) pr.nextFollowUp = data.followUpDate;
-      if(data.followUpTime) pr.nextFollowUpTime = data.followUpTime;
+      // Recalculate nextFollowUp from whatever pending follow-ups remain —
+      // fixes the case where leaving Follow-up Date blank on a new log
+      // used to leave the OLD date stuck showing as overdue forever
+      recomputeNetworkFollowUp(pr);
     }
     state.networkView = 'detail';
     state.networkMeetingDraft = null;
@@ -5932,6 +6012,15 @@ function init(){
   document.body.addEventListener('change', onBodyChange);
   document.body.addEventListener('input', onBodyInput);
   document.body.addEventListener('submit', onBodySubmit);
+  document.body.addEventListener('pointerdown', function(e){
+    const el = e.target.closest('[data-longpress-id]');
+    if(el) startLongPress(el);
+  });
+  document.body.addEventListener('pointerup', cancelLongPress);
+  document.body.addEventListener('pointercancel', cancelLongPress);
+  document.body.addEventListener('pointerleave', function(e){
+    if(e.target === _longPressTarget) cancelLongPress();
+  }, true);
   window.addEventListener('message', function(e){
     const msg = e.data;
     if(!msg) return;
